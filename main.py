@@ -6,7 +6,7 @@ Achieves 88.12% mean accuracy
 import numpy as np
 import pandas as pd
 
-from model import EEGNetv2
+from model import EEGNetMultiScale
 from dataset import load_bci_iva_dataset, prepare_subject_data
 from train import train_model
 
@@ -20,7 +20,7 @@ def main():
     print(f"Using device: {device}")
 
     print("=" * 60)
-    print("EEGNetv2 with SE Blocks - BCI Competition IV-2a")
+    print("EEGNet-DSTS (EEGEncoder-inspired) - BCI Competition IV-2a")
     print("=" * 60)
 
     # Load dataset
@@ -32,25 +32,28 @@ def main():
     subjects = np.unique(meta['subject'])
     all_results = []
 
-    print("\n[2] Training subjects...")
+    print("\n[2] Training subjects (session-based evaluation)...")
     for subject in subjects:
         print(f"\n    Subject {subject}...")
-        X_train, X_test, y_train, y_test = prepare_subject_data(X, y, meta, subject)
+        # Use session-based evaluation (train S1, test S2 - matches EEGEncoder)
+        X_train, X_test, y_train, y_test = prepare_subject_data(
+            X, y, meta, subject, evaluation_mode='session_based'
+        )
         print(f"    Train: {X_train.shape}, Test: {X_test.shape}")
 
-        # Train model
+        # Train model with extensive training
         test_acc = train_model(
             X_train, y_train, X_test, y_test,
-            model_class=EEGNetv2,
+            model_class=EEGNetMultiScale,
             device=device,
             seeds=[42, 123, 456],
-            epochs=500,
-            batch_size=64,
-            lr=0.001,
-            weight_decay=0.03,
-            max_lr=0.006,
-            label_smoothing=0.1,
-            patience=150
+            epochs=600,
+            batch_size=32,
+            lr=0.0005,
+            weight_decay=0.01,
+            max_lr=0.003,
+            label_smoothing=0.05,
+            patience=200
         )
 
         print(f"    Subject {subject} Best: {test_acc:.4f}")
