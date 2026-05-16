@@ -1,0 +1,37 @@
+{
+  "/home/istiaqfuad/Desktop/last-bci/main.py": {
+    "mtime": 1778865547.3653634,
+    "ast_hash": "b2b17edb204187b9ab30c5b79e023fb5",
+    "semantic_hash": "b2b17edb204187b9ab30c5b79e023fb5"
+  },
+  "/home/istiaqfuad/Desktop/last-bci/.claude/settings.local.json": {
+    "mtime": 1778867077.091762,
+    "ast_hash": "d31bbce9a97f92250c81a280bae56bb7",
+    "semantic_hash": "d31bbce9a97f92250c81a280bae56bb7"
+  },
+  "/home/istiaqfuad/Desktop/last-bci/README.md": {
+    "mtime": 1778865547.365735,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/home/istiaqfuad/Desktop/last-bci/papers/transformer_mi_eeg_paper.md": {
+    "mtime": 1778865156.7103372,
+    "ast_hash": "63e954e0f20cc27ef845cb0bed2a79c0",
+    "semantic_hash": "63e954e0f20cc27ef845cb0bed2a79c0"
+  },
+  "/home/istiaqfuad/Desktop/last-bci/papers/bci_dataset_description.md": {
+    "mtime": 1778865156.7103372,
+    "ast_hash": "4e2fcf47eaf1fa1c31094184350d0056",
+    "semantic_hash": "4e2fcf47eaf1fa1c31094184350d0056"
+  },
+  "/home/istiaqfuad/Desktop/last-bci/papers/CTNet_paper.md": {
+    "mtime": 1778865156.7103372,
+    "ast_hash": "8b3a8c68b2084b9a57ff9c1d8e27ca4d",
+    "semantic_hash": "8b3a8c68b2084b9a57ff9c1d8e27ca4d"
+  },
+  "/home/istiaqfuad/Desktop/last-bci/papers/ConTraNet_paper.md": {
+    "mtime": 1778865156.7103372,
+    "ast_hash": "a5526e44dd2167936f7c242426d0b743",
+    "semantic_hash": "a5526e44dd2167936f7c242426d0b743"
+  }
+}

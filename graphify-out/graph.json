@@ -1,0 +1,883 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "bci_competition_datasets",
+        "label": "BCI Competition IV Datasets",
+        "nodes": [
+          "transformer_mi_eeg_paper_bci_competition_iv_2a",
+          "eeg_augmented_deep_learning_bci_competition_iv_2b",
+          "bci_dataset_description_graz_dataset",
+          "bci_dataset_description_9_subjects",
+          "bci_dataset_description_4_classes",
+          "bci_dataset_description_22_channels"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "papers/bci_dataset_description.md"
+      },
+      {
+        "id": "transformer_bci_models",
+        "label": "Transformer-based BCI Models",
+        "nodes": [
+          "transformer_mi_eeg_paper_eegencoder",
+          "ctnet_paper_ctnet",
+          "transformer_mi_eeg_paper_stabletransformer",
+          "transformer_mi_eeg_paper_tcn",
+          "ctnet_paper_multi_head_attention"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "papers/transformer_mi_eeg_paper.md"
+      },
+      {
+        "id": "deep_learning_mi_classification",
+        "label": "Deep Learning MI Classification Approaches",
+        "nodes": [
+          "transformer_mi_eeg_paper_eegencoder",
+          "eeg_augmented_deep_learning_gdcnet",
+          "ctnet_paper_ctnet",
+          "eeg_augmented_deep_learning_cnn_lstm",
+          "ctnet_paper_cnn_transformer_hybrid"
+        ],
+        "relation": "implement",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "papers/transformer_mi_eeg_paper.md"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "label": "main.py",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "id": "main_py",
+      "community": 5,
+      "norm_label": "main.py"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "id": "last_bci_main_main",
+      "community": 5,
+      "norm_label": "main()"
+    },
+    {
+      "label": "settings.local.json",
+      "file_type": "code",
+      "source_file": ".claude/settings.local.json",
+      "source_location": "L1",
+      "id": "claude_settings_local_json",
+      "community": 4,
+      "norm_label": "settings.local.json"
+    },
+    {
+      "label": "permissions",
+      "file_type": "code",
+      "source_file": ".claude/settings.local.json",
+      "source_location": "L2",
+      "id": "claude_settings_local_permissions",
+      "community": 4,
+      "norm_label": "permissions"
+    },
+    {
+      "label": "allow",
+      "file_type": "code",
+      "source_file": ".claude/settings.local.json",
+      "source_location": "L3",
+      "id": "claude_settings_local_permissions_allow",
+      "community": 4,
+      "norm_label": "allow"
+    },
+    {
+      "label": "Main Function",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": 1,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "main_main",
+      "community": 6,
+      "norm_label": "main function"
+    },
+    {
+      "label": "Local Settings",
+      "file_type": "code",
+      "source_file": ".claude/settings.local.json",
+      "source_location": 1,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "settingslocaljson_settings",
+      "community": 7,
+      "norm_label": "local settings"
+    },
+    {
+      "label": "EEGEncoder",
+      "file_type": "paper",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 7,
+      "source_url": "https://doi.org/10.1038/s41598-025-06364-4",
+      "captured_at": null,
+      "author": "Wangdan Liao, Hongyun Liu, Weidong Wang",
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_eegencoder",
+      "community": 0,
+      "norm_label": "eegencoder"
+    },
+    {
+      "label": "Dual-Stream Temporal-Spatial Block",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 70,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_dsts",
+      "community": 0,
+      "norm_label": "dual-stream temporal-spatial block"
+    },
+    {
+      "label": "Temporal Convolutional Network",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 44,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_tcn",
+      "community": 0,
+      "norm_label": "temporal convolutional network"
+    },
+    {
+      "label": "Stable Transformer",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 128,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_stabletransformer",
+      "community": 0,
+      "norm_label": "stable transformer"
+    },
+    {
+      "label": "RMSNorm",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 157,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_rmsnorm",
+      "community": 0,
+      "norm_label": "rmsnorm"
+    },
+    {
+      "label": "SwiGLU",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 170,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_swiglu",
+      "community": 0,
+      "norm_label": "swiglu"
+    },
+    {
+      "label": "BCI Competition IV-2a Dataset",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 278,
+      "source_url": "https://bbci.de/competition/iv/",
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_bci_competition_iv_2a",
+      "community": 0,
+      "norm_label": "bci competition iv-2a dataset"
+    },
+    {
+      "label": "Motor Imagery",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 17,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_motor_imagery",
+      "community": 0,
+      "norm_label": "motor imagery"
+    },
+    {
+      "label": "Electroencephalography",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 1,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_eeg",
+      "community": 8,
+      "norm_label": "electroencephalography"
+    },
+    {
+      "label": "Pre-normalization",
+      "file_type": "concept",
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 130,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "transformer_mi_eeg_paper_prenormalization",
+      "community": 0,
+      "norm_label": "pre-normalization"
+    },
+    {
+      "label": "GDC-Net",
+      "file_type": "paper",
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 7,
+      "source_url": "https://doi.org/10.3390/electronics14142827",
+      "captured_at": null,
+      "author": "Mouna Bouchane, Wei Guo, Shuojin Yang",
+      "contributor": null,
+      "id": "eeg_augmented_deep_learning_gdcnet",
+      "community": 2,
+      "norm_label": "gdc-net"
+    },
+    {
+      "label": "DCGAN",
+      "file_type": "concept",
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 134,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "eeg_augmented_deep_learning_dcgan",
+      "community": 2,
+      "norm_label": "dcgan"
+    },
+    {
+      "label": "CNN-LSTM Hybrid",
+      "file_type": "concept",
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 176,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "eeg_augmented_deep_learning_cnn_lstm",
+      "community": 2,
+      "norm_label": "cnn-lstm hybrid"
+    },
+    {
+      "label": "BCI Competition IV-2b Dataset",
+      "file_type": "concept",
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 74,
+      "source_url": "https://www.bbci.de/competition/iv/",
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "eeg_augmented_deep_learning_bci_competition_iv_2b",
+      "community": 1,
+      "norm_label": "bci competition iv-2b dataset"
+    },
+    {
+      "label": "Generalized Morse Wavelet Transform",
+      "file_type": "concept",
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 112,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "eeg_augmented_deep_learning_gmwt",
+      "community": 2,
+      "norm_label": "generalized morse wavelet transform"
+    },
+    {
+      "label": "Left/Right Hand Motor Imagery",
+      "file_type": "concept",
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 31,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "eeg_augmented_deep_learning_left_right_hand_mi",
+      "community": 2,
+      "norm_label": "left/right hand motor imagery"
+    },
+    {
+      "label": "BCI Competition 2008 Graz Dataset",
+      "file_type": "paper",
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 1,
+      "source_url": "https://bbci.de/competition/iv/",
+      "captured_at": null,
+      "author": "C. Brunner, R. Leeb, G. R. M\u00fcller-Putz, A. Schl\u00f6gl, G. Pfurtscheller",
+      "contributor": null,
+      "id": "bci_dataset_description_graz_dataset",
+      "community": 1,
+      "norm_label": "bci competition 2008 graz dataset"
+    },
+    {
+      "label": "9 Subjects",
+      "file_type": "concept",
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 12,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "bci_dataset_description_9_subjects",
+      "community": 1,
+      "norm_label": "9 subjects"
+    },
+    {
+      "label": "4 MI Classes",
+      "file_type": "concept",
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 12,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "bci_dataset_description_4_classes",
+      "community": 1,
+      "norm_label": "4 mi classes"
+    },
+    {
+      "label": "22 EEG Channels",
+      "file_type": "concept",
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 33,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "bci_dataset_description_22_channels",
+      "community": 1,
+      "norm_label": "22 eeg channels"
+    },
+    {
+      "label": "250 Hz Sampling Rate",
+      "file_type": "concept",
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 33,
+      "source_url": null,
+      "captured_at": null,
+      "contributor": null,
+      "id": "bci_dataset_description_250_hz",
+      "community": 1,
+      "norm_label": "250 hz sampling rate"
+    },
+    {
+      "label": "CTNet",
+      "file_type": "paper",
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 12,
+      "source_url": "https://doi.org/10.1038/s41598-024-71118-7",
+      "captured_at": null,
+      "author": "Wei Zhao, Xiaolu Jiang, Baocan Zhang, Shixiao Xiao, Sujun Weng",
+      "contributor": null,
+      "id": "ctnet_paper_ctnet",
+      "community": 3,
+      "norm_label": "ctnet"
+    },
+    {
+      "label": "CNN-Transformer Hybrid Architecture",
+      "file_type": "concept",
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 114,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ctnet_paper_cnn_transformer_hybrid",
+      "community": 2,
+      "norm_label": "cnn-transformer hybrid architecture"
+    },
+    {
+      "label": "Multi-Head Attention",
+      "file_type": "concept",
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 97,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ctnet_paper_multi_head_attention",
+      "community": 3,
+      "norm_label": "multi-head attention"
+    },
+    {
+      "label": "EEGNet",
+      "file_type": "concept",
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 164,
+      "source_url": null,
+      "captured_at": null,
+      "contributor": null,
+      "id": "ctnet_paper_eegnet",
+      "community": 3,
+      "norm_label": "eegnet"
+    },
+    {
+      "label": "Subject-Specific Classification",
+      "file_type": "concept",
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 26,
+      "source_url": null,
+      "captured_at": null,
+      "contributor": null,
+      "id": "ctnet_paper_subject_specific",
+      "community": 3,
+      "norm_label": "subject-specific classification"
+    },
+    {
+      "label": "Cross-Subject Classification",
+      "file_type": "concept",
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 28,
+      "source_url": null,
+      "contributor": null,
+      "id": "ctnet_paper_cross_subject",
+      "community": 3,
+      "norm_label": "cross-subject classification"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/settings.local.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "claude_settings_local_json",
+      "target": "claude_settings_local_permissions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".claude/settings.local.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "claude_settings_local_permissions",
+      "target": "claude_settings_local_permissions_allow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 50,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_eegencoder",
+      "target": "transformer_mi_eeg_paper_tcn"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 70,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_eegencoder",
+      "target": "transformer_mi_eeg_paper_stabletransformer"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 70,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_eegencoder",
+      "target": "transformer_mi_eeg_paper_dsts"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 264,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_eegencoder",
+      "target": "transformer_mi_eeg_paper_bci_competition_iv_2a"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 17,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_eegencoder",
+      "target": "transformer_mi_eeg_paper_motor_imagery"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 1,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_eegencoder",
+      "target": "ctnet_paper_ctnet"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 182,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_dsts",
+      "target": "transformer_mi_eeg_paper_tcn"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 182,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_dsts",
+      "target": "transformer_mi_eeg_paper_stabletransformer"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 1,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_tcn",
+      "target": "ctnet_paper_cnn_transformer_hybrid"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 157,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_stabletransformer",
+      "target": "transformer_mi_eeg_paper_rmsnorm"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 170,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_stabletransformer",
+      "target": "transformer_mi_eeg_paper_swiglu"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 130,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_stabletransformer",
+      "target": "transformer_mi_eeg_paper_prenormalization"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md",
+      "source_location": 889,
+      "weight": 1.0,
+      "source": "transformer_mi_eeg_paper_bci_competition_iv_2a",
+      "target": "bci_dataset_description_graz_dataset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 255,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "transformer_mi_eeg_paper_bci_competition_iv_2a"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 134,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_gdcnet",
+      "target": "eeg_augmented_deep_learning_dcgan"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 176,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_gdcnet",
+      "target": "eeg_augmented_deep_learning_cnn_lstm"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 74,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_gdcnet",
+      "target": "eeg_augmented_deep_learning_bci_competition_iv_2b"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 112,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_gdcnet",
+      "target": "eeg_augmented_deep_learning_gmwt"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 31,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_gdcnet",
+      "target": "eeg_augmented_deep_learning_left_right_hand_mi"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 1,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_gdcnet",
+      "target": "ctnet_paper_ctnet"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 1,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_dcgan",
+      "target": "eeg_augmented_deep_learning_gmwt"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 176,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_cnn_lstm",
+      "target": "ctnet_paper_cnn_transformer_hybrid"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/EEG Augmented Deep Learning.md",
+      "source_location": 795,
+      "weight": 1.0,
+      "source": "eeg_augmented_deep_learning_bci_competition_iv_2b",
+      "target": "bci_dataset_description_graz_dataset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 257,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "eeg_augmented_deep_learning_bci_competition_iv_2b"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 12,
+      "weight": 1.0,
+      "source": "bci_dataset_description_graz_dataset",
+      "target": "bci_dataset_description_9_subjects"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 12,
+      "weight": 1.0,
+      "source": "bci_dataset_description_graz_dataset",
+      "target": "bci_dataset_description_4_classes"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 33,
+      "weight": 1.0,
+      "source": "bci_dataset_description_graz_dataset",
+      "target": "bci_dataset_description_22_channels"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/bci_dataset_description.md",
+      "source_location": 33,
+      "weight": 1.0,
+      "source": "bci_dataset_description_graz_dataset",
+      "target": "bci_dataset_description_250_hz"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 114,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "ctnet_paper_cnn_transformer_hybrid"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 97,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "ctnet_paper_multi_head_attention"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 164,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "ctnet_paper_eegnet"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 26,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "ctnet_paper_subject_specific"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/CTNet_paper.md",
+      "source_location": 28,
+      "weight": 1.0,
+      "source": "ctnet_paper_ctnet",
+      "target": "ctnet_paper_cross_subject"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "bci_competition_datasets",
+      "label": "BCI Competition IV Datasets",
+      "nodes": [
+        "transformer_mi_eeg_paper_bci_competition_iv_2a",
+        "eeg_augmented_deep_learning_bci_competition_iv_2b",
+        "bci_dataset_description_graz_dataset",
+        "bci_dataset_description_9_subjects",
+        "bci_dataset_description_4_classes",
+        "bci_dataset_description_22_channels"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/bci_dataset_description.md"
+    },
+    {
+      "id": "transformer_bci_models",
+      "label": "Transformer-based BCI Models",
+      "nodes": [
+        "transformer_mi_eeg_paper_eegencoder",
+        "ctnet_paper_ctnet",
+        "transformer_mi_eeg_paper_stabletransformer",
+        "transformer_mi_eeg_paper_tcn",
+        "ctnet_paper_multi_head_attention"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md"
+    },
+    {
+      "id": "deep_learning_mi_classification",
+      "label": "Deep Learning MI Classification Approaches",
+      "nodes": [
+        "transformer_mi_eeg_paper_eegencoder",
+        "eeg_augmented_deep_learning_gdcnet",
+        "ctnet_paper_ctnet",
+        "eeg_augmented_deep_learning_cnn_lstm",
+        "ctnet_paper_cnn_transformer_hybrid"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/transformer_mi_eeg_paper.md"
+    }
+  ]
+}

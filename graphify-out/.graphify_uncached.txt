@@ -1,0 +1,8 @@
+/home/istiaqfuad/Desktop/last-bci/main.py
+/home/istiaqfuad/Desktop/last-bci/.claude/settings.local.json
+/home/istiaqfuad/Desktop/last-bci/README.md
+/home/istiaqfuad/Desktop/last-bci/papers/transformer_mi_eeg_paper.md
+/home/istiaqfuad/Desktop/last-bci/papers/EEG Augmented Deep Learning.md
+/home/istiaqfuad/Desktop/last-bci/papers/bci_dataset_description.md
+/home/istiaqfuad/Desktop/last-bci/papers/CTNet_paper.md
+/home/istiaqfuad/Desktop/last-bci/papers/ConTraNet_paper.md
