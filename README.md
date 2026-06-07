@@ -1,6 +1,6 @@
 # MTSEEGFormer for BCI Competition IV-2a
 
-**Mean accuracy: 79.28%** on BCI Competition IV-2a (4-class motor imagery, 9 subjects)
+**Mean accuracy: 83.56%** on BCI Competition IV-2a (4-class motor imagery, 9 subjects)
 
 A single unified architecture with no ensembling tricks, evaluated under strict session-based protocol with no data leakage.
 
@@ -8,11 +8,11 @@ A single unified architecture with no ensembling tricks, evaluated under strict 
 
 | Metric | Value |
 |---|---|
-| Mean test accuracy (9 subjects) | 79.28% |
-| Std | ±12.25% |
-| Per-subject range | 58.7% (S2) – 95.1% (S3) |
+| Mean test accuracy (9 subjects) | 83.56% |
+| Std | ±9.96% |
+| Per-subject range | 66.7% (S2) – 95.1% (S3) |
 | SOTA on same dataset (4-class) | CTNet 82.52% / MSCARNet 82.66% / EEGEncoder 86.46% |
-| Architecture | MTSEEGFormer (single model, 364K params) |
+| Architecture | UnifiedEEGNet (single model, 80K params) |
 | Ensembling | None |
 | Test-time augmentation | None |
 | Data leakage | None (session-based, train-z-score, assertion-checked) |
@@ -87,28 +87,28 @@ Per-subject test accuracy from `results.csv`:
 
 | Subject | Accuracy |
 |---|---|
-| 1 | 86.11% |
-| 2 | 60.76% |
-| 3 | 90.97% |
-| 4 | 82.99% |
-| 5 | 71.53% |
-| 6 | 64.58% |
-| 7 | 89.24% |
-| 8 | 82.29% |
-| 9 | 85.76% |
+| 1 | 90.97% |
+| 2 | 66.67% |
+| 3 | 95.14% |
+| 4 | 84.38% |
+| 5 | 72.57% |
+| 6 | 73.96% |
+| 7 | 89.58% |
+| 8 | 89.58% |
+| 9 | 89.24% |
 
-**Mean: 79.28% ± 12.25%**
+**Mean: 83.56% ± 9.96%**
 
 ## Why 85% was hard (and what would close the gap)
 
-The 5.72-point gap to the 85% target is concentrated in three "hard" subjects of BCI IV-2a (S2=58.7%, S5=70.5%, S6=64.6%). These subjects are well-known to be difficult across the literature — they have lower mu/beta amplitude and noisier motor-imagery patterns, so a single model trained on 288 trials of session-1 data struggles to generalize to session 2.
+The 1.44-point gap to the 85% target is concentrated in three "hard" subjects of BCI IV-2a (S2=66.7%, S5=72.6%, S6=74.0%). These subjects are well-known to be difficult across the literature — they have lower mu/beta amplitude and noisier motor-imagery patterns, so a single model trained on 288 trials of session-1 data struggles to generalize to session 2.
 
 Closing the gap cleanly would likely require (any one of):
 - **More pretraining data**: the current pretraining uses only session 1 of the 9 IV-2a subjects. Adding data from related datasets (e.g., BCI IV-2b, High Gamma) for self-supervised pretraining would help
 - **Self-supervised pretraining**: masked autoencoding or contrastive pretraining on the unlabeled session-1 EEG (we have 2592 trials). The current pretraining is supervised cross-entropy
-- **Bigger receptive field** for hard subjects, or a smaller-capacity model (current 364K params may be over-parameterized for 288 trials)
+- **Different architecture for hard subjects**: a frequency-aware architecture (filter bank, STFT front-end) might better capture the weak mu/beta ERD in S2 and S6
 
-These were not attempted because they would either add data sources or change the "single architecture, no tricks" constraint. The reported 79.28% is the honest result of the requested setup.
+These were not attempted because they would either add data sources or change the "single architecture, no tricks" constraint. The reported 83.56% is the honest result of the requested setup.
 
 ## Requirements
 

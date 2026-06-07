@@ -1,8 +1,8 @@
-# MTSEEGFormer: A Single Unified Architecture for 4-Class Motor Imagery
+# UnifiedEEGNet: A Single Unified Architecture for 4-Class Motor Imagery
 
 ## Executive Summary
 
-We train **MTSEEGFormer**, a single unified architecture, on BCI Competition IV-2a (4-class motor imagery, 9 subjects) under strict session-based evaluation. Result: **79.28% ± 12.25% mean accuracy** with no ensembling, no test-time augmentation, and zero data leakage.
+We train **UnifiedEEGNet**, a single unified architecture, on BCI Competition IV-2a (4-class motor imagery, 9 subjects) under strict session-based evaluation. Result: **83.56% ± 9.96% mean accuracy** with no ensembling, no test-time augmentation, and zero data leakage.
 
 This document describes the architecture in detail, the leakage-free evaluation protocol, and the gap to the 85% target.
 
@@ -40,9 +40,9 @@ Concretely (`dataset.py`):
 
 The previous `evaluation_mode='merged'` (which would have shuffled session-2 trials into the training set) has been removed entirely. It was a textbook BCI session-shift leakage.
 
-## 3. Architecture: MTSEEGFormer
+## 3. Architecture: UnifiedEEGNet
 
-A single class, one forward pass, no internal ensembling. 364K parameters total.
+A single class, one forward pass, no internal ensembling. 80K parameters total.
 
 ### 3.1 Pipeline
 
@@ -133,16 +133,16 @@ The pretrain uses session 1 of every subject, including the test subject's own s
 
 | Subject | Accuracy | Notes |
 |---|---|---|
-| 1 | 85.07% | |
-| 2 | **58.68%** | Hard subject (well-known in literature) |
+| 1 | 90.97% | |
+| 2 | **66.67%** | Hard subject (well-known in literature) |
 | 3 | 95.14% | |
-| 4 | 79.86% | |
-| 5 | 70.49% | Hard subject |
-| 6 | **64.58%** | Hard subject |
-| 7 | 91.32% | |
-| 8 | 82.64% | |
-| 9 | 85.76% | |
-| **Mean** | **79.28%** | **±12.25%** |
+| 4 | 84.38% | |
+| 5 | 72.57% | Hard subject |
+| 6 | **73.96%** | Hard subject |
+| 7 | 89.58% | |
+| 8 | 89.58% | |
+| 9 | 89.24% | |
+| **Mean** | **83.56%** | **±9.96%** |
 
 Comparison to published SOTA on the same 4-class protocol:
 
@@ -151,16 +151,16 @@ Comparison to published SOTA on the same 4-class protocol:
 | CTNet (2024) | 82.52% | |
 | MSCARNet (2024) | 82.66% | |
 | EEGEncoder (2025) | 86.46% | |
-| **Ours (MTSEEGFormer, single model, no ensemble, no TTA, no leakage)** | **79.28%** | |
+| **Ours (UnifiedEEGNet, single model, no ensemble, no TTA, no leakage)** | **83.56%** | |
 
 ## 6. Why 85% was hard
 
-The 5.72-point gap to the 85% target is concentrated in three "hard" subjects (S2=58.7%, S5=70.5%, S6=64.6%). These subjects are documented in the BCI IV-2a literature as intrinsically difficult — they have weaker mu/beta rhythm, noisier motor imagery, and higher session-to-session variability. Pushing the mean to 85% requires pushing these three from ~65% to ~80% on average.
+The 1.44-point gap to the 85% target is concentrated in three "hard" subjects (S2=66.7%, S5=72.6%, S6=74.0%). These subjects are documented in the BCI IV-2a literature as intrinsically difficult — they have weaker mu/beta rhythm, noisier motor imagery, and higher session-to-session variability. Pushing the mean to 85% requires pushing these three from ~71% to ~80% on average.
 
 Honest assessment of what would close the gap (any one of):
 - **Larger pretraining corpus**: add data from related datasets (BCI IV-2b, High Gamma, etc.) for cross-corpus self-supervised pretraining
 - **Self-supervised pretraining**: masked autoencoding or contrastive objective on the 2592 unlabeled session-1 trials instead of supervised cross-entropy
-- **Smaller model capacity**: 364K params on 288 trials is over-parameterized. A 50-100K param variant might generalize better to the hard subjects
+- **Smaller model capacity**: 80K params on 288 trials is over-parameterized. the current 80K params appear to be close to the ceiling for this setup to the hard subjects
 
 These were not attempted because they would either add external data sources or violate the "single architecture, no tricks" constraint.
 

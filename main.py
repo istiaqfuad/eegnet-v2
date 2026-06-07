@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from model import MTSEEGFormer
+from model import UnifiedEEGNet
 from dataset import load_bci_iva_dataset, prepare_subject_data, prepare_pretrain_data
 from train import train_model, pretrain_model
 
@@ -18,7 +18,7 @@ MAX_LR = 0.005
 WEIGHT_DECAY = 0.02
 LABEL_SMOOTHING = 0.1
 PATIENCE = 150
-PRETRAIN_EPOCHS = 500
+PRETRAIN_EPOCHS = 200
 USE_EMA = False
 EMA_DECAY = 0.99
 
@@ -31,7 +31,7 @@ def train_subject(subject, X, y, meta, device, pretrained_state):
     print(f"    Train: {X_train.shape}, Test: {X_test.shape}")
     return train_model(
         X_train, y_train, X_test, y_test,
-        model_class=MTSEEGFormer,
+        model_class=UnifiedEEGNet,
         device=device,
         seed=SEED,
         epochs=EPOCHS,
@@ -85,7 +85,7 @@ def main():
         os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
         pretrained_state = pretrain_model(
             X_pretrain, y_pretrain,
-            model_class=MTSEEGFormer,
+            model_class=UnifiedEEGNet,
             device=device,
             save_path=pretrained_path,
             epochs=PRETRAIN_EPOCHS, batch_size=BATCH_SIZE,

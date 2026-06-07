@@ -3,6 +3,7 @@ import copy
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 
@@ -19,6 +20,17 @@ class ModelEma:
             ema_p.mul_(self.decay).add_(p.detach(), alpha=1 - self.decay)
         for ema_b, b in zip(self.shadow.buffers(), model.buffers()):
             ema_b.copy_(b)
+
+
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2.0, reduction='mean'):
+        super().__init__()
+        self.gamma = gamma
+
+    def forward(self, inputs, targets):
+        ce_loss = F.cross_entropy(inputs, targets, reduction='none')
+        pt = torch.exp(-ce_loss)
+        return ((1 - pt) ** self.gamma * ce_loss).mean()
 
 
 def mixup_data(x, y, alpha=0.3):
@@ -108,7 +120,8 @@ def train_model(X_train, y_train, X_test, y_test, model_class, device,
                 seed=42, epochs=500, batch_size=64,
                 lr=0.001, weight_decay=0.02, max_lr=0.005,
                 label_smoothing=0.1, patience=150,
-                pretrained_state=None, use_ema=True, ema_decay=0.999):
+                pretrained_state=None, use_ema=True, ema_decay=0.999,
+                use_focal_loss=False):
     from dataset import BCIDataset
 
     train_dataset = BCIDataset(X_train, y_train, augment=True, use_sr=True)
@@ -126,7 +139,7 @@ def train_model(X_train, y_train, X_test, y_test, model_class, device,
 
     ema = ModelEma(model, decay=ema_decay) if use_ema else None
 
-    criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+    criterion = FocalLoss(gamma=2.0) if use_focal_loss else nn.CrossEntropyLoss(label_smoothing=label_smoothing)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
         optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_loader),
