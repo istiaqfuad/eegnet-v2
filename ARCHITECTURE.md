@@ -1,298 +1,176 @@
-# EEGNetv2 with Squeeze-and-Excitation Blocks for Motor Imagery Classification
+# MTSEEGFormer: A Single Unified Architecture for 4-Class Motor Imagery
 
 ## Executive Summary
 
-We developed EEGNetv2, a novel EEG classification model that achieves **88.12% mean accuracy** on the BCI Competition IV-2a dataset, surpassing the previous state-of-the-art EEGEncoder (86.46%). The model introduces lightweight Squeeze-and-Excitation (SE) attention blocks adapted for EEG processing, combined with a deeper EEGNet architecture.
+We train **MTSEEGFormer**, a single unified architecture, on BCI Competition IV-2a (4-class motor imagery, 9 subjects) under strict session-based evaluation. Result: **79.28% ± 12.25% mean accuracy** with no ensembling, no test-time augmentation, and zero data leakage.
+
+This document describes the architecture in detail, the leakage-free evaluation protocol, and the gap to the 85% target.
 
 ---
 
-## 1. Introduction
+## 1. Problem and Dataset
 
-### 1.1 Problem
-Motor Imagery (MI) classification from EEG signals is a fundamental task in Brain-Computer Interface (BCI) research. The goal is to classify EEG recordings into four movement intentions: left hand, right hand, feet, and tongue.
+Motor Imagery (MI) classification from EEG is a fundamental BCI task. Given a 4-second EEG window, classify the imagined movement into one of four classes: left hand, right hand, feet, tongue.
 
-### 1.2 Dataset
 - **Dataset**: BCI Competition IV-2a (BNCI2014_001)
 - **Subjects**: 9 healthy subjects
 - **Channels**: 22 EEG channels
-- **Sampling Rate**: 250 Hz
-- **Trials**: 576 trials per subject (288 per session, 2 sessions)
-- **Classes**: 4 (left hand, right hand, feet, tongue)
+- **Sampling rate**: 250 Hz → 1000 timesteps per trial
+- **Trials**: 288 per session, 2 sessions, 576 per subject total
+- **Classes**: 4 (left_hand, right_hand, feet, tongue)
+- **Preprocessing**: MOABB MotorImagery paradigm, 0.5–100 Hz bandpass
 
-### 1.3 Previous State-of-the-Art
-| Model | Accuracy |
-|-------|----------|
-| EEGEncoder | 86.46% |
-| CTNet | 82.52% |
-| GDC-Net | 89.24% (on IV-2b) |
+## 2. Evaluation protocol (no leakage)
 
----
+We follow the official BCI Competition IV-2a protocol: train on session 1, test on session 2, per subject. Mean across the 9 subjects is the headline number.
 
-## 2. Model Architecture
+Concretely (`dataset.py`):
 
-### 2.1 Overview
+- `prepare_subject_data(X, y, meta, subject)`:
+  - asserts `len(sessions) >= 2` (so no fallback to a leaky random split)
+  - selects session 1 trials as `X_train`, session 2 as `X_test`
+  - computes `mean`, `std` from `X_train` only
+  - applies `(X_train - mean) / std` and `(X_test - mean) / std` (no test-stat leakage)
+  - prints `[no-leakage] Subject N: train=session0train (288), test=session1test (288); z-score from train only` on every call
 
-EEGNetv2 is built on the proven EEGNet architecture with strategic novel additions:
+- `prepare_pretrain_data(X, y, meta)`:
+  - selects session 1 of **all** 9 subjects
+  - session 2 of every subject is held out and never seen during pretraining
+  - this gives the fine-tuning a strong cross-subject init without leaking the test session
+
+The previous `evaluation_mode='merged'` (which would have shuffled session-2 trials into the training set) has been removed entirely. It was a textbook BCI session-shift leakage.
+
+## 3. Architecture: MTSEEGFormer
+
+A single class, one forward pass, no internal ensembling. 364K parameters total.
+
+### 3.1 Pipeline
 
 ```
-Input EEG (22 channels × 1000 timesteps)
-    │
-    ▼
-┌─────────────────────────────────────┐
-│         Block 1: Temporal           │
-│  • Conv2D(1→16, kernel=25)          │
-│  • BatchNorm                        │
-│  • Depthwise Conv (16→32, groups=16)│
-│  • BatchNorm → ELU → AvgPool        │
-│  • Dropout(0.35)                    │
-│  • SE Block (Novel)                 │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│      Block 2: Separable Conv        │
-│  • SeparableConv2D(32→32, k=15)     │
-│  • BatchNorm → ELU → AvgPool        │
-│  • Dropout(0.35)                    │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│       Block 3: Spatial              │
-│  • Conv2D(32→64, kernel=7)          │
-│  • BatchNorm → ELU → AvgPool        │
-│  • Dropout(0.35)                    │
-│  • SE Block (Novel)                 │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│     Block 4: Deeper Features       │
-│  • Conv2D(64→64, kernel=3)          │
-│  • BatchNorm → ELU                  │
-│  • Dropout(0.35)                    │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│      Classifier Head                │
-│  • AdaptiveAvgPool2d((1,8))         │
-│  • Flatten                          │
-│  • FC(512→256) → LayerNorm → GELU  │
-│  • Dropout(0.5)                     │
-│  • FC(256→128) → LayerNorm → GELU  │
-│  • Dropout(0.4)                     │
-│  • FC(128→4)                        │
-└─────────────────────────────────────┘
-    │
-    ▼
-        4-class Output
+Input EEG [B, 22, 1000]
+   │
+   ▼
+[1] EEGNet-style embedding
+    Conv2d(1, 16, kernel=(1, 25), padding=(0, 12))   ← temporal filter
+    BatchNorm2d(16)
+    ELU
+    Conv2d(16, 32, kernel=(22, 1), groups=16)       ← depthwise spatial filter
+    BatchNorm2d(32)
+    ELU                                              → [B, 32, 1, 1000]
+   │
+   ▼
+[2] Progressive downsampling (3 stride-2 convs)
+    Conv2d(32, 48, (1, 7), stride=(1,2)) + BN + GELU + Drop(0.15)   → [B, 48, 1, 500]
+    Conv2d(48, 48, (1, 7), stride=(1,2)) + BN + GELU + Drop(0.15)   → [B, 48, 1, 250]
+    Conv2d(48, 64, (1, 5), stride=(1,2)) + BN + GELU + Drop(0.15)   → [B, 64, 1, 125]
+   │
+   ▼
+[3] Multi-scale temporal convolution (MSCARNet)
+    3 parallel Conv1d(64, 21, k={15, 35, 55}, padding=k//2)  → concat 63 ch
+    BatchNorm1d(63) → Conv1d(63, 64, 1) → BatchNorm1d(64)
+    GELU                                                        → [B, 64, 125]
+   │
+   ▼
+[4] Two DSTS blocks (Dual-Stream Temporal-Spatial, from EEGEncoder)
+    Each block:
+        TCN stream:  3 stacked dilated Conv1d(64→64, k=3, dilations 1/2/4) + BN + GELU
+        Spatial stream: pre-norm TransformerEncoderLayer(d=64, heads=4, ff=256)
+        Sum + Dropout(0.25) + LayerNorm(d=64)                      → [B, 64, 125]
+   │
+   ▼
+[5] Classifier
+    x = x.mean(dim=-1)             ← mean-pool over time
+    x = RMSNorm(64)(x)             ← pre-head norm
+    x = Dropout(0.4)(x)
+    x = Linear(64, 4)(x)           ← class logits
 ```
 
-### 2.2 Novel Components
+### 3.2 Components
 
-#### 2.2.1 Squeeze-and-Excitation (SE) Blocks
+**RMSNorm** (`x / sqrt(mean(x^2) + eps) * weight`) — used inside the transformer layers and the final classifier head. Cheaper than LayerNorm, used in modern transformer architectures (LLaMA, etc.).
 
-The core novelty is the adaptation of SE blocks from SENets for EEG processing:
+**TCNBlock** — stack of dilated 1D convolutions with BN+GELU. Captures multi-scale temporal patterns. The dilation_growth=2 gives receptive fields of 3, 5, 9 samples across the three layers.
 
-```python
-class SEBlock(nn.Module):
-    def __init__(self, channels, reduction=4):
-        super().__init__()
-        self.pool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channels, channels // reduction),
-            nn.GELU(),
-            nn.Linear(channels // reduction, channels),
-            nn.Sigmoid()
-        )
+**MultiScaleTemporalConv** — three parallel 1D convs at different temporal scales (k=15, 35, 55), inspired by MSCARNet. Concatenated and projected back to 64 channels. Lets the model attend to short, medium, and long windows simultaneously.
 
-    def forward(self, x):
-        b, c, _, _ = x.size()
-        y = self.pool(x).view(b, c)
-        y = self.fc(y).view(b, c, 1, 1)
-        return x * y
-```
+**StableTransformerLayer** — pre-norm transformer: `x = x + Drop(SelfAttn(RMSNorm(x)))` and `x = x + Drop(FFN(RMSNorm(x)))`. Pre-norm is more stable than post-norm for small datasets.
 
-**Why SE blocks work for EEG:**
-- **Channel Interdependence**: EEG channels have varying importance across subjects and sessions
-- **Computational Efficiency**: Minimal parameters (channels // 4 * 2 per block)
-- **Adaptive Weighting**: Learns to emphasize/de-emphasize channel features
+**DSTSBlock** — the dual-stream block from EEGEncoder. The TCN handles the temporal axis; the transformer attends over the 125 time tokens (after the permute `(B, 64, 125) → (B, 125, 64)`). The two streams are summed and LayerNormed. Note: by the time we reach this stage, the depthwise spatial conv has already collapsed the 22 channels into the feature dimension, so the "spatial" stream is effectively a second view on the time axis — not a true channel-attention mechanism.
 
-#### 2.2.2 Deeper Architecture
+### 3.3 Parameter count
 
-Added Block 4 with a 1×3 conv for richer temporal feature extraction:
-- Captures finer temporal patterns
-- Complements the multi-scale temporal information from earlier blocks
+| Component | Params |
+|---|---|
+| Stage 1 (EEGNet embedding) | ~9K |
+| Stage 2 (downsampling) | ~7K |
+| Stage 3 (multi-scale conv) | ~145K |
+| Stage 4 (2x DSTS block) | ~170K |
+| Stage 5 (head) | ~260 |
+| **Total** | **~364K** |
 
-### 2.3 Key Architectural Decisions
+## 4. Training
 
-| Design Choice | Rationale |
-|---------------|-----------|
-| Depthwise Separable Convolutions | Parameter efficient, captures spatial-temporal patterns |
-| ELU Activation | Better gradient flow for EEG signals |
-| AdaptiveAvgPool2d | Handles variable input lengths |
-| LayerNorm in FC | More stable training than BatchNorm for small datasets |
+One configuration for all 9 subjects. No per-subject tuning.
 
----
+| Hyperparameter | Value |
+|---|---|
+| Optimizer | AdamW (lr=1e-3, weight_decay=0.02) |
+| Scheduler | OneCycleLR, max_lr=5e-3, 15% warmup, cosine anneal |
+| Epochs | 500 (patience 150) |
+| Batch size | 64 |
+| Label smoothing | 0.1 |
+| MixUp | alpha=0.3, applied ~60% of batches |
+| Augmentations (train only) | S&R (4-segment shuffle), frequency masking, channel dropout, channel permutation, temporal shift, Gaussian noise |
+| Pretrain | 500 epochs on session 1 of all 9 subjects, supervised cross-entropy, cosine LR |
+| Single seed | 42 |
+| **Ensembling** | **None** |
+| **TTA** | **None** |
+| **Test-set leakage** | **None** (asserted at runtime) |
 
-## 3. Training Process
+The pretrain uses session 1 of every subject, including the test subject's own session 1. This is not a leak because the test set is the same subject's session 2 — the pretrain has never seen session 2 of anyone.
 
-### 3.1 Data Processing
+## 5. Results
 
-1. **Windowing**: First 1000 timesteps (4 seconds at 250Hz)
-2. **Normalization**: Z-score per subject
-   ```python
-   mean, std = X_train.mean(), X_train.std() + 1e-8
-   X_train_norm = (X_train - mean) / std
-   X_test_norm = (X_test - mean) / std
-   ```
+| Subject | Accuracy | Notes |
+|---|---|---|
+| 1 | 85.07% | |
+| 2 | **58.68%** | Hard subject (well-known in literature) |
+| 3 | 95.14% | |
+| 4 | 79.86% | |
+| 5 | 70.49% | Hard subject |
+| 6 | **64.58%** | Hard subject |
+| 7 | 91.32% | |
+| 8 | 82.64% | |
+| 9 | 85.76% | |
+| **Mean** | **79.28%** | **±12.25%** |
 
-### 3.2 Data Augmentation
+Comparison to published SOTA on the same 4-class protocol:
 
-Three augmentation strategies applied with probabilities:
+| Model | Mean accuracy | Notes |
+|---|---|---|
+| CTNet (2024) | 82.52% | |
+| MSCARNet (2024) | 82.66% | |
+| EEGEncoder (2025) | 86.46% | |
+| **Ours (MTSEEGFormer, single model, no ensemble, no TTA, no leakage)** | **79.28%** | |
 
-| Augmentation | Probability | Description |
-|--------------|-------------|-------------|
-| Segment Shuffle | 40% | Shuffle 4 temporal segments |
-| Channel Permutation | 20% | Random channel reordering |
-| Gaussian Noise | 20% | σ=0.05 additive noise |
+## 6. Why 85% was hard
 
-### 3.3 Training Configuration
+The 5.72-point gap to the 85% target is concentrated in three "hard" subjects (S2=58.7%, S5=70.5%, S6=64.6%). These subjects are documented in the BCI IV-2a literature as intrinsically difficult — they have weaker mu/beta rhythm, noisier motor imagery, and higher session-to-session variability. Pushing the mean to 85% requires pushing these three from ~65% to ~80% on average.
 
-```python
-# Optimizer
-optimizer = AdamW(lr=0.001, weight_decay=0.03)
+Honest assessment of what would close the gap (any one of):
+- **Larger pretraining corpus**: add data from related datasets (BCI IV-2b, High Gamma, etc.) for cross-corpus self-supervised pretraining
+- **Self-supervised pretraining**: masked autoencoding or contrastive objective on the 2592 unlabeled session-1 trials instead of supervised cross-entropy
+- **Smaller model capacity**: 364K params on 288 trials is over-parameterized. A 50-100K param variant might generalize better to the hard subjects
 
-# Scheduler
-scheduler = OneCycleLR(
-    max_lr=0.006,
-    epochs=500,
-    pct_start=0.15,
-    anneal_strategy='cos'
-)
+These were not attempted because they would either add external data sources or violate the "single architecture, no tricks" constraint.
 
-# Loss
-criterion = CrossEntropyLoss(label_smoothing=0.1)
-
-# Early stopping
-patience = 150 epochs
-```
-
-### 3.4 Multi-Seed Training
-
-Used 3 random seeds [42, 123, 456] and selected best result per subject:
-- Reduces variance from random initialization
-- More robust evaluation
-
-### 3.5 Training Data Strategy
-
-**Key Insight**: Used both sessions (518 samples) instead of just session 1 (288 samples):
-```python
-# Combined both sessions for more training data
-all_X = np.concatenate([X_session1, X_session2], axis=0)
-# 90% train, 10% test
-```
-
----
-
-## 4. Results
-
-### 4.1 Per-Subject Performance
-
-| Subject | Accuracy |
-|---------|----------|
-| 1 | 94.83% |
-| 2 | 74.14% |
-| 3 | 100.00% |
-| 4 | 89.66% |
-| 5 | 75.86% |
-| 6 | 74.14% |
-| 7 | 96.55% |
-| 8 | 91.38% |
-| 9 | 96.55% |
-
-**Mean: 88.12% ± 10.50%**
-
-### 4.2 Comparison with SOTA
-
-| Model | Mean Accuracy | Improvement |
-|-------|---------------|-------------|
-| EEGEncoder (SOTA) | 86.46% | - |
-| CTNet | 82.52% | - |
-| **EEGNetv2 (Ours)** | **88.12%** | **+1.66%** |
-
----
-
-## 5. Publishability Analysis
-
-### 5.1 Strengths
-
-✓ **Novel Contribution**: First adaptation of SE blocks for EEG motor imagery
-✓ **State-of-the-Art**: Beats EEGEncoder by 1.66%
-✓ **Clean Architecture**: Simple modifications with clear rationale
-✓ **Improved Robustness**: Better on difficult subjects (S2, S5, S6)
-
-### 5.2 Limitations
-
-⚠ **Incremental Improvement**: 1.66% may be within statistical noise
-⚠ **Missing Metrics**: No Kappa or ITR (required for BCI papers)
-⚠ **Same Data Split**: Need to verify on identical train/test splits
-
-### 5.3 Recommendations for Publication
-
-1. **Add Metrics**: Compute Cohen's Kappa and Information Transfer Rate (ITR)
-2. **Statistical Testing**: Conduct paired t-test with EEGEncoder
-3. **Ablation Studies**: Test without SE blocks, without both sessions
-4. **Cross-Subject Evaluation**: Test leave-one-subject-out scenario
-
----
-
-## 6. Reproducibility
-
-### 6.1 Requirements
+## 7. Reproducibility
 
 ```bash
-# Python >= 3.12
-# PyTorch >= 2.1.0
-# MOABB >= 1.2.0
-# mne >= 1.8.0
-```
-
-### 6.2 Reproduction Command
-
-```bash
-cd /home/istiaqfuad/Desktop/last-bci
+uv sync
 uv run python main.py
 ```
 
-### 6.3 Expected Runtime
+First run: ~80 min on a 4GB GPU (50 min pretrain + 30 min fine-tune). Subsequent runs: ~30 min (the pretrained checkpoint in `models/pretrained.pt` is reused).
 
-- ~15-20 minutes on GPU (NVIDIA)
-- ~60-90 minutes on CPU
-
-### 6.4 Files
-
-| File | Description |
-|------|-------------|
-| `main.py` | Full training script |
-| `results.csv` | Per-subject results |
-| `results_archive/v2_eegnetv2_se_88.12.py` | Saved model code |
-| `ARCHITECTURE.md` | This report |
-
----
-
-## 7. Conclusion
-
-EEGNetv2 with SE blocks achieves 88.12% accuracy, beating the previous SOTA (EEGEncoder at 86.46%). The novelty lies in:
-1. Lightweight SE attention for channel-wise feature recalibration
-2. Deeper architecture with additional conv layer
-3. Using both training sessions for more data
-
-The model is publishable with minor additions (Kappa/ITR metrics, statistical tests). The architecture provides a clean contribution to the EEG deep learning literature.
-
----
-
-*Report generated: 2026-05-16*
-*Model: EEGNetv2 with SE Blocks*
-*Accuracy: 88.12%*
+The training output contains explicit `[no-leakage]` printouts for every per-subject split, so you can verify the protocol from the log.
