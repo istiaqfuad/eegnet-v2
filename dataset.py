@@ -262,25 +262,32 @@ def load_bci_iva_dataset(fmin=0.5, fmax=100.0):
     return X, y, meta
 
 
-def prepare_pretrain_data(X, y, meta):
+def prepare_pretrain_data(X, y, meta, align='none'):
     """
     Prepare cross-subject pre-training data.
     Uses session 1 from ALL subjects. NO data leakage because session 2 is held out.
+
+    align='ea': whiten each subject's session-1 trials by that subject's own mean
+    spatial covariance (label-free), matching the within-subject EA distribution.
     """
     sessions = meta['session'].values
-    session_1_mask = sessions == sorted(np.unique(sessions))[0]
-    X_pretrain = X[session_1_mask].copy()
+    s1 = sorted(np.unique(sessions))[0]
+    session_1_mask = sessions == s1
+    X_pretrain = X[session_1_mask][:, :, :1000].copy().astype(np.float32)
     y_pretrain = y[session_1_mask].copy()
 
-    # Truncate to 1000 timesteps
-    X_pretrain = X_pretrain[:, :, :1000].copy()
+    if align == 'ea':
+        subj_p = meta['subject'].values[session_1_mask]
+        for s in np.unique(subj_p):
+            m = subj_p == s
+            X_pretrain[m] = _ea_apply(X_pretrain[m], _inv_sqrt(_ea_reference(X_pretrain[m])))
 
-    # Normalize globally
+    # Global scalar z-score
     mean = X_pretrain.mean().astype(np.float32)
     std = X_pretrain.std().astype(np.float32) + 1e-8
-    X_pretrain = ((X_pretrain.astype(np.float32) - mean) / std).astype(np.float32)
+    X_pretrain = ((X_pretrain - mean) / std).astype(np.float32)
 
-    print(f"    Pretrain data: {X_pretrain.shape} trials, {len(np.unique(y_pretrain))} classes")
+    print(f"    Pretrain data: {X_pretrain.shape} trials, {len(np.unique(y_pretrain))} classes, align={align}")
     return X_pretrain, y_pretrain
 
 
@@ -308,15 +315,40 @@ def _per_trial_standardize(X):
     return ((X - m) / s).astype(np.float32)
 
 
-def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42):
+def _ea_reference(X):
+    """Euclidean-Alignment reference = mean spatial covariance over trials.
+    X: [N, C, T] -> R: [C, C]. Label-free.
+    """
+    X = X.astype(np.float64)
+    covs = np.einsum('nct,ndt->ncd', X, X) / X.shape[2]
+    return covs.mean(axis=0)
+
+
+def _inv_sqrt(R):
+    """Symmetric inverse square root of an SPD matrix."""
+    evals, evecs = np.linalg.eigh(R)
+    evals = np.clip(evals, 1e-6, None)
+    return (evecs * (1.0 / np.sqrt(evals))) @ evecs.T
+
+
+def _ea_apply(X, R_inv_sqrt):
+    """Whiten each trial: X' = R^{-1/2} X. X: [N, C, T]."""
+    return np.einsum('cd,ndt->nct', R_inv_sqrt, X.astype(np.float64)).astype(np.float32)
+
+
+def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none'):
     """
     Within-subject split, leak-free (official BCI IV-2a protocol):
 
       train / val = session 1, stratified split (val_frac held out for model selection)
       test        = session 2 (evaluated exactly once on the val-selected checkpoint)
 
-    Z-score statistics are fit on the TRAIN portion only and applied to val and test,
-    so neither the validation nor the test trials contribute to normalization.
+    align='ea': Euclidean Alignment — whiten each session by its own mean spatial
+    covariance (label-free) before z-score. session-1 R is fit on the TRAIN portion
+    only and applied to train+val; session-2 R is fit on its own trials. This directly
+    counters cross-session covariance shift and leaks no labels.
+
+    Z-score statistics are fit on the TRAIN portion only and applied to val and test.
     Returns (X_train, X_val, X_test, y_train, y_val, y_test).
     """
     subject_idx = meta['subject'].values == subject
@@ -336,6 +368,11 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42):
     X_train, y_train = X_s1[tr_idx], y_s1[tr_idx]
     X_val, y_val = X_s1[va_idx], y_s1[va_idx]
 
+    if align == 'ea':
+        Ris1 = _inv_sqrt(_ea_reference(X_train))  # session-1 ref from train only
+        X_train, X_val = _ea_apply(X_train, Ris1), _ea_apply(X_val, Ris1)
+        X_test = _ea_apply(X_test, _inv_sqrt(_ea_reference(X_test)))  # session-2 ref, label-free
+
     mean = X_train.mean().astype(np.float32)
     std = X_train.std().astype(np.float32) + 1e-8
 
@@ -346,7 +383,7 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42):
 
     print(f"    [no-leakage] Subject {subject}: train={len(y_train)} val={len(y_val)} "
           f"(session {sessions_sorted[0]}), test={len(y_test)} (session {sessions_sorted[1]}); "
-          f"z-score from train only", flush=True)
+          f"align={align}; z-score from train only", flush=True)
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 

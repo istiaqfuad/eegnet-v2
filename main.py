@@ -79,9 +79,10 @@ def _summarize(results, label, model_name, out_path):
 
 def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Within-subject (session 1 -> train/val, session 2 -> test), leak-free."""
-    pretrained_path = os.path.join(script_dir, 'models', f'pretrained_{model_name}{cfg.tagsuffix}.pt')
+    pretrained_path = os.path.join(script_dir, 'models',
+                                   f'pretrained_{model_name}_{cfg.align}{cfg.tagsuffix}.pt')
     print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
-    X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta)
+    X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta, align=cfg.align)
     if os.path.exists(pretrained_path):
         print(f"    Loading existing pretrained model: {pretrained_path}")
         pretrained_state = torch.load(pretrained_path, map_location=device, weights_only=True)
@@ -100,7 +101,8 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
-                                                                  val_frac=cfg.val_frac, seed=SEED)
+                                                                  val_frac=cfg.val_frac, seed=SEED,
+                                                                  align=cfg.align)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
@@ -145,6 +147,8 @@ def main():
     parser.add_argument('--aug_expand', type=int, default=1, help='Replicate augmented train epochs')
     parser.add_argument('--val_frac', type=float, default=0.2, help='Within-subject validation fraction')
     parser.add_argument('--refit', action='store_true', help='Refit on train+val for val-selected #epochs')
+    parser.add_argument('--align', choices=['none', 'ea'], default='none',
+                        help='Euclidean Alignment (per-session covariance whitening, label-free)')
     parser.add_argument('--tag', type=str, default='', help='Suffix for output CSV / pretrain cache')
     parser.add_argument('--subjects', type=str, default='',
                         help='Comma-separated subject ids to run (e.g. 2,5,6); empty = all 9')
@@ -158,7 +162,7 @@ def main():
     model_class = MODEL_MAP[args.model]
     print(f"Model: {model_class.__name__} ({args.model}) | Protocol: {args.protocol} | "
           f"band={args.fmin}-{args.fmax}Hz expand={args.aug_expand} val_frac={args.val_frac} "
-          f"refit={args.refit} tag='{args.tag}'")
+          f"refit={args.refit} align={args.align} tag='{args.tag}'")
 
     torch.manual_seed(SEED)
     np.random.seed(SEED)
