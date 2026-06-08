@@ -140,15 +140,16 @@ def _build_optim_sched(model, lr, weight_decay, max_lr, n_epochs, steps_per_epoc
     return optimizer, scheduler
 
 
-def tent_adapt(model, loader, device, steps=1, lr=1e-3):
+def tent_adapt(model, loader, device, steps=1, lr=1e-3, div_weight=1.0):
     """Label-free source-free test-time adaptation via Information Maximization (SHOT-style).
 
     Adapts ONLY the BatchNorm affine params (gamma, beta) on the target subject's
     UNLABELLED trials; BN uses batch statistics. The loss is
-        L = E[H(p)]  -  H(E[p])
+        L = E[H(p)]  -  div_weight * H(E[p])
     i.e. minimise per-sample (conditional) entropy to sharpen predictions, while
     MAXIMISING the batch marginal entropy so the model cannot collapse all trials to
-    one class (the failure mode of plain entropy-min / Tent on hard subjects). No labels
+    one class (the failure mode of plain entropy-min / Tent on hard subjects).
+    div_weight=0 reduces to plain Tent (entropy-only) — used for the ablation. No labels
     are used -> honest, transductive. Natural for LOSO. Returns an adapted deep copy.
     """
     model = copy.deepcopy(model)
@@ -176,7 +177,7 @@ def tent_adapt(model, loader, device, steps=1, lr=1e-3):
             cond_ent = -(p * p.clamp_min(1e-8).log()).sum(1).mean()   # minimise
             pbar = p.mean(0)
             div = -(pbar * pbar.clamp_min(1e-8).log()).sum()          # maximise (anti-collapse)
-            loss = cond_ent - div
+            loss = cond_ent - div_weight * div                        # div_weight=0 -> plain Tent
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -188,7 +189,8 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
                 lr=0.001, weight_decay=0.02, max_lr=0.005,
                 label_smoothing=0.1, patience=150,
                 pretrained_state=None, use_ema=True, ema_decay=0.999,
-                use_focal_loss=False, expand=1, refit=False, tta_steps=0, tta_lr=1e-3):
+                use_focal_loss=False, expand=1, refit=False, tta_steps=0, tta_lr=1e-3,
+                tta_div=1.0):
     """Leak-free training.
 
     Model selection and early stopping use ONLY the validation set (X_val/y_val),
@@ -276,9 +278,10 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
 
     if tta_steps > 0:
         # Label-free test-time adaptation on the held-out subject (transductive).
-        adapted = tent_adapt(final_model, test_loader, device, steps=tta_steps, lr=tta_lr)
+        adapted = tent_adapt(final_model, test_loader, device, steps=tta_steps, lr=tta_lr,
+                             div_weight=tta_div)
         tta_acc = evaluate(adapted, test_loader, device)
-        msg += f" | +TTA({tta_steps}): {tta_acc:.4f}"
+        msg += f" | +TTA({tta_steps},div{tta_div}): {tta_acc:.4f}"
         test_acc = tta_acc
     print(msg, flush=True)
     return test_acc

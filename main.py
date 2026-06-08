@@ -48,7 +48,7 @@ def assert_no_leakage(X_train, X_val, X_test, y_train, y_val, y_test):
 
 def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
          pretrained_state, expand=1, refit=False, epochs=EPOCHS, patience=PATIENCE, seed=SEED,
-         tta_steps=0):
+         tta_steps=0, tta_div=1.0):
     return train_model(
         X_train, y_train, X_val, y_val, X_test, y_test,
         model_class=model_class,
@@ -67,6 +67,7 @@ def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
         expand=expand,
         refit=refit,
         tta_steps=tta_steps,
+        tta_div=tta_div,
     )
 
 
@@ -114,7 +115,7 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
                         pretrained_state, expand=cfg.aug_expand, refit=cfg.refit,
                         epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
-                        tta_steps=cfg.tta_steps)
+                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
@@ -137,7 +138,7 @@ def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
                         pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
                         epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
-                        tta_steps=cfg.tta_steps)
+                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
@@ -164,6 +165,9 @@ def main():
     parser.add_argument('--tta_steps', type=int, default=0,
                         help='Test-time adaptation: entropy-min BN-affine passes over the '
                              'unlabelled test subject (Tent, label-free). 0=off')
+    parser.add_argument('--tta_div', type=float, default=1.0,
+                        help='Diversity (marginal-entropy) weight in TTA loss. '
+                             '1.0=IM/SHOT, 0.0=plain Tent (ablation)')
     parser.add_argument('--subjects', type=str, default='',
                         help='Comma-separated subject ids to run (e.g. 2,5,6); empty = all 9')
     parser.add_argument('--pretrain_epochs', type=int, default=PRETRAIN_EPOCHS,
