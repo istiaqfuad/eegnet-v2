@@ -1,0 +1,62 @@
+Model: AdaptiveAlignEEGNet (adaptalign) | Protocol: within | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=ea tag='nov3'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within] Pretraining AdaptiveAlignEEGNet on session 1 of all subjects...
+    Pretrain data: (2592, 22, 1000) trials, 4 classes, align=ea
+    Pre-training on 2592 trials (session 1 of all subjects)
+      Pretrain epoch 50/200, Loss: 0.8137
+      Pretrain epoch 100/200, Loss: 0.8011
+      Pretrain epoch 150/200, Loss: 0.7246
+      Pretrain epoch 200/200, Loss: 0.7422
+    Saved pretrained model to /home/istiaqfuad/Desktop/last-bci/models/pretrained_adaptalign_ea_s42_nov3.pt
+
+[within] Fine-tuning AdaptiveAlignEEGNet per subject (val_frac=0.2, expand=1, refit=False)...
+    [no-leakage] Subject 2: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 1.0050, ValAcc: 0.9286, ValLoss: 0.2877
+      Epoch 100/500, TrLoss: 0.7297, ValAcc: 0.9107, ValLoss: 0.3474
+      Epoch 150/500, TrLoss: 0.6649, ValAcc: 0.8571, ValLoss: 0.4741
+      Early stop at epoch 162 (no val improve for 150 epochs)
+      Best ValAcc: 0.9821 -> Test (single eval): 0.6736
+    [within] Running mean: 67.36% (1/3)
+    [no-leakage] Subject 3: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 0.8955, ValAcc: 1.0000, ValLoss: 0.1332
+      Epoch 100/500, TrLoss: 0.7209, ValAcc: 1.0000, ValLoss: 0.1352
+      Epoch 150/500, TrLoss: 0.5975, ValAcc: 1.0000, ValLoss: 0.2095
+      Early stop at epoch 159 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.9375
+    [within] Running mean: 80.56% (2/3)
+    [no-leakage] Subject 5: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 1.0320, ValAcc: 0.9286, ValLoss: 0.3493
+      Epoch 100/500, TrLoss: 0.8104, ValAcc: 0.9107, ValLoss: 0.3723
+      Epoch 150/500, TrLoss: 0.6811, ValAcc: 0.8393, ValLoss: 0.4463
+      Early stop at epoch 167 (no val improve for 150 epochs)
+      Best ValAcc: 0.9643 -> Test (single eval): 0.7014
+    [within] Running mean: 77.08% (3/3)
+
+============================================================
+FINAL RESULTS — WITHIN-SUBJECT (honest)_nov3 (AdaptiveAlignEEGNet)
+============================================================
+ subject  test_acc               model
+       2  0.673611 AdaptiveAlignEEGNet
+       3  0.937500 AdaptiveAlignEEGNet
+       5  0.701389 AdaptiveAlignEEGNet
+
+WITHIN-SUBJECT (honest)_nov3 Mean Accuracy: 0.7708 +/- 0.1450 (77.08%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_within_honest_adaptalign_nov3.csv
+
+============================================================
+SUMMARY (AdaptiveAlignEEGNet)
+  within  : 77.08%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46

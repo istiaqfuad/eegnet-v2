@@ -1,0 +1,66 @@
+Model: UnifiedEEGNet (unified) | Protocol: within | band=4.0-40.0Hz expand=1 val_frac=0.2 refit=False tag='b440'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within] Pretraining UnifiedEEGNet on session 1 of all subjects...
+    Pretrain data: (2592, 22, 1000) trials, 4 classes
+    Pre-training on 2592 trials (session 1 of all subjects)
+      Pretrain epoch 50/200, Loss: 1.0653
+      Pretrain epoch 100/200, Loss: 0.9903
+      Pretrain epoch 150/200, Loss: 0.9475
+      Pretrain epoch 200/200, Loss: 0.9382
+    Saved pretrained model to /home/istiaqfuad/Desktop/last-bci/models/pretrained_unified_b440.pt
+
+[within] Fine-tuning UnifiedEEGNet per subject (val_frac=0.2, expand=1, refit=False)...
+    [no-leakage] Subject 2: train=232 val=56 (session 0train), test=288 (session 1test); z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 1.1650, ValAcc: 0.6964, ValLoss: 0.7223
+      Epoch 100/500, TrLoss: 0.9211, ValAcc: 0.5893, ValLoss: 0.8203
+      Epoch 150/500, TrLoss: 0.8126, ValAcc: 0.5893, ValLoss: 0.9425
+      Early stop at epoch 196 (no val improve for 150 epochs)
+      Best ValAcc: 0.7679 -> Test (single eval): 0.5208
+    [within] Running mean: 52.08% (1/3)
+    [no-leakage] Subject 3: train=232 val=56 (session 0train), test=288 (session 1test); z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 0.9562, ValAcc: 0.9464, ValLoss: 0.1907
+      Epoch 100/500, TrLoss: 0.7316, ValAcc: 0.9821, ValLoss: 0.2056
+      Epoch 150/500, TrLoss: 0.6383, ValAcc: 0.9464, ValLoss: 0.2789
+      Epoch 200/500, TrLoss: 0.6682, ValAcc: 0.8750, ValLoss: 0.3879
+      Early stop at epoch 224 (no val improve for 150 epochs)
+      Best ValAcc: 0.9821 -> Test (single eval): 0.9097
+    [within] Running mean: 71.53% (2/3)
+    [no-leakage] Subject 5: train=232 val=56 (session 0train), test=288 (session 1test); z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 1.1929, ValAcc: 0.4821, ValLoss: 1.0919
+      Epoch 100/500, TrLoss: 0.9306, ValAcc: 0.5893, ValLoss: 0.9931
+      Epoch 150/500, TrLoss: 0.8056, ValAcc: 0.5357, ValLoss: 1.0362
+      Epoch 200/500, TrLoss: 0.7820, ValAcc: 0.5357, ValLoss: 1.0886
+      Epoch 250/500, TrLoss: 0.8659, ValAcc: 0.7321, ValLoss: 0.8524
+      Epoch 300/500, TrLoss: 0.8460, ValAcc: 0.4464, ValLoss: 1.0795
+      Early stop at epoch 304 (no val improve for 150 epochs)
+      Best ValAcc: 0.7679 -> Test (single eval): 0.5556
+    [within] Running mean: 66.20% (3/3)
+
+============================================================
+FINAL RESULTS — WITHIN-SUBJECT (honest)_b440 (UnifiedEEGNet)
+============================================================
+ subject  test_acc         model
+       2  0.520833 UnifiedEEGNet
+       3  0.909722 UnifiedEEGNet
+       5  0.555556 UnifiedEEGNet
+
+WITHIN-SUBJECT (honest)_b440 Mean Accuracy: 0.6620 +/- 0.2152 (66.20%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_within_honest_unified_b440.csv
+
+============================================================
+SUMMARY (UnifiedEEGNet)
+  within  : 66.20%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46

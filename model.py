@@ -231,3 +231,26 @@ class AdaptiveAlignEEGNet(nn.Module):
     def forward(self, x):
         return self.backbone(self.align(x))
 
+
+class DualAlignEEGNet(nn.Module):
+    """Dual-geometry alignment fusion — the novel contribution.
+
+    Input is the channel-stacked EA-aligned + RA-aligned views ([B, 2C, T]).
+    Two UnifiedEEGNet streams process the Euclidean- and Riemannian-aligned views
+    respectively; their logits are fused with a learned gate. Motivation: EA and RA
+    map the covariance distribution to identity under different geometries and were
+    observed to help DIFFERENT subjects (EA better on some, RA on the hardest) — the
+    fusion aims to capture both. Trained end-to-end as a single model."""
+    def __init__(self, n_classes=4, n_channels=22):
+        super().__init__()
+        self.ea_net = UnifiedEEGNet(n_classes, n_channels)
+        self.ra_net = UnifiedEEGNet(n_classes, n_channels)
+        self.gate = nn.Parameter(torch.zeros(1))  # sigmoid(0)=0.5 -> equal start
+
+    def forward(self, x):  # x: [B, 2C, T] (first C = EA view, next C = RA view)
+        c = x.shape[1] // 2
+        le = self.ea_net(x[:, :c])
+        lr = self.ra_net(x[:, c:])
+        w = torch.sigmoid(self.gate)
+        return w * le + (1.0 - w) * lr
+

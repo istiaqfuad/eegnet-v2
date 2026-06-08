@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 import torch
 
-from model import FreqAwareEEGNet, UnifiedEEGNet, AlignedEEGNet, AdaptiveAlignEEGNet
+from model import (FreqAwareEEGNet, UnifiedEEGNet, AlignedEEGNet,
+                   AdaptiveAlignEEGNet, DualAlignEEGNet)
 from dataset import (
     load_bci_iva_dataset,
     prepare_subject_data,
@@ -34,6 +35,7 @@ MODEL_MAP = {
     'unified': UnifiedEEGNet,
     'aligned': AlignedEEGNet,
     'adaptalign': AdaptiveAlignEEGNet,
+    'dualalign': DualAlignEEGNet,
 }
 
 
@@ -150,9 +152,9 @@ def main():
     parser.add_argument('--aug_expand', type=int, default=1, help='Replicate augmented train epochs')
     parser.add_argument('--val_frac', type=float, default=0.2, help='Within-subject validation fraction')
     parser.add_argument('--refit', action='store_true', help='Refit on train+val for val-selected #epochs')
-    parser.add_argument('--align', choices=['none', 'ea', 'ra'], default='none',
-                        help='Alignment: ea=Euclidean (arithmetic-mean cov), '
-                             'ra=Riemannian/Centroid (SPD geometric-mean cov), label-free')
+    parser.add_argument('--align', choices=['none', 'ea', 'ra', 'dual'], default='none',
+                        help='Alignment: ea=Euclidean, ra=Riemannian/Centroid, '
+                             'dual=stacked EA+RA views (use with --model dualalign), label-free')
     parser.add_argument('--tag', type=str, default='', help='Suffix for output CSV / pretrain cache')
     parser.add_argument('--seed', type=int, default=SEED, help='Random seed (vary for multi-seed runs)')
     parser.add_argument('--subjects', type=str, default='',

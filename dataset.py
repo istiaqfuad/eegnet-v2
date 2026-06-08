@@ -276,11 +276,18 @@ def prepare_pretrain_data(X, y, meta, align='none'):
     X_pretrain = X[session_1_mask][:, :, :1000].copy().astype(np.float32)
     y_pretrain = y[session_1_mask].copy()
 
+    subj_p = meta['subject'].values[session_1_mask]
     if align in ('ea', 'ra'):
-        subj_p = meta['subject'].values[session_1_mask]
         for s in np.unique(subj_p):
             m = subj_p == s
             X_pretrain[m] = _ea_apply(X_pretrain[m], _whitener(X_pretrain[m], align))
+    elif align == 'dual':
+        Xd = np.zeros((X_pretrain.shape[0], 2 * X_pretrain.shape[1], X_pretrain.shape[2]), dtype=np.float32)
+        for s in np.unique(subj_p):
+            m = subj_p == s
+            Xs = X_pretrain[m]
+            Xd[m] = _dual_views(Xs, _inv_sqrt(_ea_reference(Xs)), _ca_whitener(Xs))
+        X_pretrain = Xd
 
     # Global scalar z-score
     mean = X_pretrain.mean().astype(np.float32)
@@ -360,6 +367,11 @@ def _whitener(X, align):
     raise ValueError(f"unknown align {align}")
 
 
+def _dual_views(X, W_ea, W_ra):
+    """Concatenate EA-aligned and RA-aligned views along channels: [N,C,T] -> [N,2C,T]."""
+    return np.concatenate([_ea_apply(X, W_ea), _ea_apply(X, W_ra)], axis=1)
+
+
 def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none'):
     """
     Within-subject split, leak-free (official BCI IV-2a protocol):
@@ -396,6 +408,13 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
         Ris1 = _whitener(X_train, align)          # session-1 ref from train only
         X_train, X_val = _ea_apply(X_train, Ris1), _ea_apply(X_val, Ris1)
         X_test = _ea_apply(X_test, _whitener(X_test, align))  # session-2 ref, label-free
+    elif align == 'dual':
+        # Stack EA-aligned and RA-aligned views along the channel axis -> [N, 2C, T].
+        We1, Wr1 = _inv_sqrt(_ea_reference(X_train)), _ca_whitener(X_train)   # session-1 refs (train)
+        We2, Wr2 = _inv_sqrt(_ea_reference(X_test)), _ca_whitener(X_test)     # session-2 refs (own)
+        X_train = _dual_views(X_train, We1, Wr1)
+        X_val = _dual_views(X_val, We1, Wr1)
+        X_test = _dual_views(X_test, We2, Wr2)
 
     mean = X_train.mean().astype(np.float32)
     std = X_train.std().astype(np.float32) + 1e-8
