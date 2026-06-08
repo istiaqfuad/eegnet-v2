@@ -163,8 +163,9 @@ class SlidingWindowDataset(Dataset):
 
 class BCIDataset(Dataset):
     """BCI Competition IV-2a Dataset with comprehensive augmentation pipeline"""
-    def __init__(self, X, y, augment=False, use_sr=True, use_sliding_window=False):
+    def __init__(self, X, y, augment=False, use_sr=True, use_sliding_window=False, expand=1):
         X = X[:, :, :1000].copy()
+        self.expand = max(1, int(expand)) if augment else 1
 
         if use_sliding_window:
             self.use_sliding = True
@@ -198,12 +199,13 @@ class BCIDataset(Dataset):
     def __len__(self):
         if self.use_sliding:
             return len(self.sw_dataset)
-        return len(self.y)
+        return len(self.y) * self.expand
 
     def __getitem__(self, idx):
         if self.use_sliding:
             return self.sw_dataset[idx]
 
+        idx = idx % len(self.y)  # expand>1 reuses trials with fresh random augmentation
         x = self.X[idx].clone()
         y = self.y[idx]
 
@@ -239,16 +241,17 @@ class BCIDataset(Dataset):
         return x, y
 
 
-def load_bci_iva_dataset():
-    """Load BCI Competition IV-2a dataset using MOABB
-    Uses full frequency range (0.5-100 Hz) to match EEGEncoder paper preprocessing.
+def load_bci_iva_dataset(fmin=0.5, fmax=100.0):
+    """Load BCI Competition IV-2a dataset using MOABB.
+
+    Band-pass [fmin, fmax] Hz is configurable: broadband 0.5-100 keeps gamma but
+    also drift/line/EMG; the motor-imagery mu/beta rhythms live in ~4-40 Hz, so a
+    narrower band often denoises EEGNet-style models.
     """
     from moabb.paradigms import MotorImagery
     from moabb.datasets import BNCI2014_001
 
-    # Use full frequency range (0.5-100 Hz) instead of default 7-35 Hz
-    # This preserves gamma band (30-100 Hz) which is important for MI
-    paradigm = MotorImagery(n_classes=4, channels=None, fmin=0.5, fmax=100.0)
+    paradigm = MotorImagery(n_classes=4, channels=None, fmin=fmin, fmax=fmax)
     dataset = BNCI2014_001()
     dataset.download()
     X, y, meta = paradigm.get_data(dataset)

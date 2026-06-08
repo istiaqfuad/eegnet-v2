@@ -42,22 +42,25 @@ def assert_no_leakage(X_train, X_val, X_test, y_train, y_val, y_test):
     assert X_train.shape[1:] == X_val.shape[1:] == X_test.shape[1:], "Shape mismatch across splits"
 
 
-def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device, pretrained_state):
+def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
+         pretrained_state, expand=1, refit=False, epochs=EPOCHS, patience=PATIENCE):
     return train_model(
         X_train, y_train, X_val, y_val, X_test, y_test,
         model_class=model_class,
         device=device,
         seed=SEED,
-        epochs=EPOCHS,
+        epochs=epochs,
         batch_size=BATCH_SIZE,
         lr=LR,
         weight_decay=WEIGHT_DECAY,
         max_lr=MAX_LR,
         label_smoothing=LABEL_SMOOTHING,
-        patience=PATIENCE,
+        patience=patience,
         pretrained_state=pretrained_state,
         use_ema=USE_EMA,
         ema_decay=EMA_DECAY,
+        expand=expand,
+        refit=refit,
     )
 
 
@@ -74,9 +77,9 @@ def _summarize(results, label, model_name, out_path):
     return avg
 
 
-def run_within(X, y, meta, model_class, model_name, device, script_dir):
+def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Within-subject (session 1 -> train/val, session 2 -> test), leak-free."""
-    pretrained_path = os.path.join(script_dir, 'models', f'pretrained_{model_name}.pt')
+    pretrained_path = os.path.join(script_dir, 'models', f'pretrained_{model_name}{cfg.tagsuffix}.pt')
     print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
     X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta)
     if os.path.exists(pretrained_path):
@@ -86,44 +89,49 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir):
         os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
         pretrained_state = pretrain_model(
             X_pretrain, y_pretrain, model_class=model_class, device=device,
-            save_path=pretrained_path, epochs=PRETRAIN_EPOCHS, batch_size=BATCH_SIZE,
+            save_path=pretrained_path, epochs=cfg.pretrain_epochs, batch_size=BATCH_SIZE,
             lr=LR, weight_decay=WEIGHT_DECAY,
         )
 
-    print(f"\n[within] Fine-tuning {model_class.__name__} per subject...")
-    subjects = sorted(int(s) for s in np.unique(meta['subject']))
-    out_path = os.path.join(script_dir, f'results_within_honest_{model_name}.csv')
+    print(f"\n[within] Fine-tuning {model_class.__name__} per subject "
+          f"(val_frac={cfg.val_frac}, expand={cfg.aug_expand}, refit={cfg.refit})...")
+    subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
+    out_path = os.path.join(script_dir, f'results_within_honest_{model_name}{cfg.tagsuffix}.csv')
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
-                                                                  val_frac=0.2, seed=SEED)
+                                                                  val_frac=cfg.val_frac, seed=SEED)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
-        test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device, pretrained_state)
+        test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
+                        pretrained_state, expand=cfg.aug_expand, refit=cfg.refit,
+                        epochs=cfg.epochs, patience=cfg.patience)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
         print(f"    [within] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
-    return _summarize(results, 'WITHIN-SUBJECT (honest)', model_class.__name__, out_path)
+    return _summarize(results, f'WITHIN-SUBJECT (honest){cfg.tagsuffix}', model_class.__name__, out_path)
 
 
-def run_loso(X, y, meta, model_class, model_name, device, script_dir):
+def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Leave-one-subject-out cross-subject, trained from scratch on the 8-subject pool."""
     print(f"\n[loso] Cross-subject (LOSO) for {model_class.__name__} — no pretrain, from scratch...")
-    subjects = sorted(int(s) for s in np.unique(meta['subject']))
-    out_path = os.path.join(script_dir, f'results_loso_{model_name}.csv')
+    subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
+    out_path = os.path.join(script_dir, f'results_loso_{model_name}{cfg.tagsuffix}.csv')
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_loso_data(X, y, meta, subject,
                                                                val_frac=0.1, seed=SEED)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
-        test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device, pretrained_state=None)
+        test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
+                        pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
+                        epochs=cfg.epochs, patience=cfg.patience)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
         print(f"    [loso] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
-    return _summarize(results, 'CROSS-SUBJECT LOSO', model_class.__name__, out_path)
+    return _summarize(results, f'CROSS-SUBJECT LOSO{cfg.tagsuffix}', model_class.__name__, out_path)
 
 
 def main():
@@ -132,9 +140,25 @@ def main():
                         help='Model architecture to use')
     parser.add_argument('--protocol', choices=['within', 'loso', 'both'], default='within',
                         help='Evaluation protocol: within-subject, cross-subject LOSO, or both')
+    parser.add_argument('--fmin', type=float, default=0.5, help='Band-pass low cutoff (Hz)')
+    parser.add_argument('--fmax', type=float, default=100.0, help='Band-pass high cutoff (Hz)')
+    parser.add_argument('--aug_expand', type=int, default=1, help='Replicate augmented train epochs')
+    parser.add_argument('--val_frac', type=float, default=0.2, help='Within-subject validation fraction')
+    parser.add_argument('--refit', action='store_true', help='Refit on train+val for val-selected #epochs')
+    parser.add_argument('--tag', type=str, default='', help='Suffix for output CSV / pretrain cache')
+    parser.add_argument('--subjects', type=str, default='',
+                        help='Comma-separated subject ids to run (e.g. 2,5,6); empty = all 9')
+    parser.add_argument('--pretrain_epochs', type=int, default=PRETRAIN_EPOCHS,
+                        help='Cross-subject pretrain epochs (lower for quick tests)')
+    parser.add_argument('--epochs', type=int, default=EPOCHS, help='Fine-tune epochs')
+    parser.add_argument('--patience', type=int, default=PATIENCE, help='Early-stop patience')
     args = parser.parse_args()
+    args.tagsuffix = f'_{args.tag}' if args.tag else ''
+    args.subject_list = [int(s) for s in args.subjects.split(',') if s.strip()] if args.subjects else None
     model_class = MODEL_MAP[args.model]
-    print(f"Model: {model_class.__name__} ({args.model}) | Protocol: {args.protocol}")
+    print(f"Model: {model_class.__name__} ({args.model}) | Protocol: {args.protocol} | "
+          f"band={args.fmin}-{args.fmax}Hz expand={args.aug_expand} val_frac={args.val_frac} "
+          f"refit={args.refit} tag='{args.tag}'")
 
     torch.manual_seed(SEED)
     np.random.seed(SEED)
@@ -147,7 +171,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     print("\nLoading BCI Competition IV-2a (MOABB)...")
-    X, y, meta = load_bci_iva_dataset()
+    X, y, meta = load_bci_iva_dataset(fmin=args.fmin, fmax=args.fmax)
     print(f"    X: {X.shape}, y: {y.shape}")
     print(f"    Subjects: {sorted(np.unique(meta['subject']).tolist())}")
     sessions_per_subj = meta.groupby('subject')['session'].nunique().to_dict()
@@ -156,9 +180,9 @@ def main():
 
     means = {}
     if args.protocol in ('within', 'both'):
-        means['within'] = run_within(X, y, meta, model_class, args.model, device, script_dir)
+        means['within'] = run_within(X, y, meta, model_class, args.model, device, script_dir, args)
     if args.protocol in ('loso', 'both'):
-        means['loso'] = run_loso(X, y, meta, model_class, args.model, device, script_dir)
+        means['loso'] = run_loso(X, y, meta, model_class, args.model, device, script_dir, args)
 
     print("\n" + "=" * 60)
     print(f"SUMMARY ({model_class.__name__})")

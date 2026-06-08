@@ -131,22 +131,35 @@ def pretrain_model(X_pretrain, y_pretrain, model_class, device, save_path=None,
     return best_state
 
 
+def _build_optim_sched(model, lr, weight_decay, max_lr, n_epochs, steps_per_epoch):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer, max_lr=max_lr, epochs=max(1, n_epochs), steps_per_epoch=steps_per_epoch,
+        pct_start=0.15, anneal_strategy='cos',
+    )
+    return optimizer, scheduler
+
+
 def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
                 seed=42, epochs=500, batch_size=64,
                 lr=0.001, weight_decay=0.02, max_lr=0.005,
                 label_smoothing=0.1, patience=150,
                 pretrained_state=None, use_ema=True, ema_decay=0.999,
-                use_focal_loss=False):
+                use_focal_loss=False, expand=1, refit=False):
     """Leak-free training.
 
     Model selection and early stopping use ONLY the validation set (X_val/y_val),
     which is carved from the training data and never includes test trials. The test
-    set (X_test/y_test) is evaluated exactly once, at the end, on the val-selected
-    checkpoint. The test set is never observed during training or selection.
+    set (X_test/y_test) is evaluated exactly once, at the end.
+
+    expand: replicate augmented training epochs (more aug variety / steps per epoch).
+    refit: after picking the best epoch on val, refit a fresh model on train+val for
+           that many epochs (no val peeking), then test once. Uses all session-1 data
+           for the final fit while keeping epoch-count selection leak-free.
     """
     from dataset import BCIDataset
 
-    train_dataset = BCIDataset(X_train, y_train, augment=True, use_sr=True)
+    train_dataset = BCIDataset(X_train, y_train, augment=True, use_sr=True, expand=expand)
     val_dataset = BCIDataset(X_val, y_val, augment=False, use_sr=False)
     test_dataset = BCIDataset(X_test, y_test, augment=False, use_sr=False)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
@@ -164,16 +177,12 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
     ema = ModelEma(model, decay=ema_decay) if use_ema else None
 
     criterion = FocalLoss(gamma=2.0) if use_focal_loss else nn.CrossEntropyLoss(label_smoothing=label_smoothing)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer, max_lr=max_lr, epochs=epochs, steps_per_epoch=len(train_loader),
-        pct_start=0.15, anneal_strategy='cos',
-    )
+    optimizer, scheduler = _build_optim_sched(model, lr, weight_decay, max_lr, epochs, len(train_loader))
 
     # Selection is on the VALIDATION set only. Primary key: val acc (higher better);
     # tie-break: val loss (lower better) — the val set is small, so the loss tie-break
     # stabilises checkpoint choice.
-    best_val_acc, best_val_loss, best_state, no_improve = -1.0, float('inf'), None, 0
+    best_val_acc, best_val_loss, best_state, best_epoch, no_improve = -1.0, float('inf'), None, 0, 0
     for epoch in range(epochs):
         loss = train_one_epoch(model, train_loader, optimizer, criterion, device, use_mixup=True, ema=ema)
         scheduler.step()
@@ -184,7 +193,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
                   f"ValAcc: {val_acc:.4f}, ValLoss: {val_loss:.4f}", flush=True)
         improved = (val_acc > best_val_acc) or (val_acc == best_val_acc and val_loss < best_val_loss)
         if improved:
-            best_val_acc, best_val_loss = val_acc, val_loss
+            best_val_acc, best_val_loss, best_epoch = val_acc, val_loss, epoch
             best_state = {k: v.cpu().clone() for k, v in eval_model.state_dict().items()}
             no_improve = 0
         else:
@@ -192,6 +201,28 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
         if no_improve >= patience:
             print(f"      Early stop at epoch {epoch+1} (no val improve for {patience} epochs)", flush=True)
             break
+
+    if refit:
+        # Refit a fresh model on train+val for the val-selected #epochs, then test once.
+        n_ep = best_epoch + 1
+        Xtv = np.concatenate([X_train, X_val], axis=0)
+        ytv = np.concatenate([y_train, y_val], axis=0)
+        refit_ds = BCIDataset(Xtv, ytv, augment=True, use_sr=True, expand=expand)
+        refit_loader = DataLoader(refit_ds, batch_size=batch_size, shuffle=True, num_workers=0)
+        torch.manual_seed(seed)
+        np.random.seed(seed)
+        rmodel = model_class(n_classes=4, n_channels=22).to(device)
+        if pretrained_state is not None:
+            rmodel.load_state_dict(pretrained_state, strict=False)
+        rcrit = FocalLoss(gamma=2.0) if use_focal_loss else nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+        ropt, rsched = _build_optim_sched(rmodel, lr, weight_decay, max_lr, n_ep, len(refit_loader))
+        for _ in range(n_ep):
+            train_one_epoch(rmodel, refit_loader, ropt, rcrit, device, use_mixup=True, ema=None)
+            rsched.step()
+        test_acc = evaluate(rmodel, test_loader, device)
+        print(f"      Best ValAcc: {best_val_acc:.4f} @ep{best_epoch+1} "
+              f"-> REFIT(train+val,{n_ep}ep) Test (single eval): {test_acc:.4f}", flush=True)
+        return test_acc
 
     # Final, single evaluation on the held-out TEST set with the val-selected checkpoint.
     final_model = ema.shadow if ema is not None else model
