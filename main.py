@@ -43,12 +43,12 @@ def assert_no_leakage(X_train, X_val, X_test, y_train, y_val, y_test):
 
 
 def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
-         pretrained_state, expand=1, refit=False, epochs=EPOCHS, patience=PATIENCE):
+         pretrained_state, expand=1, refit=False, epochs=EPOCHS, patience=PATIENCE, seed=SEED):
     return train_model(
         X_train, y_train, X_val, y_val, X_test, y_test,
         model_class=model_class,
         device=device,
-        seed=SEED,
+        seed=seed,
         epochs=epochs,
         batch_size=BATCH_SIZE,
         lr=LR,
@@ -80,7 +80,7 @@ def _summarize(results, label, model_name, out_path):
 def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Within-subject (session 1 -> train/val, session 2 -> test), leak-free."""
     pretrained_path = os.path.join(script_dir, 'models',
-                                   f'pretrained_{model_name}_{cfg.align}{cfg.tagsuffix}.pt')
+                                   f'pretrained_{model_name}_{cfg.align}_s{cfg.seed}{cfg.tagsuffix}.pt')
     print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
     X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta, align=cfg.align)
     if os.path.exists(pretrained_path):
@@ -101,13 +101,13 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
-                                                                  val_frac=cfg.val_frac, seed=SEED,
+                                                                  val_frac=cfg.val_frac, seed=cfg.seed,
                                                                   align=cfg.align)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
                         pretrained_state, expand=cfg.aug_expand, refit=cfg.refit,
-                        epochs=cfg.epochs, patience=cfg.patience)
+                        epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
@@ -123,12 +123,12 @@ def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_loso_data(X, y, meta, subject,
-                                                               val_frac=0.1, seed=SEED)
+                                                               val_frac=0.1, seed=cfg.seed)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
                         pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
-                        epochs=cfg.epochs, patience=cfg.patience)
+                        epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
@@ -150,6 +150,7 @@ def main():
     parser.add_argument('--align', choices=['none', 'ea'], default='none',
                         help='Euclidean Alignment (per-session covariance whitening, label-free)')
     parser.add_argument('--tag', type=str, default='', help='Suffix for output CSV / pretrain cache')
+    parser.add_argument('--seed', type=int, default=SEED, help='Random seed (vary for multi-seed runs)')
     parser.add_argument('--subjects', type=str, default='',
                         help='Comma-separated subject ids to run (e.g. 2,5,6); empty = all 9')
     parser.add_argument('--pretrain_epochs', type=int, default=PRETRAIN_EPOCHS,
@@ -164,8 +165,8 @@ def main():
           f"band={args.fmin}-{args.fmax}Hz expand={args.aug_expand} val_frac={args.val_frac} "
           f"refit={args.refit} align={args.align} tag='{args.tag}'")
 
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
