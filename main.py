@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from model import FreqAwareEEGNet, UnifiedEEGNet
+from model import FreqAwareEEGNet, UnifiedEEGNet, AlignedEEGNet, AdaptiveAlignEEGNet
 from dataset import (
     load_bci_iva_dataset,
     prepare_subject_data,
@@ -32,6 +32,8 @@ EMA_DECAY = 0.99
 MODEL_MAP = {
     'freqaware': FreqAwareEEGNet,
     'unified': UnifiedEEGNet,
+    'aligned': AlignedEEGNet,
+    'adaptalign': AdaptiveAlignEEGNet,
 }
 
 
