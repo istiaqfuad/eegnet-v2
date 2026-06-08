@@ -141,13 +141,15 @@ def _build_optim_sched(model, lr, weight_decay, max_lr, n_epochs, steps_per_epoc
 
 
 def tent_adapt(model, loader, device, steps=1, lr=1e-3):
-    """Label-free test-time adaptation (Tent, Wang et al. 2021).
+    """Label-free source-free test-time adaptation via Information Maximization (SHOT-style).
 
-    Adapts ONLY the BatchNorm affine params (gamma, beta) by minimising the mean
-    prediction entropy over the target subject's UNLABELLED trials; BN uses batch
-    statistics (running stats disabled). No labels are touched -> honest, transductive
-    adaptation. Natural for LOSO: the held-out subject's unlabelled EEG is available.
-    Returns a deep-copied, adapted model (the input model is left untouched).
+    Adapts ONLY the BatchNorm affine params (gamma, beta) on the target subject's
+    UNLABELLED trials; BN uses batch statistics. The loss is
+        L = E[H(p)]  -  H(E[p])
+    i.e. minimise per-sample (conditional) entropy to sharpen predictions, while
+    MAXIMISING the batch marginal entropy so the model cannot collapse all trials to
+    one class (the failure mode of plain entropy-min / Tent on hard subjects). No labels
+    are used -> honest, transductive. Natural for LOSO. Returns an adapted deep copy.
     """
     model = copy.deepcopy(model)
     model.train()
@@ -171,9 +173,12 @@ def tent_adapt(model, loader, device, steps=1, lr=1e-3):
         for x, _ in loader:
             x = x.to(device)
             p = model(x).softmax(1)
-            entropy = -(p * p.clamp_min(1e-8).log()).sum(1).mean()
+            cond_ent = -(p * p.clamp_min(1e-8).log()).sum(1).mean()   # minimise
+            pbar = p.mean(0)
+            div = -(pbar * pbar.clamp_min(1e-8).log()).sum()          # maximise (anti-collapse)
+            loss = cond_ent - div
             opt.zero_grad()
-            entropy.backward()
+            loss.backward()
             opt.step()
     return model
 
