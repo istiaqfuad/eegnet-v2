@@ -77,6 +77,21 @@ def evaluate(model, loader, device):
     return correct / total
 
 
+def evaluate_acc_loss(model, loader, device):
+    """Return (accuracy, mean cross-entropy loss) over a loader."""
+    model.eval()
+    correct = total = 0
+    loss_sum = 0.0
+    with torch.no_grad():
+        for x, y in loader:
+            x, y = x.to(device), y.to(device)
+            logits = model(x)
+            loss_sum += F.cross_entropy(logits, y, reduction='sum').item()
+            correct += logits.argmax(1).eq(y).sum().item()
+            total += y.size(0)
+    return correct / total, loss_sum / max(total, 1)
+
+
 def pretrain_model(X_pretrain, y_pretrain, model_class, device, save_path=None,
                    epochs=200, batch_size=64, lr=0.001, weight_decay=0.02):
     from dataset import BCIDataset
@@ -116,18 +131,27 @@ def pretrain_model(X_pretrain, y_pretrain, model_class, device, save_path=None,
     return best_state
 
 
-def train_model(X_train, y_train, X_test, y_test, model_class, device,
+def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
                 seed=42, epochs=500, batch_size=64,
                 lr=0.001, weight_decay=0.02, max_lr=0.005,
                 label_smoothing=0.1, patience=150,
                 pretrained_state=None, use_ema=True, ema_decay=0.999,
                 use_focal_loss=False):
+    """Leak-free training.
+
+    Model selection and early stopping use ONLY the validation set (X_val/y_val),
+    which is carved from the training data and never includes test trials. The test
+    set (X_test/y_test) is evaluated exactly once, at the end, on the val-selected
+    checkpoint. The test set is never observed during training or selection.
+    """
     from dataset import BCIDataset
 
     train_dataset = BCIDataset(X_train, y_train, augment=True, use_sr=True)
-    val_dataset = BCIDataset(X_test, y_test, augment=False, use_sr=False)
+    val_dataset = BCIDataset(X_val, y_val, augment=False, use_sr=False)
+    test_dataset = BCIDataset(X_test, y_test, augment=False, use_sr=False)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
 
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -146,37 +170,33 @@ def train_model(X_train, y_train, X_test, y_test, model_class, device,
         pct_start=0.15, anneal_strategy='cos',
     )
 
-    best_val_acc, best_state, no_improve = 0.0, None, 0
+    # Selection is on the VALIDATION set only. Primary key: val acc (higher better);
+    # tie-break: val loss (lower better) — the val set is small, so the loss tie-break
+    # stabilises checkpoint choice.
+    best_val_acc, best_val_loss, best_state, no_improve = -1.0, float('inf'), None, 0
     for epoch in range(epochs):
         loss = train_one_epoch(model, train_loader, optimizer, criterion, device, use_mixup=True, ema=ema)
         scheduler.step()
-        if ema is not None:
-            val_acc = evaluate(ema.shadow, val_loader, device)
-        else:
-            val_acc = evaluate(model, val_loader, device)
+        eval_model = ema.shadow if ema is not None else model
+        val_acc, val_loss = evaluate_acc_loss(eval_model, val_loader, device)
         if (epoch + 1) % 50 == 0:
-            print(f"      Epoch {epoch+1}/{epochs}, Loss: {loss:.4f}, Val Acc: {val_acc:.4f}", flush=True)
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            if ema is not None:
-                best_state = {k: v.cpu().clone() for k, v in ema.shadow.state_dict().items()}
-            else:
-                best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+            print(f"      Epoch {epoch+1}/{epochs}, TrLoss: {loss:.4f}, "
+                  f"ValAcc: {val_acc:.4f}, ValLoss: {val_loss:.4f}", flush=True)
+        improved = (val_acc > best_val_acc) or (val_acc == best_val_acc and val_loss < best_val_loss)
+        if improved:
+            best_val_acc, best_val_loss = val_acc, val_loss
+            best_state = {k: v.cpu().clone() for k, v in eval_model.state_dict().items()}
             no_improve = 0
         else:
             no_improve += 1
         if no_improve >= patience:
-            print(f"      Early stop at epoch {epoch+1} (no improve for {patience} epochs)", flush=True)
+            print(f"      Early stop at epoch {epoch+1} (no val improve for {patience} epochs)", flush=True)
             break
 
+    # Final, single evaluation on the held-out TEST set with the val-selected checkpoint.
+    final_model = ema.shadow if ema is not None else model
     if best_state is not None:
-        if ema is not None:
-            ema.shadow.load_state_dict(best_state)
-            test_acc = evaluate(ema.shadow, val_loader, device)
-        else:
-            model.load_state_dict(best_state)
-            test_acc = evaluate(model, val_loader, device)
-    else:
-        test_acc = evaluate(ema.shadow if ema is not None else model, val_loader, device)
-    print(f"      Best val: {best_val_acc:.4f}, Test: {test_acc:.4f}", flush=True)
+        final_model.load_state_dict(best_state)
+    test_acc = evaluate(final_model, test_loader, device)
+    print(f"      Best ValAcc: {best_val_acc:.4f} -> Test (single eval): {test_acc:.4f}", flush=True)
     return test_acc

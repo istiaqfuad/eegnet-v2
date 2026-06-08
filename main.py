@@ -7,7 +7,12 @@ import pandas as pd
 import torch
 
 from model import FreqAwareEEGNet, UnifiedEEGNet
-from dataset import load_bci_iva_dataset, prepare_subject_data, prepare_pretrain_data
+from dataset import (
+    load_bci_iva_dataset,
+    prepare_subject_data,
+    prepare_loso_data,
+    prepare_pretrain_data,
+)
 from train import train_model, pretrain_model
 
 
@@ -30,20 +35,106 @@ MODEL_MAP = {
 }
 
 
-def assert_no_leakage(X_train, X_test, y_train, y_test):
-    assert X_train.shape[0] > 0 and X_test.shape[0] > 0, "Empty split"
-    assert set(np.unique(y_train)).issubset({0, 1, 2, 3}), "Unexpected train labels"
-    assert set(np.unique(y_test)).issubset({0, 1, 2, 3}), "Unexpected test labels"
-    assert X_train.shape[1:] == X_test.shape[1:], "Shape mismatch train/test"
+def assert_no_leakage(X_train, X_val, X_test, y_train, y_val, y_test):
+    assert X_train.shape[0] > 0 and X_val.shape[0] > 0 and X_test.shape[0] > 0, "Empty split"
+    for arr in (y_train, y_val, y_test):
+        assert set(np.unique(arr)).issubset({0, 1, 2, 3}), "Unexpected labels"
+    assert X_train.shape[1:] == X_val.shape[1:] == X_test.shape[1:], "Shape mismatch across splits"
+
+
+def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device, pretrained_state):
+    return train_model(
+        X_train, y_train, X_val, y_val, X_test, y_test,
+        model_class=model_class,
+        device=device,
+        seed=SEED,
+        epochs=EPOCHS,
+        batch_size=BATCH_SIZE,
+        lr=LR,
+        weight_decay=WEIGHT_DECAY,
+        max_lr=MAX_LR,
+        label_smoothing=LABEL_SMOOTHING,
+        patience=PATIENCE,
+        pretrained_state=pretrained_state,
+        use_ema=USE_EMA,
+        ema_decay=EMA_DECAY,
+    )
+
+
+def _summarize(results, label, model_name, out_path):
+    df = pd.DataFrame(results)
+    df.to_csv(out_path, index=False)
+    avg, std = df['test_acc'].mean(), df['test_acc'].std()
+    print("\n" + "=" * 60)
+    print(f"FINAL RESULTS — {label} ({model_name})")
+    print("=" * 60)
+    print(df.to_string(index=False))
+    print(f"\n{label} Mean Accuracy: {avg:.4f} +/- {std:.4f} ({avg*100:.2f}%)")
+    print(f"    saved -> {out_path}")
+    return avg
+
+
+def run_within(X, y, meta, model_class, model_name, device, script_dir):
+    """Within-subject (session 1 -> train/val, session 2 -> test), leak-free."""
+    pretrained_path = os.path.join(script_dir, 'models', f'pretrained_{model_name}.pt')
+    print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
+    X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta)
+    if os.path.exists(pretrained_path):
+        print(f"    Loading existing pretrained model: {pretrained_path}")
+        pretrained_state = torch.load(pretrained_path, map_location=device, weights_only=True)
+    else:
+        os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
+        pretrained_state = pretrain_model(
+            X_pretrain, y_pretrain, model_class=model_class, device=device,
+            save_path=pretrained_path, epochs=PRETRAIN_EPOCHS, batch_size=BATCH_SIZE,
+            lr=LR, weight_decay=WEIGHT_DECAY,
+        )
+
+    print(f"\n[within] Fine-tuning {model_class.__name__} per subject...")
+    subjects = sorted(int(s) for s in np.unique(meta['subject']))
+    out_path = os.path.join(script_dir, f'results_within_honest_{model_name}.csv')
+    results = []
+    for subject in subjects:
+        X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
+                                                                  val_frac=0.2, seed=SEED)
+        assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
+        print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
+        test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device, pretrained_state)
+        results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
+        df = pd.DataFrame(results)
+        df.to_csv(out_path, index=False)
+        print(f"    [within] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
+    return _summarize(results, 'WITHIN-SUBJECT (honest)', model_class.__name__, out_path)
+
+
+def run_loso(X, y, meta, model_class, model_name, device, script_dir):
+    """Leave-one-subject-out cross-subject, trained from scratch on the 8-subject pool."""
+    print(f"\n[loso] Cross-subject (LOSO) for {model_class.__name__} — no pretrain, from scratch...")
+    subjects = sorted(int(s) for s in np.unique(meta['subject']))
+    out_path = os.path.join(script_dir, f'results_loso_{model_name}.csv')
+    results = []
+    for subject in subjects:
+        X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_loso_data(X, y, meta, subject,
+                                                               val_frac=0.1, seed=SEED)
+        assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
+        print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
+        test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device, pretrained_state=None)
+        results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
+        df = pd.DataFrame(results)
+        df.to_csv(out_path, index=False)
+        print(f"    [loso] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
+    return _summarize(results, 'CROSS-SUBJECT LOSO', model_class.__name__, out_path)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='BCI Competition IV-2a training')
-    parser.add_argument('--model', choices=list(MODEL_MAP.keys()), default='freqaware',
+    parser = argparse.ArgumentParser(description='BCI Competition IV-2a training (leak-free)')
+    parser.add_argument('--model', choices=list(MODEL_MAP.keys()), default='unified',
                         help='Model architecture to use')
+    parser.add_argument('--protocol', choices=['within', 'loso', 'both'], default='within',
+                        help='Evaluation protocol: within-subject, cross-subject LOSO, or both')
     args = parser.parse_args()
     model_class = MODEL_MAP[args.model]
-    print(f"Model: {model_class.__name__} ({args.model})")
+    print(f"Model: {model_class.__name__} ({args.model}) | Protocol: {args.protocol}")
 
     torch.manual_seed(SEED)
     np.random.seed(SEED)
@@ -54,82 +145,29 @@ def main():
         print(f"  GPU: {torch.cuda.get_device_name(0)}")
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    results_path = os.path.join(script_dir, 'results.csv')
-    pretrained_path = os.path.join(script_dir, 'models', 'pretrained.pt')
 
-    print("\n[1/3] Loading BCI Competition IV-2a (MOABB)...")
+    print("\nLoading BCI Competition IV-2a (MOABB)...")
     X, y, meta = load_bci_iva_dataset()
     print(f"    X: {X.shape}, y: {y.shape}")
     print(f"    Subjects: {sorted(np.unique(meta['subject']).tolist())}")
-
     sessions_per_subj = meta.groupby('subject')['session'].nunique().to_dict()
     assert all(v == 2 for v in sessions_per_subj.values()), \
         f"Expected 2 sessions per subject, got {sessions_per_subj}"
 
-    print(f"\n[2/3] Pretraining {model_class.__name__} on session 1 of all subjects...")
-    X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta)
-    if os.path.exists(pretrained_path):
-        print(f"    Loading existing pretrained model: {pretrained_path}")
-        pretrained_state = torch.load(pretrained_path, map_location=device, weights_only=True)
-    else:
-        os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
-        pretrained_state = pretrain_model(
-            X_pretrain, y_pretrain,
-            model_class=model_class,
-            device=device,
-            save_path=pretrained_path,
-            epochs=PRETRAIN_EPOCHS, batch_size=BATCH_SIZE,
-            lr=LR, weight_decay=WEIGHT_DECAY,
-        )
-
-    print(f"\n[3/3] Fine-tuning {model_class.__name__} on each subject...")
-    subjects = sorted(int(s) for s in np.unique(meta['subject']))
-    results = []
-    for subject in subjects:
-        X_train, X_test, y_train, y_test = prepare_subject_data(X, y, meta, subject)
-        assert_no_leakage(X_train, X_test, y_train, y_test)
-        print(f"\n    Subject {subject}")
-        print(f"      Train: {X_train.shape}, Test: {X_test.shape}")
-        test_acc = train_model(
-            X_train, y_train, X_test, y_test,
-            model_class=model_class,
-            device=device,
-            seed=SEED,
-            epochs=EPOCHS,
-            batch_size=BATCH_SIZE,
-            lr=LR,
-            weight_decay=WEIGHT_DECAY,
-            max_lr=MAX_LR,
-            label_smoothing=LABEL_SMOOTHING,
-            patience=PATIENCE,
-            pretrained_state=pretrained_state,
-            use_ema=USE_EMA,
-            ema_decay=EMA_DECAY,
-        )
-        results.append({'subject': subject, 'test_acc': test_acc})
-
-        df = pd.DataFrame(results)
-        df.to_csv(results_path, index=False)
-        running_mean = df['test_acc'].mean()
-        print(f"    Running mean: {running_mean*100:.2f}% ({len(df)}/{len(subjects)})")
+    means = {}
+    if args.protocol in ('within', 'both'):
+        means['within'] = run_within(X, y, meta, model_class, args.model, device, script_dir)
+    if args.protocol in ('loso', 'both'):
+        means['loso'] = run_loso(X, y, meta, model_class, args.model, device, script_dir)
 
     print("\n" + "=" * 60)
-    print("FINAL RESULTS")
-    print("=" * 60)
-    df = pd.DataFrame(results)
-    print(df.to_string(index=False))
-    avg = df['test_acc'].mean()
-    std = df['test_acc'].std()
-    print(f"\nMean Accuracy: {avg:.4f} +/- {std:.4f} ({avg*100:.2f}%)")
-    print(f"Target: 85%+ -> {'PASS' if avg >= 0.85 else 'FAIL'}")
-
-    print(f"\nComparison with SOTA on BCI IV-2a (4-class motor imagery):")
-    print(f"  CTNet (2024):        82.52%")
-    print(f"  MSCARNet (2024):     82.66%")
-    print(f"  EEGEncoder (2025):   86.46%")
-    print(f"  Ours ({model_class.__name__}):     {avg*100:.2f}%")
-    return avg
+    print(f"SUMMARY ({model_class.__name__})")
+    for k, v in means.items():
+        print(f"  {k:8s}: {v*100:.2f}%")
+    print("Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46")
+    return float(np.mean(list(means.values()))) if means else 0.0
 
 
 if __name__ == "__main__":
-    sys.exit(0 if main() >= 0.85 else 1)
+    main()
+    sys.exit(0)

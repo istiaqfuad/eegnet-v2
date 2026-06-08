@@ -281,52 +281,101 @@ def prepare_pretrain_data(X, y, meta):
     return X_pretrain, y_pretrain
 
 
-def prepare_subject_data(X, y, meta, subject, evaluation_mode='session_based'):
-    """
-    Prepare train/test split for a subject with NO data leakage
+def _stratified_split(y, val_frac, seed):
+    """Class-stratified index split. Returns (train_idx, val_idx)."""
+    rng = np.random.RandomState(seed)
+    train_idx, val_idx = [], []
+    for c in np.unique(y):
+        idx = np.where(y == c)[0]
+        rng.shuffle(idx)
+        n_val = max(1, int(round(val_frac * len(idx))))
+        val_idx.extend(idx[:n_val].tolist())
+        train_idx.extend(idx[n_val:].tolist())
+    return np.array(sorted(train_idx)), np.array(sorted(val_idx))
 
-    session_based: Train on session 1, test on session 2 (official BCI competition)
+
+def _per_trial_standardize(X):
+    """Standardize each trial per channel using its own statistics.
+    No cross-trial / cross-set statistics -> zero normalization leakage.
+    X: [N, C, T]
+    """
+    X = X.astype(np.float32)
+    m = X.mean(axis=2, keepdims=True)
+    s = X.std(axis=2, keepdims=True) + 1e-8
+    return ((X - m) / s).astype(np.float32)
+
+
+def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42):
+    """
+    Within-subject split, leak-free (official BCI IV-2a protocol):
+
+      train / val = session 1, stratified split (val_frac held out for model selection)
+      test        = session 2 (evaluated exactly once on the val-selected checkpoint)
+
+    Z-score statistics are fit on the TRAIN portion only and applied to val and test,
+    so neither the validation nor the test trials contribute to normalization.
+    Returns (X_train, X_val, X_test, y_train, y_val, y_test).
     """
     subject_idx = meta['subject'].values == subject
-    X_subject = X[subject_idx].copy()
+    X_subject = X[subject_idx][:, :, :1000].copy()
     y_subject = y[subject_idx].copy()
-    sessions = np.unique(meta.loc[subject_idx, 'session'].values)
+    subj_sessions = meta.loc[subject_idx, 'session'].values
+    sessions_sorted = sorted(np.unique(subj_sessions))
+    assert len(sessions_sorted) >= 2, \
+        f"Subject {subject}: need >=2 sessions for session-based split, got {sessions_sorted}"
 
-    if evaluation_mode == 'session_based':
-        if len(sessions) >= 2:
-            sessions_sorted = sorted(sessions)
-            s1_mask = meta.loc[subject_idx, 'session'].values == sessions_sorted[0]
-            s2_mask = meta.loc[subject_idx, 'session'].values == sessions_sorted[1]
+    s1_mask = subj_sessions == sessions_sorted[0]
+    s2_mask = subj_sessions == sessions_sorted[1]
+    X_s1, y_s1 = X_subject[s1_mask], y_subject[s1_mask]
+    X_test, y_test = X_subject[s2_mask], y_subject[s2_mask]
 
-            X_train = X_subject[s1_mask]
-            y_train = y_subject[s1_mask]
-            X_test = X_subject[s2_mask]
-            y_test = y_subject[s2_mask]
-        else:
-            n_train = int(0.9 * len(y_subject))
-            X_train, X_test = X_subject[:n_train].copy(), X_subject[n_train:].copy()
-            y_train, y_test = y_subject[:n_train], y_subject[n_train:]
+    tr_idx, va_idx = _stratified_split(y_s1, val_frac, seed)
+    X_train, y_train = X_s1[tr_idx], y_s1[tr_idx]
+    X_val, y_val = X_s1[va_idx], y_s1[va_idx]
 
-    elif evaluation_mode == 'merged':
-        if len(sessions) >= 2:
-            s1 = meta.loc[subject_idx, 'session'].values == sessions[0]
-            s2 = meta.loc[subject_idx, 'session'].values == sessions[1]
-            all_X = np.concatenate([X_subject[s1], X_subject[s2]], axis=0)
-            all_y = np.concatenate([y_subject[s1], y_subject[s2]], axis=0)
-            idx = np.random.permutation(len(all_y))
-            n_train = int(0.9 * len(all_y))
-            X_train, X_test = all_X[idx[:n_train]], all_X[idx[n_train:]]
-            y_train, y_test = all_y[idx[:n_train]], all_y[idx[n_train:]]
-        else:
-            n_train = int(0.9 * len(y_subject))
-            X_train, X_test = X_subject[:n_train].copy(), X_subject[n_train:].copy()
-            y_train, y_test = y_subject[:n_train], y_subject[n_train:]
-
-    # Z-score normalization per subject (using ONLY training data - NO LEAKAGE)
-    # Ensure float32 to avoid dtype mismatch on GPU
     mean = X_train.mean().astype(np.float32)
     std = X_train.std().astype(np.float32) + 1e-8
-    X_train_norm = ((X_train.astype(np.float32) - mean) / std).astype(np.float32)
-    X_test_norm = ((X_test.astype(np.float32) - mean) / std).astype(np.float32)
 
-    return X_train_norm, X_test_norm, y_train, y_test
+    def norm(a):
+        return ((a.astype(np.float32) - mean) / std).astype(np.float32)
+
+    X_train, X_val, X_test = norm(X_train), norm(X_val), norm(X_test)
+
+    print(f"    [no-leakage] Subject {subject}: train={len(y_train)} val={len(y_val)} "
+          f"(session {sessions_sorted[0]}), test={len(y_test)} (session {sessions_sorted[1]}); "
+          f"z-score from train only", flush=True)
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42):
+    """
+    Leave-one-subject-out (cross-subject) split, leak-free:
+
+      train / val = all trials (both sessions) of every OTHER subject,
+                    stratified split (val_frac held out for model selection)
+      test        = all trials (both sessions) of the held-out subject
+                    (evaluated exactly once)
+
+    Normalization is per-trial channel-wise standardization, so no statistic crosses
+    the train/val/test boundary -> zero normalization leakage.
+    Returns (X_train, X_val, X_test, y_train, y_val, y_test).
+    """
+    subj = meta['subject'].values
+    Xa = X[:, :, :1000]
+    train_mask = subj != test_subject
+    test_mask = subj == test_subject
+
+    X_pool = _per_trial_standardize(Xa[train_mask])
+    y_pool = y[train_mask].copy()
+    X_test = _per_trial_standardize(Xa[test_mask])
+    y_test = y[test_mask].copy()
+
+    tr_idx, va_idx = _stratified_split(y_pool, val_frac, seed)
+    X_train, y_train = X_pool[tr_idx], y_pool[tr_idx]
+    X_val, y_val = X_pool[va_idx], y_pool[va_idx]
+
+    others = sorted(int(s) for s in np.unique(subj[train_mask]))
+    print(f"    [no-leakage] LOSO test_subject={test_subject}: train={len(y_train)} "
+          f"val={len(y_val)} from subjects {others}, test={len(y_test)} (subject {test_subject}); "
+          f"per-trial channel-wise z-score", flush=True)
+    return X_train, X_val, X_test, y_train, y_val, y_test
