@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from model import UnifiedEEGNet
+from model import FreqAwareEEGNet
 from dataset import load_bci_iva_dataset, prepare_subject_data, prepare_pretrain_data
 from train import train_model, pretrain_model
 
@@ -85,7 +85,7 @@ def main():
         os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
         pretrained_state = pretrain_model(
             X_pretrain, y_pretrain,
-            model_class=UnifiedEEGNet,
+        model_class=FreqAwareEEGNet,
             device=device,
             save_path=pretrained_path,
             epochs=PRETRAIN_EPOCHS, batch_size=BATCH_SIZE,
