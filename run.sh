@@ -1,3 +1,5 @@
 #!/bin/bash
-cd /home/istiaqfuad/Desktop/last-bci
-python3 main.py
+set -e
+cd "$(dirname "$0")"
+MODEL="${1:-freqaware}"
+python3 main.py --model "$MODEL"

@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -5,7 +6,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from model import FreqAwareEEGNet
+from model import FreqAwareEEGNet, UnifiedEEGNet
 from dataset import load_bci_iva_dataset, prepare_subject_data, prepare_pretrain_data
 from train import train_model, pretrain_model
 
@@ -23,28 +24,10 @@ USE_EMA = False
 EMA_DECAY = 0.99
 
 
-def train_subject(subject, X, y, meta, device, pretrained_state):
-    print(f"\n    {'='*50}\n    Subject {subject}\n    {'='*50}")
-    X_train, X_test, y_train, y_test = prepare_subject_data(
-        X, y, meta, subject
-    )
-    print(f"    Train: {X_train.shape}, Test: {X_test.shape}")
-    return train_model(
-        X_train, y_train, X_test, y_test,
-        model_class=UnifiedEEGNet,
-        device=device,
-        seed=SEED,
-        epochs=EPOCHS,
-        batch_size=BATCH_SIZE,
-        lr=LR,
-        weight_decay=WEIGHT_DECAY,
-        max_lr=MAX_LR,
-        label_smoothing=LABEL_SMOOTHING,
-        patience=PATIENCE,
-        pretrained_state=pretrained_state,
-        use_ema=USE_EMA,
-        ema_decay=EMA_DECAY,
-    )
+MODEL_MAP = {
+    'freqaware': FreqAwareEEGNet,
+    'unified': UnifiedEEGNet,
+}
 
 
 def assert_no_leakage(X_train, X_test, y_train, y_test):
@@ -55,6 +38,13 @@ def assert_no_leakage(X_train, X_test, y_train, y_test):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='BCI Competition IV-2a training')
+    parser.add_argument('--model', choices=list(MODEL_MAP.keys()), default='freqaware',
+                        help='Model architecture to use')
+    args = parser.parse_args()
+    model_class = MODEL_MAP[args.model]
+    print(f"Model: {model_class.__name__} ({args.model})")
+
     torch.manual_seed(SEED)
     np.random.seed(SEED)
 
@@ -76,7 +66,7 @@ def main():
     assert all(v == 2 for v in sessions_per_subj.values()), \
         f"Expected 2 sessions per subject, got {sessions_per_subj}"
 
-    print("\n[2/3] Pretraining on session 1 of all subjects (no leakage to test session 2)...")
+    print(f"\n[2/3] Pretraining {model_class.__name__} on session 1 of all subjects...")
     X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta)
     if os.path.exists(pretrained_path):
         print(f"    Loading existing pretrained model: {pretrained_path}")
@@ -85,29 +75,43 @@ def main():
         os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
         pretrained_state = pretrain_model(
             X_pretrain, y_pretrain,
-        model_class=FreqAwareEEGNet,
+            model_class=model_class,
             device=device,
             save_path=pretrained_path,
             epochs=PRETRAIN_EPOCHS, batch_size=BATCH_SIZE,
             lr=LR, weight_decay=WEIGHT_DECAY,
         )
 
-    print("\n[3/3] Fine-tuning on each subject (session 1 -> test on session 2)...")
+    print(f"\n[3/3] Fine-tuning {model_class.__name__} on each subject...")
     subjects = sorted(int(s) for s in np.unique(meta['subject']))
     results = []
     for subject in subjects:
-        X_train, X_test, y_train, y_test = prepare_subject_data(
-            X, y, meta, subject
-        )
+        X_train, X_test, y_train, y_test = prepare_subject_data(X, y, meta, subject)
         assert_no_leakage(X_train, X_test, y_train, y_test)
-        test_acc = train_subject(subject, X, y, meta, device, pretrained_state)
+        print(f"\n    Subject {subject}")
+        print(f"      Train: {X_train.shape}, Test: {X_test.shape}")
+        test_acc = train_model(
+            X_train, y_train, X_test, y_test,
+            model_class=model_class,
+            device=device,
+            seed=SEED,
+            epochs=EPOCHS,
+            batch_size=BATCH_SIZE,
+            lr=LR,
+            weight_decay=WEIGHT_DECAY,
+            max_lr=MAX_LR,
+            label_smoothing=LABEL_SMOOTHING,
+            patience=PATIENCE,
+            pretrained_state=pretrained_state,
+            use_ema=USE_EMA,
+            ema_decay=EMA_DECAY,
+        )
         results.append({'subject': subject, 'test_acc': test_acc})
 
         df = pd.DataFrame(results)
         df.to_csv(results_path, index=False)
         running_mean = df['test_acc'].mean()
-        print(f"\n    Saved partial results. Running mean: {running_mean*100:.2f}% "
-              f"({len(df)}/{len(subjects)})")
+        print(f"    Running mean: {running_mean*100:.2f}% ({len(df)}/{len(subjects)})")
 
     print("\n" + "=" * 60)
     print("FINAL RESULTS")
@@ -119,11 +123,11 @@ def main():
     print(f"\nMean Accuracy: {avg:.4f} +/- {std:.4f} ({avg*100:.2f}%)")
     print(f"Target: 85%+ -> {'PASS' if avg >= 0.85 else 'FAIL'}")
 
-    print("\nComparison with SOTA on BCI IV-2a (4-class motor imagery):")
+    print(f"\nComparison with SOTA on BCI IV-2a (4-class motor imagery):")
     print(f"  CTNet (2024):        82.52%")
     print(f"  MSCARNet (2024):     82.66%")
     print(f"  EEGEncoder (2025):   86.46%")
-    print(f"  Ours (single model): {avg*100:.2f}%")
+    print(f"  Ours ({model_class.__name__}):     {avg*100:.2f}%")
     return avg
 
 
