@@ -140,12 +140,50 @@ def _build_optim_sched(model, lr, weight_decay, max_lr, n_epochs, steps_per_epoc
     return optimizer, scheduler
 
 
+def tent_adapt(model, loader, device, steps=1, lr=1e-3):
+    """Label-free test-time adaptation (Tent, Wang et al. 2021).
+
+    Adapts ONLY the BatchNorm affine params (gamma, beta) by minimising the mean
+    prediction entropy over the target subject's UNLABELLED trials; BN uses batch
+    statistics (running stats disabled). No labels are touched -> honest, transductive
+    adaptation. Natural for LOSO: the held-out subject's unlabelled EEG is available.
+    Returns a deep-copied, adapted model (the input model is left untouched).
+    """
+    model = copy.deepcopy(model)
+    model.train()
+    params = []
+    for m in model.modules():
+        if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
+            m.track_running_stats = False           # use batch statistics
+            m.running_mean = None
+            m.running_var = None
+            if m.affine:
+                m.weight.requires_grad_(True)
+                m.bias.requires_grad_(True)
+                params += [m.weight, m.bias]
+        else:
+            for p in m.parameters(recurse=False):
+                p.requires_grad_(False)
+    if not params:
+        return model
+    opt = torch.optim.Adam(params, lr=lr)
+    for _ in range(steps):
+        for x, _ in loader:
+            x = x.to(device)
+            p = model(x).softmax(1)
+            entropy = -(p * p.clamp_min(1e-8).log()).sum(1).mean()
+            opt.zero_grad()
+            entropy.backward()
+            opt.step()
+    return model
+
+
 def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
                 seed=42, epochs=500, batch_size=64,
                 lr=0.001, weight_decay=0.02, max_lr=0.005,
                 label_smoothing=0.1, patience=150,
                 pretrained_state=None, use_ema=True, ema_decay=0.999,
-                use_focal_loss=False, expand=1, refit=False):
+                use_focal_loss=False, expand=1, refit=False, tta_steps=0, tta_lr=1e-3):
     """Leak-free training.
 
     Model selection and early stopping use ONLY the validation set (X_val/y_val),
@@ -229,5 +267,13 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
     if best_state is not None:
         final_model.load_state_dict(best_state)
     test_acc = evaluate(final_model, test_loader, device)
-    print(f"      Best ValAcc: {best_val_acc:.4f} -> Test (single eval): {test_acc:.4f}", flush=True)
+    msg = f"      Best ValAcc: {best_val_acc:.4f} -> Test (single eval): {test_acc:.4f}"
+
+    if tta_steps > 0:
+        # Label-free test-time adaptation on the held-out subject (transductive).
+        adapted = tent_adapt(final_model, test_loader, device, steps=tta_steps, lr=tta_lr)
+        tta_acc = evaluate(adapted, test_loader, device)
+        msg += f" | +TTA({tta_steps}): {tta_acc:.4f}"
+        test_acc = tta_acc
+    print(msg, flush=True)
     return test_acc
