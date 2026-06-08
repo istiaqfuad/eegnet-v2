@@ -125,7 +125,8 @@ def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_loso_data(X, y, meta, subject,
-                                                               val_frac=0.1, seed=cfg.seed)
+                                                               val_frac=0.1, seed=cfg.seed,
+                                                               align=cfg.align)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
@@ -149,8 +150,9 @@ def main():
     parser.add_argument('--aug_expand', type=int, default=1, help='Replicate augmented train epochs')
     parser.add_argument('--val_frac', type=float, default=0.2, help='Within-subject validation fraction')
     parser.add_argument('--refit', action='store_true', help='Refit on train+val for val-selected #epochs')
-    parser.add_argument('--align', choices=['none', 'ea'], default='none',
-                        help='Euclidean Alignment (per-session covariance whitening, label-free)')
+    parser.add_argument('--align', choices=['none', 'ea', 'ra'], default='none',
+                        help='Alignment: ea=Euclidean (arithmetic-mean cov), '
+                             'ra=Riemannian/Centroid (SPD geometric-mean cov), label-free')
     parser.add_argument('--tag', type=str, default='', help='Suffix for output CSV / pretrain cache')
     parser.add_argument('--seed', type=int, default=SEED, help='Random seed (vary for multi-seed runs)')
     parser.add_argument('--subjects', type=str, default='',

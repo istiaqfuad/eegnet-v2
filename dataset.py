@@ -276,11 +276,11 @@ def prepare_pretrain_data(X, y, meta, align='none'):
     X_pretrain = X[session_1_mask][:, :, :1000].copy().astype(np.float32)
     y_pretrain = y[session_1_mask].copy()
 
-    if align == 'ea':
+    if align in ('ea', 'ra'):
         subj_p = meta['subject'].values[session_1_mask]
         for s in np.unique(subj_p):
             m = subj_p == s
-            X_pretrain[m] = _ea_apply(X_pretrain[m], _inv_sqrt(_ea_reference(X_pretrain[m])))
+            X_pretrain[m] = _ea_apply(X_pretrain[m], _whitener(X_pretrain[m], align))
 
     # Global scalar z-score
     mean = X_pretrain.mean().astype(np.float32)
@@ -332,8 +332,32 @@ def _inv_sqrt(R):
 
 
 def _ea_apply(X, R_inv_sqrt):
-    """Whiten each trial: X' = R^{-1/2} X. X: [N, C, T]."""
+    """Whiten each trial: X' = R^{-1/2} X. X: [N, C, T]. Works for any whitener."""
     return np.einsum('cd,ndt->nct', R_inv_sqrt, X.astype(np.float64)).astype(np.float32)
+
+
+def _ca_whitener(X):
+    """Centroid / Riemannian Alignment whitener = invsqrtm(Riemannian mean covariance).
+
+    Uses the SPD geometric (Frechet) mean of per-trial OAS covariances as the
+    reference, instead of EA's arithmetic mean. Label-free. X: [N, C, T] -> [C, C].
+    Recent MI transfer-learning literature lists this as Centroid Alignment (CA),
+    alongside EA / Riemannian Alignment / Parallel Transport.
+    """
+    from pyriemann.estimation import Covariances
+    from pyriemann.utils.mean import mean_riemann
+    from pyriemann.utils.base import invsqrtm
+    covs = Covariances("oas").fit_transform(X.astype(np.float64))
+    return invsqrtm(mean_riemann(covs)).astype(np.float64)
+
+
+def _whitener(X, align):
+    """Per-set whitener for the requested alignment ('ea' arithmetic / 'ra' Riemannian)."""
+    if align == 'ea':
+        return _inv_sqrt(_ea_reference(X))
+    if align == 'ra':
+        return _ca_whitener(X)
+    raise ValueError(f"unknown align {align}")
 
 
 def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none'):
@@ -368,10 +392,10 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
     X_train, y_train = X_s1[tr_idx], y_s1[tr_idx]
     X_val, y_val = X_s1[va_idx], y_s1[va_idx]
 
-    if align == 'ea':
-        Ris1 = _inv_sqrt(_ea_reference(X_train))  # session-1 ref from train only
+    if align in ('ea', 'ra'):
+        Ris1 = _whitener(X_train, align)          # session-1 ref from train only
         X_train, X_val = _ea_apply(X_train, Ris1), _ea_apply(X_val, Ris1)
-        X_test = _ea_apply(X_test, _inv_sqrt(_ea_reference(X_test)))  # session-2 ref, label-free
+        X_test = _ea_apply(X_test, _whitener(X_test, align))  # session-2 ref, label-free
 
     mean = X_train.mean().astype(np.float32)
     std = X_train.std().astype(np.float32) + 1e-8
@@ -387,7 +411,7 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 
-def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42):
+def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42, align='none'):
     """
     Leave-one-subject-out (cross-subject) split, leak-free:
 
@@ -396,8 +420,10 @@ def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42):
       test        = all trials (both sessions) of the held-out subject
                     (evaluated exactly once)
 
-    Normalization is per-trial channel-wise standardization, so no statistic crosses
-    the train/val/test boundary -> zero normalization leakage.
+    align='none': per-trial channel-wise standardization (no cross-set statistic).
+    align='ea'/'ra': per-SUBJECT alignment — whiten each subject's trials by that
+    subject's own EA/Riemannian reference (label-free), then z-score. This is the
+    standard cross-subject alignment that maps every subject's centroid to identity.
     Returns (X_train, X_val, X_test, y_train, y_val, y_test).
     """
     subj = meta['subject'].values
@@ -405,9 +431,20 @@ def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42):
     train_mask = subj != test_subject
     test_mask = subj == test_subject
 
-    X_pool = _per_trial_standardize(Xa[train_mask])
+    if align in ('ea', 'ra'):
+        Xal = Xa.astype(np.float32).copy()
+        for s in np.unique(subj):
+            m = subj == s
+            Xal[m] = _ea_apply(Xal[m], _whitener(Xal[m], align))
+        # global scalar z-score from the training pool only
+        mtr = Xal[train_mask].mean().astype(np.float32)
+        std = Xal[train_mask].std().astype(np.float32) + 1e-8
+        X_pool = ((Xal[train_mask] - mtr) / std).astype(np.float32)
+        X_test = ((Xal[test_mask] - mtr) / std).astype(np.float32)
+    else:
+        X_pool = _per_trial_standardize(Xa[train_mask])
+        X_test = _per_trial_standardize(Xa[test_mask])
     y_pool = y[train_mask].copy()
-    X_test = _per_trial_standardize(Xa[test_mask])
     y_test = y[test_mask].copy()
 
     tr_idx, va_idx = _stratified_split(y_pool, val_frac, seed)
@@ -417,5 +454,5 @@ def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42):
     others = sorted(int(s) for s in np.unique(subj[train_mask]))
     print(f"    [no-leakage] LOSO test_subject={test_subject}: train={len(y_train)} "
           f"val={len(y_val)} from subjects {others}, test={len(y_test)} (subject {test_subject}); "
-          f"per-trial channel-wise z-score", flush=True)
+          f"align={align}", flush=True)
     return X_train, X_val, X_test, y_train, y_val, y_test
