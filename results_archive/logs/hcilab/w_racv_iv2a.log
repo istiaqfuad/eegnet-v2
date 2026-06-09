@@ -1,0 +1,28 @@
+Device: cuda
+  GPU: NVIDIA GeForce GTX 1050 Ti
+
+Loading dataset 'iv2a' (MOABB)...
+Choosing from all possible events
+    Dataset iv2a (BNCI2014_001): X=(5184, 22, 1001), classes=4, channels=22
+Model: UnifiedEEGNet (unified) | Dataset: iv2a (classes=4, ch=22) | Protocol: within_cv | band=0.5-100.0Hz align=ra tta_steps=5 seed=42 tag='racv'
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within_cv] UnifiedEEGNet 5-fold, align=ra, tta_steps=5; from scratch per fold
+    [no-leakage] Subject 1 fold 1/5: train=368 val=92 test=116; align=ra; z-score from train only
+      Epoch 50/500, TrLoss: 0.8885, ValAcc: 0.6630, ValLoss: 0.7033
+      Epoch 100/500, TrLoss: 0.7174, ValAcc: 0.8261, ValLoss: 0.4664
+      Epoch 150/500, TrLoss: 0.6164, ValAcc: 0.8478, ValLoss: 0.4665
+      Epoch 200/500, TrLoss: 0.6969, ValAcc: 0.8370, ValLoss: 0.4647
+      Epoch 250/500, TrLoss: 0.7009, ValAcc: 0.8696, ValLoss: 0.4590
+      Epoch 300/500, TrLoss: 0.6297, ValAcc: 0.8587, ValLoss: 0.4298
+      Epoch 350/500, TrLoss: 0.6395, ValAcc: 0.8261, ValLoss: 0.5621
+      Epoch 400/500, TrLoss: 0.5093, ValAcc: 0.8261, ValLoss: 0.4302
+      Epoch 450/500, TrLoss: 0.6064, ValAcc: 0.8804, ValLoss: 0.3819
+      Epoch 500/500, TrLoss: 0.6970, ValAcc: 0.8913, ValLoss: 0.4091
+      Best ValAcc: 0.9130 -> Test (single eval): 0.8707 | +TTA(5,div1.0): 0.8707
+    [no-leakage] Subject 1 fold 2/5: train=369 val=92 test=115; align=ra; z-score from train only
+      Epoch 50/500, TrLoss: 0.8543, ValAcc: 0.7174, ValLoss: 0.6416
+      Epoch 100/500, TrLoss: 0.6570, ValAcc: 0.8370, ValLoss: 0.4327
+      Epoch 150/500, TrLoss: 0.6027, ValAcc: 0.8370, ValLoss: 0.4175
+      Epoch 200/500, TrLoss: 0.5449, ValAcc: 0.8478, ValLoss: 0.3817
+      Epoch 250/500, TrLoss: 0.4998, ValAcc: 0.9022, ValLoss: 0.3490

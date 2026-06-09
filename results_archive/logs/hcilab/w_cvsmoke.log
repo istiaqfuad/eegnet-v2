@@ -1,0 +1,34 @@
+Device: cuda
+  GPU: NVIDIA GeForce GTX 1050 Ti
+
+Loading dataset 'iv2a' (MOABB)...
+Choosing from all possible events
+    Dataset iv2a (BNCI2014_001): X=(5184, 22, 1001), classes=4, channels=22
+Model: UnifiedEEGNet (unified) | Dataset: iv2a (classes=4, ch=22) | Protocol: within_cv | band=0.5-100.0Hz align=ra tta_steps=3 seed=42 tag='cvsmoke'
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within_cv] UnifiedEEGNet 5-fold, align=ra, tta_steps=3; from scratch per fold
+    [no-leakage] Subject 1 fold 1/5: train=368 val=92 test=116; align=ra; z-score from train only
+      Best ValAcc: 0.4891 -> Test (single eval): 0.4914 | +TTA(3,div1.0): 0.5431
+    [no-leakage] Subject 1 fold 2/5: train=369 val=92 test=115; align=ra; z-score from train only
+      Best ValAcc: 0.4891 -> Test (single eval): 0.4957 | +TTA(3,div1.0): 0.6261
+    [no-leakage] Subject 1 fold 3/5: train=369 val=92 test=115; align=ra; z-score from train only
+      Best ValAcc: 0.4130 -> Test (single eval): 0.3913 | +TTA(3,div1.0): 0.5478
+    [no-leakage] Subject 1 fold 4/5: train=369 val=92 test=115; align=ra; z-score from train only
+      Best ValAcc: 0.4239 -> Test (single eval): 0.3913 | +TTA(3,div1.0): 0.4783
+    [no-leakage] Subject 1 fold 5/5: train=369 val=92 test=115; align=ra; z-score from train only
+      Best ValAcc: 0.5109 -> Test (single eval): 0.5130 | +TTA(3,div1.0): 0.5391
+    [within_cv] Subject 1: 54.69% | running mean 54.69% (1/1)
+
+============================================================
+FINAL RESULTS — WITHIN-CV iv2a_cvsmoke (UnifiedEEGNet)
+============================================================
+ subject  test_acc         model
+       1  0.546882 UnifiedEEGNet
+
+WITHIN-CV iv2a_cvsmoke Mean Accuracy: 0.5469 +/- nan (54.69%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_within_cv_iv2a_unified_cvsmoke.csv
+
+============================================================
+SUMMARY (UnifiedEEGNet, iv2a)
+  within_cv : 54.69%

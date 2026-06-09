@@ -1,0 +1,4 @@
+subject,test_acc,model
+2,0.7465277777777778,DualAlignEEGNet
+3,0.9479166666666666,DualAlignEEGNet
+5,0.7256944444444444,DualAlignEEGNet

@@ -26,6 +26,23 @@ Within 84.9 beats CTNet 82.5 / MSCARNet 82.7 and approaches EEGEncoder 86.5.
 
 ---
 
+## 1b. Multi-dataset benchmark (literature protocols)
+
+Same method (RA + UnifiedEEGNet + IM-TTA) on two datasets, each with its **standard
+session-holdout** protocol (no session pooling): IV-2a = train session 1 / test session 2;
+IV-2b = train sessions 1–3 / test sessions 4–5. LOSO = leave-one-subject-out.
+
+| Method | IV-2a within | IV-2a LOSO | IV-2b within | IV-2b LOSO |
+|---|---|---|---|---|
+| baseline (no align) | 75.6 | 59.1 | 85.7 | 76.1 |
+| + RA alignment | 81.9 | 64.8 | 87.2 | 76.6 |
+| **+ RA + IM-TTA** | **84.9 ± 0.8** | **67.8 ± 0.4** | 86.1 ± 0.2 | **80.2 ± 0.2** |
+
+(IV-2a within/LOSO and IV-2b 3-seed means.) **IM-TTA's gain is consistent cross-subject**
+(LOSO: IV-2a +3.0, IV-2b +3.6) and dataset-dependent within-subject (helps IV-2a +3.0, neutral
+on IV-2b 2-class where RA-alone 87.2 is best). Alignment helps everywhere. IV-2b is 2-class/3-ch
+(chance 50%); IV-2a is 4-class/22-ch (chance 25%). Sources: `results_*_iv2b_*` CSVs/logs.
+
 ## 2. Within-subject (session-to-session)
 
 Train = session 1 (stratified 80/20 train/val), Test = session 2. Cross-subject supervised
