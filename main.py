@@ -131,24 +131,15 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
 def run_within_cv(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Within-subject k-fold CV (sessions pooled). Uniform across datasets.
 
-    Per held-out subject: pretrain on the OTHER subjects only (so the init never sees
-    the test subject's trials), then run K stratified folds; average folds per subject.
+    Each subject is trained from scratch per fold (no cross-subject pretrain) — clean
+    (no test-fold contamination) and avoids a per-subject pretrain. Average folds.
     """
     subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
-    all_subjects = sorted(int(s) for s in np.unique(meta['subject']))
     out_path = os.path.join(script_dir, f'results_within_cv_{cfg.dataset}_{model_name}{cfg.tagsuffix}.csv')
     print(f"\n[within_cv] {model_class.__name__} {cfg.kfolds}-fold, align={cfg.align}, "
-          f"tta_steps={cfg.tta_steps}; pretrain on other subjects per fold-group")
+          f"tta_steps={cfg.tta_steps}; from scratch per fold")
     results = []
     for subject in subjects:
-        # Cross-subject pretrain on the OTHER subjects' session-1 (excludes held subject).
-        others_mask = np.isin(meta['subject'].values, [s for s in all_subjects if s != subject])
-        Xo, yo, mo = X[others_mask], y[others_mask], meta[others_mask]
-        Xp, yp = prepare_pretrain_data(Xo, yo, mo, align=cfg.align)
-        pstate = pretrain_model(Xp, yp, model_class=model_class, device=device,
-                                save_path=None, epochs=cfg.pretrain_epochs, batch_size=BATCH_SIZE,
-                                lr=LR, weight_decay=WEIGHT_DECAY,
-                                n_classes=cfg.n_classes, n_channels=cfg.n_channels)
         fold_accs = []
         for fold in range(cfg.kfolds):
             X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data_cv(
@@ -156,7 +147,7 @@ def run_within_cv(X, y, meta, model_class, model_name, device, script_dir, cfg):
                 val_frac=cfg.val_frac, seed=cfg.seed, align=cfg.align)
             assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
             acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
-                       pstate, expand=cfg.aug_expand, refit=cfg.refit,
+                       pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
                        epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
                        n_classes=cfg.n_classes, n_channels=cfg.n_channels)
