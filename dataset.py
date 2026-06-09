@@ -241,10 +241,13 @@ class BCIDataset(Dataset):
         return x, y
 
 
-# Dataset registry: name -> (MOABB dataset class name, n_classes)
+# Dataset registry: name -> (MOABB dataset class name, n_classes, n_test_sessions)
+# n_test_sessions = number of LAST sessions held out as test (literature hold-out protocol):
+#   IV-2a: 2 sessions -> train session 1, test session 2  (official competition)
+#   IV-2b: 5 sessions -> train sessions 1-3, test sessions 4-5 (official competition)
 DATASETS = {
-    'iv2a': ('BNCI2014_001', 4),   # BCI IV-2a: 22 ch, 4 class, 2 sessions
-    'iv2b': ('BNCI2014_004', 2),   # BCI IV-2b: 3 ch,  2 class, 5 sessions
+    'iv2a': ('BNCI2014_001', 4, 1),   # 22 ch, 4 class, 2 sessions
+    'iv2b': ('BNCI2014_004', 2, 2),   # 3 ch,  2 class, 5 sessions
 }
 
 LABEL_MAP = {'left_hand': 0, 'right_hand': 1, 'feet': 2, 'tongue': 3}
@@ -260,7 +263,7 @@ def load_dataset(name='iv2a', fmin=0.5, fmax=100.0):
     from moabb.paradigms import MotorImagery
 
     assert name in DATASETS, f"unknown dataset {name}; choices={list(DATASETS)}"
-    ds_name, n_classes = DATASETS[name]
+    ds_name, n_classes, _ = DATASETS[name]
     paradigm = MotorImagery(n_classes=n_classes, channels=None, fmin=fmin, fmax=fmax)
     dataset = getattr(mds, ds_name)()
     dataset.download()
@@ -388,19 +391,20 @@ def _dual_views(X, W_ea, W_ra):
     return np.concatenate([_ea_apply(X, W_ea), _ea_apply(X, W_ra)], axis=1)
 
 
-def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none'):
+def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none',
+                         n_test_sessions=1):
     """
-    Within-subject split, leak-free (official BCI IV-2a protocol):
+    Within-subject SESSION-HOLDOUT split, leak-free (official competition protocol):
 
-      train / val = session 1, stratified split (val_frac held out for model selection)
-      test        = session 2 (evaluated exactly once on the val-selected checkpoint)
+      test  = the LAST `n_test_sessions` sessions (sorted)
+      train = the remaining (earlier) sessions; a stratified val_frac is held out for
+              model selection.
+      IV-2a: n_test_sessions=1 -> train session 1, test session 2.
+      IV-2b: n_test_sessions=2 -> train sessions 1-3, test sessions 4-5.
 
-    align='ea': Euclidean Alignment — whiten each session by its own mean spatial
-    covariance (label-free) before z-score. session-1 R is fit on the TRAIN portion
-    only and applied to train+val; session-2 R is fit on its own trials. This directly
-    counters cross-session covariance shift and leaks no labels.
-
-    Z-score statistics are fit on the TRAIN portion only and applied to val and test.
+    Sessions are NEVER pooled/mixed (that would be same-session leakage). Alignment
+    (ea/ra/dual) references are fit on the TRAIN trials (applied to train+val) and on
+    the test trials' own statistics (label-free). Z-score from train only.
     Returns (X_train, X_val, X_test, y_train, y_val, y_test).
     """
     subject_idx = meta['subject'].values == subject
@@ -408,26 +412,27 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
     y_subject = y[subject_idx].copy()
     subj_sessions = meta.loc[subject_idx, 'session'].values
     sessions_sorted = sorted(np.unique(subj_sessions))
-    assert len(sessions_sorted) >= 2, \
-        f"Subject {subject}: need >=2 sessions for session-based split, got {sessions_sorted}"
+    assert len(sessions_sorted) > n_test_sessions, \
+        f"Subject {subject}: need > {n_test_sessions} sessions, got {sessions_sorted}"
 
-    s1_mask = subj_sessions == sessions_sorted[0]
-    s2_mask = subj_sessions == sessions_sorted[1]
-    X_s1, y_s1 = X_subject[s1_mask], y_subject[s1_mask]
-    X_test, y_test = X_subject[s2_mask], y_subject[s2_mask]
+    train_sessions = sessions_sorted[:-n_test_sessions]
+    test_sessions = sessions_sorted[-n_test_sessions:]
+    tr_mask = np.isin(subj_sessions, train_sessions)
+    te_mask = np.isin(subj_sessions, test_sessions)
+    X_trn, y_trn = X_subject[tr_mask], y_subject[tr_mask]
+    X_test, y_test = X_subject[te_mask], y_subject[te_mask]
 
-    tr_idx, va_idx = _stratified_split(y_s1, val_frac, seed)
-    X_train, y_train = X_s1[tr_idx], y_s1[tr_idx]
-    X_val, y_val = X_s1[va_idx], y_s1[va_idx]
+    tr_idx, va_idx = _stratified_split(y_trn, val_frac, seed)
+    X_train, y_train = X_trn[tr_idx], y_trn[tr_idx]
+    X_val, y_val = X_trn[va_idx], y_trn[va_idx]
 
     if align in ('ea', 'ra'):
-        Ris1 = _whitener(X_train, align)          # session-1 ref from train only
-        X_train, X_val = _ea_apply(X_train, Ris1), _ea_apply(X_val, Ris1)
-        X_test = _ea_apply(X_test, _whitener(X_test, align))  # session-2 ref, label-free
+        Wtr = _whitener(X_train, align)            # train ref from train only
+        X_train, X_val = _ea_apply(X_train, Wtr), _ea_apply(X_val, Wtr)
+        X_test = _ea_apply(X_test, _whitener(X_test, align))  # test ref, label-free
     elif align == 'dual':
-        # Stack EA-aligned and RA-aligned views along the channel axis -> [N, 2C, T].
-        We1, Wr1 = _inv_sqrt(_ea_reference(X_train)), _ca_whitener(X_train)   # session-1 refs (train)
-        We2, Wr2 = _inv_sqrt(_ea_reference(X_test)), _ca_whitener(X_test)     # session-2 refs (own)
+        We1, Wr1 = _inv_sqrt(_ea_reference(X_train)), _ca_whitener(X_train)
+        We2, Wr2 = _inv_sqrt(_ea_reference(X_test)), _ca_whitener(X_test)
         X_train = _dual_views(X_train, We1, Wr1)
         X_val = _dual_views(X_val, We1, Wr1)
         X_test = _dual_views(X_test, We2, Wr2)
@@ -441,7 +446,7 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
     X_train, X_val, X_test = norm(X_train), norm(X_val), norm(X_test)
 
     print(f"    [no-leakage] Subject {subject}: train={len(y_train)} val={len(y_val)} "
-          f"(session {sessions_sorted[0]}), test={len(y_test)} (session {sessions_sorted[1]}); "
+          f"(sessions {train_sessions}), test={len(y_test)} (sessions {test_sessions}); "
           f"align={align}; z-score from train only", flush=True)
     return X_train, X_val, X_test, y_train, y_val, y_test
 

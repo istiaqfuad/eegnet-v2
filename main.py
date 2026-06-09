@@ -113,7 +113,8 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
                                                                   val_frac=cfg.val_frac, seed=cfg.seed,
-                                                                  align=cfg.align)
+                                                                  align=cfg.align,
+                                                                  n_test_sessions=cfg.n_test_sessions)
         assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
         print(f"      Train: {X_tr.shape}, Val: {X_va.shape}, Test: {X_te.shape}")
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
@@ -234,6 +235,7 @@ def main():
     print(f"\nLoading dataset '{args.dataset}' (MOABB)...")
     X, y, meta, n_classes, n_channels = load_dataset(args.dataset, fmin=args.fmin, fmax=args.fmax)
     args.n_classes, args.n_channels = n_classes, n_channels
+    args.n_test_sessions = DATASETS[args.dataset][2]
     print(f"Model: {model_class.__name__} ({args.model}) | Dataset: {args.dataset} "
           f"(classes={n_classes}, ch={n_channels}) | Protocol: {args.protocol} | "
           f"band={args.fmin}-{args.fmax}Hz align={args.align} tta_steps={args.tta_steps} "
@@ -242,8 +244,8 @@ def main():
 
     if args.protocol in ('within', 'both'):
         sps = meta.groupby('subject')['session'].nunique().to_dict()
-        assert all(v >= 2 for v in sps.values()), \
-            f"session-based within needs >=2 sessions/subject, got {sps}"
+        assert all(v > args.n_test_sessions for v in sps.values()), \
+            f"session-based within needs > {args.n_test_sessions} sessions/subject, got {sps}"
 
     means = {}
     if args.protocol in ('within', 'both'):
