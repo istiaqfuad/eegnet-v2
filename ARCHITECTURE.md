@@ -1,176 +1,137 @@
-# UnifiedEEGNet: A Single Unified Architecture for 4-Class Motor Imagery
+# Architecture & Novelty
 
-## Executive Summary
+This document describes the actual model and method in `model.py` / `dataset.py` / `train.py`.
+(The previous version of this file described an obsolete `MTSEEGFormer` that no longer exists.)
 
-We train **UnifiedEEGNet**, a single unified architecture, on BCI Competition IV-2a (4-class motor imagery, 9 subjects) under strict session-based evaluation. Result: **83.56% ± 9.96% mean accuracy** with no ensembling, no test-time augmentation, and zero data leakage.
+Task: 4-class motor-imagery decoding on BCI Competition IV-2a (BNCI2014-001), 9 subjects,
+22 EEG channels, 1000 samples @ 250 Hz, broadband 0.5–100 Hz.
 
-This document describes the architecture in detail, the leakage-free evaluation protocol, and the gap to the 85% target.
+The system has three parts, applied in order:
+
+```
+ raw EEG [B,22,1000]
+   │
+   ▼  (1) ALIGNMENT  — label-free covariance whitening (EA or RA/Centroid)
+ aligned EEG [B,22,1000]
+   │
+   ▼  (2) BACKBONE   — UnifiedEEGNet (EEGNet-style CNN, 34k params)
+ logits [B,4]
+   │
+   ▼  (3) IM-TTA     — source-free test-time adaptation on the target subject (cross-subject only)
+ prediction
+```
 
 ---
 
-## 1. Problem and Dataset
+## 1. Alignment front-end (label-free, `dataset.py`)
 
-Motor Imagery (MI) classification from EEG is a fundamental BCI task. Given a 4-second EEG window, classify the imagined movement into one of four classes: left hand, right hand, feet, tongue.
+EEG covariance drifts across sessions and subjects — the dominant source of error in
+cross-session/cross-subject MI. We whiten each recording by a covariance **reference** so its
+trials are mapped toward a common geometry. Reference is computed **without labels**, so it is
+honest (no test-label leakage) and applies equally to train, validation and test.
 
-- **Dataset**: BCI Competition IV-2a (BNCI2014_001)
-- **Subjects**: 9 healthy subjects
-- **Channels**: 22 EEG channels
-- **Sampling rate**: 250 Hz → 1000 timesteps per trial
-- **Trials**: 288 per session, 2 sessions, 576 per subject total
-- **Classes**: 4 (left_hand, right_hand, feet, tongue)
-- **Preprocessing**: MOABB MotorImagery paradigm, 0.5–100 Hz bandpass
+For a set of trials, compute the per-channel reference whitener `M` and apply `X' = M · X`:
 
-## 2. Evaluation protocol (no leakage)
+- **Euclidean Alignment (EA)** — `M = R^{-1/2}`, `R = mean_n (X_n X_nᵀ / T)` (arithmetic mean of
+  per-trial spatial covariances). Maps the arithmetic-mean covariance to the identity.
+- **Riemannian / Centroid Alignment (RA)** — `M = invsqrtm( mean_riemann(cov_n) )`, the SPD
+  geometric (Fréchet) mean of OAS-shrunk covariances (`pyriemann`). Respects the curved geometry
+  of the SPD manifold; better conditioned when covariances are heterogeneous.
 
-We follow the official BCI Competition IV-2a protocol: train on session 1, test on session 2, per subject. Mean across the 9 subjects is the headline number.
+Where the reference is fit (always label-free):
+- **Within-subject**: session-1 reference fit on the training split only (applied to train+val);
+  session-2 (test) reference fit on its own trials.
+- **Cross-subject (LOSO)**: each subject whitened by its own reference (its centroid → identity).
 
-Concretely (`dataset.py`):
+Effect (measured): within-subject **+7 pp** (75.6 → 82.7); cross-subject **+5.5 pp** (59.1 → 64.6).
+Alignment is the single largest honest lever and the foundation the rest builds on.
 
-- `prepare_subject_data(X, y, meta, subject)`:
-  - asserts `len(sessions) >= 2` (so no fallback to a leaky random split)
-  - selects session 1 trials as `X_train`, session 2 as `X_test`
-  - computes `mean`, `std` from `X_train` only
-  - applies `(X_train - mean) / std` and `(X_test - mean) / std` (no test-stat leakage)
-  - prints `[no-leakage] Subject N: train=session0train (288), test=session1test (288); z-score from train only` on every call
+---
 
-- `prepare_pretrain_data(X, y, meta)`:
-  - selects session 1 of **all** 9 subjects
-  - session 2 of every subject is held out and never seen during pretraining
-  - this gives the fine-tuning a strong cross-subject init without leaking the test session
+## 2. Backbone — `UnifiedEEGNet` (`model.py`, 34,132 params)
 
-The previous `evaluation_mode='merged'` (which would have shuffled session-2 trials into the training set) has been removed entirely. It was a textbook BCI session-shift leakage.
-
-## 3. Architecture: UnifiedEEGNet
-
-A single class, one forward pass, no internal ensembling. 80K parameters total.
-
-### 3.1 Pipeline
+A compact EEGNet-style CNN — deliberately small for the ~288 trials/subject regime.
 
 ```
-Input EEG [B, 22, 1000]
-   │
-   ▼
-[1] EEGNet-style embedding
-    Conv2d(1, 16, kernel=(1, 25), padding=(0, 12))   ← temporal filter
-    BatchNorm2d(16)
-    ELU
-    Conv2d(16, 32, kernel=(22, 1), groups=16)       ← depthwise spatial filter
-    BatchNorm2d(32)
-    ELU                                              → [B, 32, 1, 1000]
-   │
-   ▼
-[2] Progressive downsampling (3 stride-2 convs)
-    Conv2d(32, 48, (1, 7), stride=(1,2)) + BN + GELU + Drop(0.15)   → [B, 48, 1, 500]
-    Conv2d(48, 48, (1, 7), stride=(1,2)) + BN + GELU + Drop(0.15)   → [B, 48, 1, 250]
-    Conv2d(48, 64, (1, 5), stride=(1,2)) + BN + GELU + Drop(0.15)   → [B, 64, 1, 125]
-   │
-   ▼
-[3] Multi-scale temporal convolution (MSCARNet)
-    3 parallel Conv1d(64, 21, k={15, 35, 55}, padding=k//2)  → concat 63 ch
-    BatchNorm1d(63) → Conv1d(63, 64, 1) → BatchNorm1d(64)
-    GELU                                                        → [B, 64, 125]
-   │
-   ▼
-[4] Two DSTS blocks (Dual-Stream Temporal-Spatial, from EEGEncoder)
-    Each block:
-        TCN stream:  3 stacked dilated Conv1d(64→64, k=3, dilations 1/2/4) + BN + GELU
-        Spatial stream: pre-norm TransformerEncoderLayer(d=64, heads=4, ff=256)
-        Sum + Dropout(0.25) + LayerNorm(d=64)                      → [B, 64, 125]
-   │
-   ▼
-[5] Classifier
-    x = x.mean(dim=-1)             ← mean-pool over time
-    x = RMSNorm(64)(x)             ← pre-head norm
-    x = Dropout(0.4)(x)
-    x = Linear(64, 4)(x)           ← class logits
+Input [B,1,22,1000]
+  Conv2d(1→8, kernel=(1,64), pad=(0,31))      temporal filters (~mu/beta cycles @250Hz)
+  BatchNorm2d(8)
+  DepthwiseConv2d(8→16, kernel=(22,1), groups=8)   spatial filters over channels (CSP-like)
+  BatchNorm2d(16) → ELU → AvgPool(1,4) → Dropout(0.35)
+  Conv2d(16→32, (1,16), pad=(0,7)) → BN → ELU → AvgPool(1,8) → Dropout(0.35)
+  Conv2d(32→32, (1,8),  pad=(0,3)) → BN → ELU → AvgPool(1,4) → Dropout(0.35)
+  AdaptiveAvgPool(1,8) → Flatten(256) → Linear(256→64) → GELU → Dropout(0.5) → Linear(64→4)
 ```
 
-### 3.2 Components
+Why it works **with** alignment: the depthwise spatial conv learns CSP-like spatial filters; on
+EA/RA-whitened input these operate in a whitened space, so they behave like CSP-after-whitening —
+the classical recipe, now learned end-to-end. Training: AdamW, OneCycleLR, label smoothing 0.1,
+MixUp, S&R + signal-space augmentation, **checkpoint/early-stop on a held-out validation split**,
+**test evaluated exactly once** (leak-free).
 
-**RMSNorm** (`x / sqrt(mean(x^2) + eps) * weight`) — used inside the transformer layers and the final classifier head. Cheaper than LayerNorm, used in modern transformer architectures (LLaMA, etc.).
+Cross-subject supervised pretraining (session 1 of all subjects) initialises the within-subject
+fine-tuning; for LOSO the model is trained from scratch on the 8 source subjects.
 
-**TCNBlock** — stack of dilated 1D convolutions with BN+GELU. Captures multi-scale temporal patterns. The dilation_growth=2 gives receptive fields of 3, 5, 9 samples across the three layers.
+---
 
-**MultiScaleTemporalConv** — three parallel 1D convs at different temporal scales (k=15, 35, 55), inspired by MSCARNet. Concatenated and projected back to 64 channels. Lets the model attend to short, medium, and long windows simultaneously.
+## 3. Novel module — Information-Maximization Test-Time Adaptation (`tent_adapt`, `train.py`)
 
-**StableTransformerLayer** — pre-norm transformer: `x = x + Drop(SelfAttn(RMSNorm(x)))` and `x = x + Drop(FFN(RMSNorm(x)))`. Pre-norm is more stable than post-norm for small datasets.
+**The contribution.** Alignment removes covariance shift but a residual subject gap remains —
+strongest on hard subjects. After the model is trained on the (aligned) source subjects, we adapt
+it to the held-out target subject using **only that subject's unlabelled trials** (which are
+legitimately available in the LOSO setting — transductive, no labels touched).
 
-**DSTSBlock** — the dual-stream block from EEGEncoder. The TCN handles the temporal axis; the transformer attends over the 125 time tokens (after the permute `(B, 64, 125) → (B, 125, 64)`). The two streams are summed and LayerNormed. Note: by the time we reach this stage, the depthwise spatial conv has already collapsed the 22 channels into the feature dimension, so the "spatial" stream is effectively a second view on the time axis — not a true channel-attention mechanism.
+Adapt **only the BatchNorm affine parameters** (γ, β); BN uses **batch statistics** (running stats
+disabled). For each pass over the target's unlabelled trials, minimise the **Information
+Maximization** objective:
 
-### 3.3 Parameter count
+```
+  L  =  E[ H(p) ]            (conditional entropy — sharpen each prediction)
+      −  H( E[p] )           (marginal entropy   — keep classes balanced)
+```
 
-| Component | Params |
+where `p = softmax(f(x))`, `E[·]` over the batch.
+
+**Why both terms (the key design):** plain entropy minimisation (Tent) collapses on hard MI
+subjects — predictions pile onto one class (confirmation bias), and the gain vanishes. The second
+term **maximises the batch marginal entropy**, forbidding collapse to a single class. The
+`--tta_div` weight toggles it; the ablation is decisive:
+
+| TTA on aligned EEGNet | LOSO acc |
 |---|---|
-| Stage 1 (EEGNet embedding) | ~9K |
-| Stage 2 (downsampling) | ~7K |
-| Stage 3 (multi-scale conv) | ~145K |
-| Stage 4 (2x DSTS block) | ~170K |
-| Stage 5 (head) | ~260 |
-| **Total** | **~364K** |
+| no TTA | 64.6 |
+| plain Tent (entropy only, div=0) | 64.5  ← no gain (collapse) |
+| **IM-TTA (entropy + diversity, div=1)** | **66.7** |
 
-## 4. Training
+Cost: a few gradient steps on a handful of BN parameters; one forward model at test time
+(no ensembling). Helps **8/9** subjects.
 
-One configuration for all 9 subjects. No per-subject tuning.
+---
 
-| Hyperparameter | Value |
-|---|---|
-| Optimizer | AdamW (lr=1e-3, weight_decay=0.02) |
-| Scheduler | OneCycleLR, max_lr=5e-3, 15% warmup, cosine anneal |
-| Epochs | 500 (patience 150) |
-| Batch size | 64 |
-| Label smoothing | 0.1 |
-| MixUp | alpha=0.3, applied ~60% of batches |
-| Augmentations (train only) | S&R (4-segment shuffle), frequency masking, channel dropout, channel permutation, temporal shift, Gaussian noise |
-| Pretrain | 500 epochs on session 1 of all 9 subjects, supervised cross-entropy, cosine LR |
-| Single seed | 42 |
-| **Ensembling** | **None** |
-| **TTA** | **None** |
-| **Test-set leakage** | **None** (asserted at runtime) |
+## 4. Full pipelines
 
-The pretrain uses session 1 of every subject, including the test subject's own session 1. This is not a leak because the test set is the same subject's session 2 — the pretrain has never seen session 2 of anyone.
+**Within-subject** (per subject): EA-align → pretrained UnifiedEEGNet → fine-tune (val-selected) →
+single test eval. **82.7% ± 0.6** (6 seeds).
 
-## 5. Results
+**Cross-subject (LOSO)**: RA-align all subjects → train UnifiedEEGNet on 8 source subjects
+(val-selected) → **IM-TTA on the held-out subject's unlabelled trials** → single test eval.
+**67.8% ± 0.4** (3 seeds); baseline → here = **+8.7 pp** (59.1 → 67.8).
 
-| Subject | Accuracy | Notes |
-|---|---|---|
-| 1 | 90.97% | |
-| 2 | **66.67%** | Hard subject (well-known in literature) |
-| 3 | 95.14% | |
-| 4 | 84.38% | |
-| 5 | 72.57% | Hard subject |
-| 6 | **73.96%** | Hard subject |
-| 7 | 89.58% | |
-| 8 | 89.58% | |
-| 9 | 89.24% | |
-| **Mean** | **83.56%** | **±9.96%** |
+---
 
-Comparison to published SOTA on the same 4-class protocol:
+## 5. Novelty statement (honest)
 
-| Model | Mean accuracy | Notes |
-|---|---|---|
-| CTNet (2024) | 82.52% | |
-| MSCARNet (2024) | 82.66% | |
-| EEGEncoder (2025) | 86.46% | |
-| **Ours (UnifiedEEGNet, single model, no ensemble, no TTA, no leakage)** | **83.56%** | |
+- **EEGNet backbone** — standard (Lawhern 2018); not claimed as novel.
+- **EA / RA alignment** — established transfer-learning tools (He & Wu 2020; Riemannian/Centroid
+  alignment); not claimed as novel — used as a strong, principled baseline lever.
+- **Information-Maximization test-time adaptation for cross-subject MI-BCI** — the contribution.
+  IM/entropy adaptation exists in unsupervised domain adaptation (Tent, Wang 2021; SHOT,
+  Liang 2020). The novelty here is **(a)** the first source-free IM test-time adaptation applied to
+  cross-subject motor-imagery BCI, **(b)** combined with Euclidean/Riemannian alignment as a two-stage
+  align-then-adapt pipeline, and **(c)** the empirical finding that the anti-collapse diversity term
+  is *necessary* for hard MI subjects (plain Tent gives no gain), with a full align×TTA ablation
+  showing the two stages are complementary (+5.7 align, +6.4 TTA-alone, +8.7 combined).
 
-## 6. Why 85% was hard
-
-The 1.44-point gap to the 85% target is concentrated in three "hard" subjects (S2=66.7%, S5=72.6%, S6=74.0%). These subjects are documented in the BCI IV-2a literature as intrinsically difficult — they have weaker mu/beta rhythm, noisier motor imagery, and higher session-to-session variability. Pushing the mean to 85% requires pushing these three from ~71% to ~80% on average.
-
-Honest assessment of what would close the gap (any one of):
-- **Larger pretraining corpus**: add data from related datasets (BCI IV-2b, High Gamma, etc.) for cross-corpus self-supervised pretraining
-- **Self-supervised pretraining**: masked autoencoding or contrastive objective on the 2592 unlabeled session-1 trials instead of supervised cross-entropy
-- **Smaller model capacity**: 80K params on 288 trials is over-parameterized. the current 80K params appear to be close to the ceiling for this setup to the hard subjects
-
-These were not attempted because they would either add external data sources or violate the "single architecture, no tricks" constraint.
-
-## 7. Reproducibility
-
-```bash
-uv sync
-uv run python main.py
-```
-
-First run: ~80 min on a 4GB GPU (50 min pretrain + 30 min fine-tune). Subsequent runs: ~30 min (the pretrained checkpoint in `models/pretrained.pt` is reused).
-
-The training output contains explicit `[no-leakage]` printouts for every per-subject split, so you can verify the protocol from the log.
+Framing: an **applied / methods** contribution (new method combination + mechanism finding for a
+domain), not a brand-new optimisation objective. All evaluation is leak-free and reported honestly;
+see `RESULTS.md` for tables and source CSVs.

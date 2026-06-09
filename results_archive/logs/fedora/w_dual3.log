@@ -1,0 +1,63 @@
+Model: DualAlignEEGNet (dualalign) | Protocol: within | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=dual tag='dual3'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within] Pretraining DualAlignEEGNet on session 1 of all subjects...
+    Pretrain data: (2592, 44, 1000) trials, 4 classes, align=dual
+    Pre-training on 2592 trials (session 1 of all subjects)
+      Pretrain epoch 50/200, Loss: 0.7499
+      Pretrain epoch 100/200, Loss: 0.6858
+      Pretrain epoch 150/200, Loss: 0.6359
+      Pretrain epoch 200/200, Loss: 0.6539
+    Saved pretrained model to /home/istiaqfuad/Desktop/last-bci/models/pretrained_dualalign_dual_s42_dual3.pt
+
+[within] Fine-tuning DualAlignEEGNet per subject (val_frac=0.2, expand=1, refit=False)...
+    [no-leakage] Subject 2: train=232 val=56 (session 0train), test=288 (session 1test); align=dual; z-score from train only
+      Train: (232, 44, 1000), Val: (56, 44, 1000), Test: (288, 44, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 0.6553, ValAcc: 0.9643, ValLoss: 0.2261
+      Epoch 100/500, TrLoss: 0.5198, ValAcc: 0.9643, ValLoss: 0.3197
+      Epoch 150/500, TrLoss: 0.6033, ValAcc: 0.8929, ValLoss: 0.3604
+      Early stop at epoch 186 (no val improve for 150 epochs)
+      Best ValAcc: 0.9821 -> Test (single eval): 0.7465
+    [within] Running mean: 74.65% (1/3)
+    [no-leakage] Subject 3: train=232 val=56 (session 0train), test=288 (session 1test); align=dual; z-score from train only
+      Train: (232, 44, 1000), Val: (56, 44, 1000), Test: (288, 44, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 0.6324, ValAcc: 1.0000, ValLoss: 0.1298
+      Epoch 100/500, TrLoss: 0.4540, ValAcc: 0.9821, ValLoss: 0.1602
+      Epoch 150/500, TrLoss: 0.5593, ValAcc: 1.0000, ValLoss: 0.1624
+      Early stop at epoch 162 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.9479
+    [within] Running mean: 84.72% (2/3)
+    [no-leakage] Subject 5: train=232 val=56 (session 0train), test=288 (session 1test); align=dual; z-score from train only
+      Train: (232, 44, 1000), Val: (56, 44, 1000), Test: (288, 44, 1000)
+      Loaded pretrained weights (seed 42)
+      Epoch 50/500, TrLoss: 0.6424, ValAcc: 0.9821, ValLoss: 0.2267
+      Epoch 100/500, TrLoss: 0.5221, ValAcc: 0.9643, ValLoss: 0.3012
+      Epoch 150/500, TrLoss: 0.6075, ValAcc: 0.8929, ValLoss: 0.3386
+      Epoch 200/500, TrLoss: 0.5443, ValAcc: 0.8750, ValLoss: 0.3984
+      Early stop at epoch 208 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.7257
+    [within] Running mean: 80.67% (3/3)
+
+============================================================
+FINAL RESULTS — WITHIN-SUBJECT (honest)_dual3 (DualAlignEEGNet)
+============================================================
+ subject  test_acc           model
+       2  0.746528 DualAlignEEGNet
+       3  0.947917 DualAlignEEGNet
+       5  0.725694 DualAlignEEGNet
+
+WITHIN-SUBJECT (honest)_dual3 Mean Accuracy: 0.8067 +/- 0.1227 (80.67%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_within_honest_dualalign_dual3.csv
+
+============================================================
+SUMMARY (DualAlignEEGNet)
+  within  : 80.67%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46

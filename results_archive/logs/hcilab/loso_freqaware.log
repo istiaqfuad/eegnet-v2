@@ -1,0 +1,35 @@
+Model: FreqAwareEEGNet (freqaware) | Protocol: loso
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[loso] Cross-subject (LOSO) for FreqAwareEEGNet — no pretrain, from scratch...
+    [no-leakage] LOSO test_subject=1: train=4148 val=460 from subjects [2, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 1); per-trial channel-wise z-score
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.1214, ValAcc: 0.6870, ValLoss: 0.8672
+      Epoch 100/500, TrLoss: 1.0267, ValAcc: 0.7109, ValLoss: 0.7676
+      Epoch 150/500, TrLoss: 0.9363, ValAcc: 0.7413, ValLoss: 0.7131
+      Epoch 200/500, TrLoss: 0.9661, ValAcc: 0.7435, ValLoss: 0.6918
+      Epoch 250/500, TrLoss: 0.9529, ValAcc: 0.7565, ValLoss: 0.6833
+      Epoch 300/500, TrLoss: 0.9263, ValAcc: 0.7630, ValLoss: 0.6366
+      Epoch 350/500, TrLoss: 0.9009, ValAcc: 0.7652, ValLoss: 0.6329
+      Epoch 400/500, TrLoss: 0.8907, ValAcc: 0.7609, ValLoss: 0.6363
+      Epoch 450/500, TrLoss: 0.8770, ValAcc: 0.7674, ValLoss: 0.6309
+      Epoch 500/500, TrLoss: 0.8971, ValAcc: 0.7696, ValLoss: 0.6079
+      Best ValAcc: 0.7957 -> Test (single eval): 0.6354
+    [loso] Running mean: 63.54% (1/9)
+    [no-leakage] LOSO test_subject=2: train=4148 val=460 from subjects [1, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 2); per-trial channel-wise z-score
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0864, ValAcc: 0.7174, ValLoss: 0.7846
+      Epoch 100/500, TrLoss: 0.9934, ValAcc: 0.7630, ValLoss: 0.6725
+      Epoch 150/500, TrLoss: 0.9074, ValAcc: 0.7761, ValLoss: 0.6187
+      Epoch 200/500, TrLoss: 0.9268, ValAcc: 0.7891, ValLoss: 0.5969
+      Epoch 250/500, TrLoss: 0.9170, ValAcc: 0.7870, ValLoss: 0.5905
+      Epoch 300/500, TrLoss: 0.8928, ValAcc: 0.7935, ValLoss: 0.5515
+      Epoch 350/500, TrLoss: 0.8756, ValAcc: 0.7870, ValLoss: 0.5410
+      Epoch 400/500, TrLoss: 0.8590, ValAcc: 0.7913, ValLoss: 0.5488
+      Epoch 450/500, TrLoss: 0.8437, ValAcc: 0.8022, ValLoss: 0.5443

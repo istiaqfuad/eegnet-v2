@@ -1,0 +1,68 @@
+Model: UnifiedEEGNet (unified) | Protocol: loso | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=ea tag='tta3'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[loso] Cross-subject (LOSO) for UnifiedEEGNet — no pretrain, from scratch...
+    [no-leakage] LOSO test_subject=1: train=4148 val=460 from subjects [2, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 1); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0540, ValAcc: 0.6891, ValLoss: 0.8188
+      Epoch 100/500, TrLoss: 0.9626, ValAcc: 0.7457, ValLoss: 0.6708
+      Epoch 150/500, TrLoss: 0.8753, ValAcc: 0.7522, ValLoss: 0.6450
+      Epoch 200/500, TrLoss: 0.9036, ValAcc: 0.7609, ValLoss: 0.6080
+      Epoch 250/500, TrLoss: 0.9003, ValAcc: 0.7848, ValLoss: 0.6036
+      Epoch 300/500, TrLoss: 0.8904, ValAcc: 0.8043, ValLoss: 0.5718
+      Epoch 350/500, TrLoss: 0.8668, ValAcc: 0.8109, ValLoss: 0.5445
+      Epoch 400/500, TrLoss: 0.8564, ValAcc: 0.8000, ValLoss: 0.5484
+      Epoch 450/500, TrLoss: 0.8569, ValAcc: 0.7935, ValLoss: 0.5446
+      Epoch 500/500, TrLoss: 0.8713, ValAcc: 0.8239, ValLoss: 0.5435
+      Best ValAcc: 0.8304 -> Test (single eval): 0.7639 | +TTA(5): 0.7812
+    [loso] Running mean: 78.12% (1/3)
+    [no-leakage] LOSO test_subject=2: train=4148 val=460 from subjects [1, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 2); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0174, ValAcc: 0.7152, ValLoss: 0.7510
+      Epoch 100/500, TrLoss: 0.9274, ValAcc: 0.7848, ValLoss: 0.5982
+      Epoch 150/500, TrLoss: 0.8332, ValAcc: 0.7978, ValLoss: 0.5611
+      Epoch 200/500, TrLoss: 0.8764, ValAcc: 0.8109, ValLoss: 0.5181
+      Epoch 250/500, TrLoss: 0.8654, ValAcc: 0.8174, ValLoss: 0.5115
+      Epoch 300/500, TrLoss: 0.8561, ValAcc: 0.8196, ValLoss: 0.4934
+      Epoch 350/500, TrLoss: 0.8315, ValAcc: 0.8413, ValLoss: 0.4684
+      Epoch 400/500, TrLoss: 0.8258, ValAcc: 0.8239, ValLoss: 0.4914
+      Epoch 450/500, TrLoss: 0.8120, ValAcc: 0.8304, ValLoss: 0.4855
+      Epoch 500/500, TrLoss: 0.8361, ValAcc: 0.8391, ValLoss: 0.4824
+      Best ValAcc: 0.8500 -> Test (single eval): 0.5312 | +TTA(5): 0.4549
+    [loso] Running mean: 61.81% (2/3)
+    [no-leakage] LOSO test_subject=5: train=4148 val=460 from subjects [1, 2, 3, 4, 6, 7, 8, 9], test=576 (subject 5); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0054, ValAcc: 0.7109, ValLoss: 0.7361
+      Epoch 100/500, TrLoss: 0.9306, ValAcc: 0.7717, ValLoss: 0.6084
+      Epoch 150/500, TrLoss: 0.8413, ValAcc: 0.7891, ValLoss: 0.5800
+      Epoch 200/500, TrLoss: 0.8752, ValAcc: 0.8152, ValLoss: 0.5421
+      Epoch 250/500, TrLoss: 0.8758, ValAcc: 0.8196, ValLoss: 0.5428
+      Epoch 300/500, TrLoss: 0.8470, ValAcc: 0.8174, ValLoss: 0.5326
+      Epoch 350/500, TrLoss: 0.8470, ValAcc: 0.8348, ValLoss: 0.5010
+      Epoch 400/500, TrLoss: 0.8155, ValAcc: 0.8304, ValLoss: 0.4887
+      Epoch 450/500, TrLoss: 0.8197, ValAcc: 0.8261, ValLoss: 0.5056
+      Epoch 500/500, TrLoss: 0.8401, ValAcc: 0.8239, ValLoss: 0.4980
+      Best ValAcc: 0.8391 -> Test (single eval): 0.5191 | +TTA(5): 0.5278
+    [loso] Running mean: 58.80% (3/3)
+
+============================================================
+FINAL RESULTS — CROSS-SUBJECT LOSO_tta3 (UnifiedEEGNet)
+============================================================
+ subject  test_acc         model
+       1  0.781250 UnifiedEEGNet
+       2  0.454861 UnifiedEEGNet
+       5  0.527778 UnifiedEEGNet
+
+CROSS-SUBJECT LOSO_tta3 Mean Accuracy: 0.5880 +/- 0.1713 (58.80%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_loso_unified_tta3.csv
+
+============================================================
+SUMMARY (UnifiedEEGNet)
+  loso    : 58.80%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46

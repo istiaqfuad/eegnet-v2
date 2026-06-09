@@ -1,0 +1,68 @@
+Model: UnifiedEEGNet (unified) | Protocol: loso | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=ra tag='lra3'
+Device: cuda
+  GPU: NVIDIA GeForce GTX 1050 Ti
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[loso] Cross-subject (LOSO) for UnifiedEEGNet — no pretrain, from scratch...
+    [no-leakage] LOSO test_subject=1: train=4148 val=460 from subjects [2, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 1); align=ra
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0524, ValAcc: 0.6935, ValLoss: 0.8102
+      Epoch 100/500, TrLoss: 0.9706, ValAcc: 0.7717, ValLoss: 0.6673
+      Epoch 150/500, TrLoss: 0.8912, ValAcc: 0.7652, ValLoss: 0.6270
+      Epoch 200/500, TrLoss: 0.9153, ValAcc: 0.7826, ValLoss: 0.5917
+      Epoch 250/500, TrLoss: 0.9089, ValAcc: 0.7804, ValLoss: 0.5907
+      Epoch 300/500, TrLoss: 0.8999, ValAcc: 0.8000, ValLoss: 0.5736
+      Epoch 350/500, TrLoss: 0.8655, ValAcc: 0.8065, ValLoss: 0.5445
+      Epoch 400/500, TrLoss: 0.8542, ValAcc: 0.8043, ValLoss: 0.5437
+      Epoch 450/500, TrLoss: 0.8460, ValAcc: 0.8152, ValLoss: 0.5443
+      Epoch 500/500, TrLoss: 0.8734, ValAcc: 0.8152, ValLoss: 0.5429
+      Best ValAcc: 0.8413 -> Test (single eval): 0.7760
+    [loso] Running mean: 77.60% (1/3)
+    [no-leakage] LOSO test_subject=2: train=4148 val=460 from subjects [1, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 2); align=ra
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0126, ValAcc: 0.7196, ValLoss: 0.7433
+      Epoch 100/500, TrLoss: 0.9366, ValAcc: 0.7913, ValLoss: 0.5893
+      Epoch 150/500, TrLoss: 0.8496, ValAcc: 0.8087, ValLoss: 0.5442
+      Epoch 200/500, TrLoss: 0.8772, ValAcc: 0.8304, ValLoss: 0.4964
+      Epoch 250/500, TrLoss: 0.8722, ValAcc: 0.8304, ValLoss: 0.5032
+      Epoch 300/500, TrLoss: 0.8533, ValAcc: 0.8457, ValLoss: 0.4795
+      Epoch 350/500, TrLoss: 0.8237, ValAcc: 0.8370, ValLoss: 0.4649
+      Epoch 400/500, TrLoss: 0.8223, ValAcc: 0.8565, ValLoss: 0.4676
+      Epoch 450/500, TrLoss: 0.8125, ValAcc: 0.8457, ValLoss: 0.4744
+      Epoch 500/500, TrLoss: 0.8354, ValAcc: 0.8457, ValLoss: 0.4662
+      Best ValAcc: 0.8674 -> Test (single eval): 0.4948
+    [loso] Running mean: 63.54% (2/3)
+    [no-leakage] LOSO test_subject=5: train=4148 val=460 from subjects [1, 2, 3, 4, 6, 7, 8, 9], test=576 (subject 5); align=ra
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0127, ValAcc: 0.7109, ValLoss: 0.7404
+      Epoch 100/500, TrLoss: 0.9319, ValAcc: 0.7696, ValLoss: 0.5958
+      Epoch 150/500, TrLoss: 0.8391, ValAcc: 0.7891, ValLoss: 0.5612
+      Epoch 200/500, TrLoss: 0.8674, ValAcc: 0.7978, ValLoss: 0.5396
+      Epoch 250/500, TrLoss: 0.8703, ValAcc: 0.8109, ValLoss: 0.5382
+      Epoch 300/500, TrLoss: 0.8536, ValAcc: 0.8283, ValLoss: 0.5305
+      Epoch 350/500, TrLoss: 0.8350, ValAcc: 0.8370, ValLoss: 0.4941
+      Epoch 400/500, TrLoss: 0.8241, ValAcc: 0.8348, ValLoss: 0.4871
+      Epoch 450/500, TrLoss: 0.8170, ValAcc: 0.8326, ValLoss: 0.5085
+      Epoch 500/500, TrLoss: 0.8414, ValAcc: 0.8174, ValLoss: 0.5032
+      Best ValAcc: 0.8587 -> Test (single eval): 0.5226
+    [loso] Running mean: 59.78% (3/3)
+
+============================================================
+FINAL RESULTS — CROSS-SUBJECT LOSO_lra3 (UnifiedEEGNet)
+============================================================
+ subject  test_acc         model
+       1  0.776042 UnifiedEEGNet
+       2  0.494792 UnifiedEEGNet
+       5  0.522569 UnifiedEEGNet
+
+CROSS-SUBJECT LOSO_lra3 Mean Accuracy: 0.5978 +/- 0.1550 (59.78%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_loso_unified_lra3.csv
+
+============================================================
+SUMMARY (UnifiedEEGNet)
+  loso    : 59.78%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46

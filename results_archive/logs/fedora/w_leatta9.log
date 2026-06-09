@@ -1,0 +1,157 @@
+Model: UnifiedEEGNet (unified) | Protocol: loso | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=ea tag='leatta9'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[loso] Cross-subject (LOSO) for UnifiedEEGNet — no pretrain, from scratch...
+    [no-leakage] LOSO test_subject=1: train=4148 val=460 from subjects [2, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 1); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0540, ValAcc: 0.6891, ValLoss: 0.8188
+      Epoch 100/500, TrLoss: 0.9626, ValAcc: 0.7457, ValLoss: 0.6708
+      Epoch 150/500, TrLoss: 0.8753, ValAcc: 0.7522, ValLoss: 0.6450
+      Epoch 200/500, TrLoss: 0.9036, ValAcc: 0.7609, ValLoss: 0.6080
+      Epoch 250/500, TrLoss: 0.9003, ValAcc: 0.7848, ValLoss: 0.6036
+      Epoch 300/500, TrLoss: 0.8904, ValAcc: 0.8043, ValLoss: 0.5718
+      Epoch 350/500, TrLoss: 0.8668, ValAcc: 0.8130, ValLoss: 0.5445
+      Epoch 400/500, TrLoss: 0.8564, ValAcc: 0.8000, ValLoss: 0.5484
+      Epoch 450/500, TrLoss: 0.8569, ValAcc: 0.7935, ValLoss: 0.5447
+      Epoch 500/500, TrLoss: 0.8713, ValAcc: 0.8239, ValLoss: 0.5435
+      Best ValAcc: 0.8304 -> Test (single eval): 0.7639 | +TTA(5): 0.8003
+    [loso] Running mean: 80.03% (1/9)
+    [no-leakage] LOSO test_subject=2: train=4148 val=460 from subjects [1, 3, 4, 5, 6, 7, 8, 9], test=576 (subject 2); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0174, ValAcc: 0.7152, ValLoss: 0.7510
+      Epoch 100/500, TrLoss: 0.9274, ValAcc: 0.7848, ValLoss: 0.5982
+      Epoch 150/500, TrLoss: 0.8332, ValAcc: 0.7978, ValLoss: 0.5610
+      Epoch 200/500, TrLoss: 0.8764, ValAcc: 0.8109, ValLoss: 0.5181
+      Epoch 250/500, TrLoss: 0.8654, ValAcc: 0.8174, ValLoss: 0.5115
+      Epoch 300/500, TrLoss: 0.8561, ValAcc: 0.8196, ValLoss: 0.4934
+      Epoch 350/500, TrLoss: 0.8315, ValAcc: 0.8413, ValLoss: 0.4684
+      Epoch 400/500, TrLoss: 0.8258, ValAcc: 0.8239, ValLoss: 0.4914
+      Epoch 450/500, TrLoss: 0.8120, ValAcc: 0.8304, ValLoss: 0.4856
+      Epoch 500/500, TrLoss: 0.8361, ValAcc: 0.8391, ValLoss: 0.4824
+      Best ValAcc: 0.8500 -> Test (single eval): 0.5312 | +TTA(5): 0.4861
+    [loso] Running mean: 64.32% (2/9)
+    [no-leakage] LOSO test_subject=3: train=4148 val=460 from subjects [1, 2, 4, 5, 6, 7, 8, 9], test=576 (subject 3); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0679, ValAcc: 0.6652, ValLoss: 0.8416
+      Epoch 100/500, TrLoss: 0.9762, ValAcc: 0.7478, ValLoss: 0.6970
+      Epoch 150/500, TrLoss: 0.8894, ValAcc: 0.7739, ValLoss: 0.6530
+      Epoch 200/500, TrLoss: 0.9186, ValAcc: 0.7891, ValLoss: 0.6033
+      Epoch 250/500, TrLoss: 0.9046, ValAcc: 0.8087, ValLoss: 0.5938
+      Epoch 300/500, TrLoss: 0.8945, ValAcc: 0.8109, ValLoss: 0.5739
+      Epoch 350/500, TrLoss: 0.8736, ValAcc: 0.8065, ValLoss: 0.5531
+      Epoch 400/500, TrLoss: 0.8521, ValAcc: 0.8043, ValLoss: 0.5571
+      Epoch 450/500, TrLoss: 0.8455, ValAcc: 0.8043, ValLoss: 0.5583
+      Epoch 500/500, TrLoss: 0.8753, ValAcc: 0.8043, ValLoss: 0.5724
+      Best ValAcc: 0.8261 -> Test (single eval): 0.8281 | +TTA(5): 0.8542
+    [loso] Running mean: 71.35% (3/9)
+    [no-leakage] LOSO test_subject=4: train=4148 val=460 from subjects [1, 2, 3, 5, 6, 7, 8, 9], test=576 (subject 4); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0166, ValAcc: 0.7174, ValLoss: 0.7665
+      Epoch 100/500, TrLoss: 0.9371, ValAcc: 0.7478, ValLoss: 0.6483
+      Epoch 150/500, TrLoss: 0.8580, ValAcc: 0.7609, ValLoss: 0.6211
+      Epoch 200/500, TrLoss: 0.8855, ValAcc: 0.7870, ValLoss: 0.5783
+      Epoch 250/500, TrLoss: 0.8768, ValAcc: 0.7826, ValLoss: 0.5816
+      Epoch 300/500, TrLoss: 0.8548, ValAcc: 0.8065, ValLoss: 0.5594
+      Epoch 350/500, TrLoss: 0.8522, ValAcc: 0.8109, ValLoss: 0.5338
+      Epoch 400/500, TrLoss: 0.8338, ValAcc: 0.8196, ValLoss: 0.5266
+      Epoch 450/500, TrLoss: 0.8310, ValAcc: 0.8087, ValLoss: 0.5417
+      Epoch 500/500, TrLoss: 0.8551, ValAcc: 0.8022, ValLoss: 0.5434
+      Best ValAcc: 0.8283 -> Test (single eval): 0.4983 | +TTA(5): 0.5712
+    [loso] Running mean: 67.80% (4/9)
+    [no-leakage] LOSO test_subject=5: train=4148 val=460 from subjects [1, 2, 3, 4, 6, 7, 8, 9], test=576 (subject 5); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0054, ValAcc: 0.7109, ValLoss: 0.7361
+      Epoch 100/500, TrLoss: 0.9306, ValAcc: 0.7717, ValLoss: 0.6084
+      Epoch 150/500, TrLoss: 0.8413, ValAcc: 0.7891, ValLoss: 0.5799
+      Epoch 200/500, TrLoss: 0.8752, ValAcc: 0.8152, ValLoss: 0.5421
+      Epoch 250/500, TrLoss: 0.8758, ValAcc: 0.8196, ValLoss: 0.5429
+      Epoch 300/500, TrLoss: 0.8470, ValAcc: 0.8174, ValLoss: 0.5326
+      Epoch 350/500, TrLoss: 0.8470, ValAcc: 0.8348, ValLoss: 0.5010
+      Epoch 400/500, TrLoss: 0.8155, ValAcc: 0.8304, ValLoss: 0.4886
+      Epoch 450/500, TrLoss: 0.8197, ValAcc: 0.8261, ValLoss: 0.5056
+      Epoch 500/500, TrLoss: 0.8401, ValAcc: 0.8239, ValLoss: 0.4980
+      Best ValAcc: 0.8391 -> Test (single eval): 0.5191 | +TTA(5): 0.5608
+    [loso] Running mean: 65.45% (5/9)
+    [no-leakage] LOSO test_subject=6: train=4148 val=460 from subjects [1, 2, 3, 4, 5, 7, 8, 9], test=576 (subject 6); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0166, ValAcc: 0.7022, ValLoss: 0.7624
+      Epoch 100/500, TrLoss: 0.9447, ValAcc: 0.7630, ValLoss: 0.6141
+      Epoch 150/500, TrLoss: 0.8565, ValAcc: 0.8065, ValLoss: 0.5809
+      Epoch 200/500, TrLoss: 0.8830, ValAcc: 0.8239, ValLoss: 0.5331
+      Epoch 250/500, TrLoss: 0.8770, ValAcc: 0.8217, ValLoss: 0.5446
+      Epoch 300/500, TrLoss: 0.8509, ValAcc: 0.8413, ValLoss: 0.5242
+      Epoch 350/500, TrLoss: 0.8427, ValAcc: 0.8326, ValLoss: 0.5085
+      Epoch 400/500, TrLoss: 0.8228, ValAcc: 0.8326, ValLoss: 0.4878
+      Epoch 450/500, TrLoss: 0.8258, ValAcc: 0.8348, ValLoss: 0.5160
+      Epoch 500/500, TrLoss: 0.8527, ValAcc: 0.8370, ValLoss: 0.5031
+      Best ValAcc: 0.8587 -> Test (single eval): 0.5799 | +TTA(5): 0.5747
+    [loso] Running mean: 64.12% (6/9)
+    [no-leakage] LOSO test_subject=7: train=4148 val=460 from subjects [1, 2, 3, 4, 5, 6, 8, 9], test=576 (subject 7); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0396, ValAcc: 0.6913, ValLoss: 0.8050
+      Epoch 100/500, TrLoss: 0.9488, ValAcc: 0.7848, ValLoss: 0.6429
+      Epoch 150/500, TrLoss: 0.8650, ValAcc: 0.7717, ValLoss: 0.6200
+      Epoch 200/500, TrLoss: 0.8970, ValAcc: 0.8283, ValLoss: 0.5615
+      Epoch 250/500, TrLoss: 0.8995, ValAcc: 0.7935, ValLoss: 0.5857
+      Epoch 300/500, TrLoss: 0.8785, ValAcc: 0.8087, ValLoss: 0.5647
+      Epoch 350/500, TrLoss: 0.8600, ValAcc: 0.8130, ValLoss: 0.5488
+      Epoch 400/500, TrLoss: 0.8534, ValAcc: 0.8174, ValLoss: 0.5334
+      Epoch 450/500, TrLoss: 0.8468, ValAcc: 0.8065, ValLoss: 0.5489
+      Early stop at epoch 479 (no val improve for 150 epochs)
+      Best ValAcc: 0.8370 -> Test (single eval): 0.6910 | +TTA(5): 0.7413
+    [loso] Running mean: 65.55% (7/9)
+    [no-leakage] LOSO test_subject=8: train=4148 val=460 from subjects [1, 2, 3, 4, 5, 6, 7, 9], test=576 (subject 8); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0505, ValAcc: 0.6891, ValLoss: 0.8347
+      Epoch 100/500, TrLoss: 0.9772, ValAcc: 0.7522, ValLoss: 0.6821
+      Epoch 150/500, TrLoss: 0.8916, ValAcc: 0.7630, ValLoss: 0.6527
+      Epoch 200/500, TrLoss: 0.9124, ValAcc: 0.7935, ValLoss: 0.5797
+      Epoch 250/500, TrLoss: 0.9132, ValAcc: 0.7870, ValLoss: 0.5998
+      Epoch 300/500, TrLoss: 0.8864, ValAcc: 0.7870, ValLoss: 0.5811
+      Epoch 350/500, TrLoss: 0.8922, ValAcc: 0.8152, ValLoss: 0.5476
+      Epoch 400/500, TrLoss: 0.8685, ValAcc: 0.8130, ValLoss: 0.5461
+      Epoch 450/500, TrLoss: 0.8567, ValAcc: 0.8109, ValLoss: 0.5448
+      Epoch 500/500, TrLoss: 0.8636, ValAcc: 0.8065, ValLoss: 0.5492
+      Best ValAcc: 0.8370 -> Test (single eval): 0.7483 | +TTA(5): 0.7587
+    [loso] Running mean: 66.84% (8/9)
+    [no-leakage] LOSO test_subject=9: train=4148 val=460 from subjects [1, 2, 3, 4, 5, 6, 7, 8], test=576 (subject 9); align=ea
+      Train: (4148, 22, 1000), Val: (460, 22, 1000), Test: (576, 22, 1000)
+      Epoch 50/500, TrLoss: 1.0434, ValAcc: 0.6826, ValLoss: 0.8147
+      Epoch 100/500, TrLoss: 0.9655, ValAcc: 0.7609, ValLoss: 0.6614
+      Epoch 150/500, TrLoss: 0.8748, ValAcc: 0.7674, ValLoss: 0.6380
+      Epoch 200/500, TrLoss: 0.9036, ValAcc: 0.8022, ValLoss: 0.5796
+      Epoch 250/500, TrLoss: 0.8955, ValAcc: 0.8065, ValLoss: 0.5851
+      Epoch 300/500, TrLoss: 0.8727, ValAcc: 0.8022, ValLoss: 0.5706
+      Epoch 350/500, TrLoss: 0.8604, ValAcc: 0.8174, ValLoss: 0.5497
+      Epoch 400/500, TrLoss: 0.8536, ValAcc: 0.8065, ValLoss: 0.5357
+      Early stop at epoch 413 (no val improve for 150 epochs)
+      Best ValAcc: 0.8261 -> Test (single eval): 0.6528 | +TTA(5): 0.6892
+    [loso] Running mean: 67.07% (9/9)
+
+============================================================
+FINAL RESULTS — CROSS-SUBJECT LOSO_leatta9 (UnifiedEEGNet)
+============================================================
+ subject  test_acc         model
+       1  0.800347 UnifiedEEGNet
+       2  0.486111 UnifiedEEGNet
+       3  0.854167 UnifiedEEGNet
+       4  0.571181 UnifiedEEGNet
+       5  0.560764 UnifiedEEGNet
+       6  0.574653 UnifiedEEGNet
+       7  0.741319 UnifiedEEGNet
+       8  0.758681 UnifiedEEGNet
+       9  0.689236 UnifiedEEGNet
+
+CROSS-SUBJECT LOSO_leatta9 Mean Accuracy: 0.6707 +/- 0.1269 (67.07%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_loso_unified_leatta9.csv
+
+============================================================
+SUMMARY (UnifiedEEGNet)
+  loso    : 67.07%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46

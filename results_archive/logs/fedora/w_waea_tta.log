@@ -1,0 +1,15 @@
+Model: UnifiedEEGNet (unified) | Protocol: within | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=ea tag='waea_tta'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within] Pretraining UnifiedEEGNet on session 1 of all subjects...
+    Pretrain data: (2592, 22, 1000) trials, 4 classes, align=ea
+    Pre-training on 2592 trials (session 1 of all subjects)
+      Pretrain epoch 50/200, Loss: 0.8653
+      Pretrain epoch 100/200, Loss: 0.7979
+      Pretrain epoch 150/200, Loss: 0.7499

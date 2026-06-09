@@ -1,0 +1,133 @@
+Model: UnifiedEEGNet (unified) | Protocol: within | band=0.5-100.0Hz expand=1 val_frac=0.2 refit=False align=ea tag='ea9s3'
+Device: cuda
+  GPU: NVIDIA GeForce RTX 2070 SUPER
+
+Loading BCI Competition IV-2a (MOABB)...
+Choosing from all possible events
+    X: (5184, 22, 1001), y: (5184,)
+    Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[within] Pretraining UnifiedEEGNet on session 1 of all subjects...
+    Pretrain data: (2592, 22, 1000) trials, 4 classes, align=ea
+    Pre-training on 2592 trials (session 1 of all subjects)
+      Pretrain epoch 50/200, Loss: 0.8769
+      Pretrain epoch 100/200, Loss: 0.8097
+      Pretrain epoch 150/200, Loss: 0.7679
+      Pretrain epoch 200/200, Loss: 0.7815
+    Saved pretrained model to /home/istiaqfuad/Desktop/last-bci/models/pretrained_unified_ea_s3_ea9s3.pt
+
+[within] Fine-tuning UnifiedEEGNet per subject (val_frac=0.2, expand=1, refit=False)...
+    [no-leakage] Subject 1: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8071, ValAcc: 0.9286, ValLoss: 0.2485
+      Epoch 100/500, TrLoss: 0.5909, ValAcc: 0.8571, ValLoss: 0.3422
+      Epoch 150/500, TrLoss: 0.5779, ValAcc: 0.9464, ValLoss: 0.3183
+      Early stop at epoch 154 (no val improve for 150 epochs)
+      Best ValAcc: 0.9821 -> Test (single eval): 0.8403
+    [within] Running mean: 84.03% (1/9)
+    [no-leakage] Subject 2: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8681, ValAcc: 0.9643, ValLoss: 0.2331
+      Epoch 100/500, TrLoss: 0.6819, ValAcc: 0.9821, ValLoss: 0.2206
+      Epoch 150/500, TrLoss: 0.6591, ValAcc: 0.9643, ValLoss: 0.2729
+      Epoch 200/500, TrLoss: 0.5631, ValAcc: 0.9286, ValLoss: 0.3326
+      Epoch 250/500, TrLoss: 0.6342, ValAcc: 0.8929, ValLoss: 0.4118
+      Early stop at epoch 259 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.6910
+    [within] Running mean: 76.56% (2/9)
+    [no-leakage] Subject 3: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8148, ValAcc: 1.0000, ValLoss: 0.1549
+      Epoch 100/500, TrLoss: 0.5851, ValAcc: 0.9464, ValLoss: 0.1908
+      Epoch 150/500, TrLoss: 0.5936, ValAcc: 0.9643, ValLoss: 0.1910
+      Early stop at epoch 198 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.9236
+    [within] Running mean: 81.83% (3/9)
+    [no-leakage] Subject 4: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8631, ValAcc: 0.9286, ValLoss: 0.3081
+      Epoch 100/500, TrLoss: 0.6427, ValAcc: 0.9286, ValLoss: 0.3248
+      Epoch 150/500, TrLoss: 0.6589, ValAcc: 0.9464, ValLoss: 0.3740
+      Epoch 200/500, TrLoss: 0.5786, ValAcc: 0.9464, ValLoss: 0.3827
+      Early stop at epoch 237 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.8021
+    [within] Running mean: 81.42% (4/9)
+    [no-leakage] Subject 5: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.9082, ValAcc: 0.9107, ValLoss: 0.3288
+      Epoch 100/500, TrLoss: 0.6424, ValAcc: 0.8750, ValLoss: 0.3533
+      Epoch 150/500, TrLoss: 0.6441, ValAcc: 0.8571, ValLoss: 0.4290
+      Epoch 200/500, TrLoss: 0.5489, ValAcc: 0.8214, ValLoss: 0.4493
+      Epoch 250/500, TrLoss: 0.6429, ValAcc: 0.8393, ValLoss: 0.4771
+      Early stop at epoch 264 (no val improve for 150 epochs)
+      Best ValAcc: 0.9464 -> Test (single eval): 0.7951
+    [within] Running mean: 81.04% (5/9)
+    [no-leakage] Subject 6: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.9020, ValAcc: 0.9286, ValLoss: 0.3282
+      Epoch 100/500, TrLoss: 0.6407, ValAcc: 0.9107, ValLoss: 0.3888
+      Epoch 150/500, TrLoss: 0.7055, ValAcc: 0.8393, ValLoss: 0.5181
+      Early stop at epoch 183 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.7396
+    [within] Running mean: 79.86% (6/9)
+    [no-leakage] Subject 7: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8299, ValAcc: 1.0000, ValLoss: 0.1902
+      Epoch 100/500, TrLoss: 0.5955, ValAcc: 0.9821, ValLoss: 0.1974
+      Epoch 150/500, TrLoss: 0.5882, ValAcc: 0.9821, ValLoss: 0.2233
+      Epoch 200/500, TrLoss: 0.5173, ValAcc: 0.9821, ValLoss: 0.2274
+      Epoch 250/500, TrLoss: 0.5771, ValAcc: 0.9643, ValLoss: 0.2108
+      Epoch 300/500, TrLoss: 0.6818, ValAcc: 1.0000, ValLoss: 0.3580
+      Epoch 350/500, TrLoss: 0.5966, ValAcc: 0.9821, ValLoss: 0.1881
+      Early stop at epoch 377 (no val improve for 150 epochs)
+      Best ValAcc: 1.0000 -> Test (single eval): 0.7951
+    [within] Running mean: 79.81% (7/9)
+    [no-leakage] Subject 8: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8209, ValAcc: 0.9821, ValLoss: 0.1936
+      Epoch 100/500, TrLoss: 0.6018, ValAcc: 0.9464, ValLoss: 0.2570
+      Epoch 150/500, TrLoss: 0.5851, ValAcc: 0.9464, ValLoss: 0.3432
+      Early stop at epoch 169 (no val improve for 150 epochs)
+      Best ValAcc: 0.9821 -> Test (single eval): 0.8819
+    [within] Running mean: 80.86% (8/9)
+    [no-leakage] Subject 9: train=232 val=56 (session 0train), test=288 (session 1test); align=ea; z-score from train only
+      Train: (232, 22, 1000), Val: (56, 22, 1000), Test: (288, 22, 1000)
+      Loaded pretrained weights (seed 3)
+      Epoch 50/500, TrLoss: 0.8245, ValAcc: 0.9643, ValLoss: 0.1984
+      Epoch 100/500, TrLoss: 0.6033, ValAcc: 0.9464, ValLoss: 0.2382
+      Epoch 150/500, TrLoss: 0.6567, ValAcc: 0.9464, ValLoss: 0.2738
+      Epoch 200/500, TrLoss: 0.5404, ValAcc: 0.9286, ValLoss: 0.2952
+      Epoch 250/500, TrLoss: 0.6163, ValAcc: 0.9643, ValLoss: 0.2794
+      Early stop at epoch 284 (no val improve for 150 epochs)
+      Best ValAcc: 0.9821 -> Test (single eval): 0.8819
+    [within] Running mean: 81.67% (9/9)
+
+============================================================
+FINAL RESULTS — WITHIN-SUBJECT (honest)_ea9s3 (UnifiedEEGNet)
+============================================================
+ subject  test_acc         model
+       1  0.840278 UnifiedEEGNet
+       2  0.690972 UnifiedEEGNet
+       3  0.923611 UnifiedEEGNet
+       4  0.802083 UnifiedEEGNet
+       5  0.795139 UnifiedEEGNet
+       6  0.739583 UnifiedEEGNet
+       7  0.795139 UnifiedEEGNet
+       8  0.881944 UnifiedEEGNet
+       9  0.881944 UnifiedEEGNet
+
+WITHIN-SUBJECT (honest)_ea9s3 Mean Accuracy: 0.8167 +/- 0.0737 (81.67%)
+    saved -> /home/istiaqfuad/Desktop/last-bci/results_within_honest_unified_ea9s3.csv
+
+============================================================
+SUMMARY (UnifiedEEGNet)
+  within  : 81.67%
+Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46
