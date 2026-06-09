@@ -96,10 +96,10 @@ Plain entropy-min ≈ no TTA (the anti-collapse diversity term is what converts 
 ### 3.3 TTA-steps sensitivity (RA + IM-TTA, seed 42)
 | steps | 1 | 5 | 10 | 20 |
 |---|---|---|---|---|
-| LOSO | 66.78 | 67.28 | _~67.5 (running)_ | 67.98 |
+| LOSO | 66.78 | 67.28 | 68.19 | 67.98 |
 
-Monotonic, mild — accuracy rises gently with the adaptation budget and plateaus; the method
-is not sensitive to the exact step count (steps=5 used throughout; steps=20 marginally best).
+Accuracy rises gently with the adaptation budget and plateaus around steps 10–20; the method
+is not sensitive to the exact step count (steps=5 used throughout; 10–20 marginally best).
 Sources: `_rs1`, `_lratta9` (steps=5), `_rs10`, `_rs20`.
 
 ---
