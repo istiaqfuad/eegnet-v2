@@ -27,8 +27,8 @@ The system has three parts, applied in order:
 
 EEG covariance drifts across sessions and subjects — the dominant source of error in
 cross-session/cross-subject MI. We whiten each recording by a covariance **reference** so its
-trials are mapped toward a common geometry. Reference is computed **without labels**, so it is
-honest (no test-label leakage) and applies equally to train, validation and test.
+trials are mapped toward a common geometry. The reference is computed **without labels**, so it
+applies the same way to train, validation and test data.
 
 For a set of trials, compute the per-channel reference whitener `M` and apply `X' = M · X`:
 
@@ -44,7 +44,7 @@ Where the reference is fit (always label-free):
 - **Cross-subject (LOSO)**: each subject whitened by its own reference (its centroid → identity).
 
 Effect (measured): within-subject **+7 pp** (75.6 → 82.7); cross-subject **+5.5 pp** (59.1 → 64.6).
-Alignment is the single largest honest lever and the foundation the rest builds on.
+Alignment is the single largest lever and the foundation the rest builds on.
 
 ---
 
@@ -66,8 +66,8 @@ Input [B,1,22,1000]
 Why it works **with** alignment: the depthwise spatial conv learns CSP-like spatial filters; on
 EA/RA-whitened input these operate in a whitened space, so they behave like CSP-after-whitening —
 the classical recipe, now learned end-to-end. Training: AdamW, OneCycleLR, label smoothing 0.1,
-MixUp, S&R + signal-space augmentation, **checkpoint/early-stop on a held-out validation split**,
-**test evaluated exactly once** (leak-free).
+MixUp, S&R + signal-space augmentation, checkpoint/early-stop on a held-out validation split,
+test scored once at the end.
 
 Cross-subject supervised pretraining (session 1 of all subjects) initialises the within-subject
 fine-tuning; for LOSO the model is trained from scratch on the 8 source subjects.
@@ -122,7 +122,7 @@ IM-TTA on session-2 unlabelled trials → single test eval. **84.88% ± 0.83** (
 
 ---
 
-## 5. Novelty statement (honest)
+## 5. What's new here
 
 - **EEGNet backbone** — standard (Lawhern 2018); not claimed as novel.
 - **EA / RA alignment** — established transfer-learning tools (He & Wu 2020; Riemannian/Centroid
@@ -135,6 +135,6 @@ IM-TTA on session-2 unlabelled trials → single test eval. **84.88% ± 0.83** (
   is *necessary* for hard MI subjects (plain Tent gives no gain), with a full align×TTA ablation
   showing the two stages are complementary (+5.7 align, +6.4 TTA-alone, +8.7 combined).
 
-Framing: an **applied / methods** contribution (new method combination + mechanism finding for a
-domain), not a brand-new optimisation objective. All evaluation is leak-free and reported honestly;
-see `RESULTS.md` for tables and source CSVs.
+In short, an applied/methods contribution — a new combination plus a mechanism finding for this
+domain, rather than a brand-new optimisation objective. See `RESULTS.md` for the tables and the
+underlying CSVs.

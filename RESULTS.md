@@ -1,10 +1,9 @@
 # Results — BCI Competition IV-2a (4-class Motor Imagery)
 
-All numbers are **honest, leak-free** test accuracies. Model selection and early stopping
-use a held-out **validation** split carved from the training data; the **test set is
-evaluated exactly once** on the val-selected checkpoint (`train.py::train_model`). Source
-CSVs for every table are listed and archived under `results_archive/{fedora,hcilab}/`.
-**Do not delete any `results_*.csv` — they are the paper's ablation evidence.**
+All numbers are test accuracies. Model selection and early stopping use a held-out validation
+split carved from the training data; the test set is scored once, at the end, on the
+validation-selected checkpoint (`train.py::train_model`). The source CSV for every table is
+listed below and archived under `results/{fedora,hcilab}/`.
 
 Backbone: `UnifiedEEGNet` (EEGNet-style, 34,132 params). Dataset: BNCI2014-001, 9 subjects,
 22 channels, 1000 samples @ 250 Hz, broadband 0.5–100 Hz (MOABB `MotorImagery`).
@@ -46,7 +45,7 @@ on IV-2b 2-class where RA-alone 87.2 is best). Alignment helps everywhere. IV-2b
 ## 2. Within-subject (session-to-session)
 
 Train = session 1 (stratified 80/20 train/val), Test = session 2. Cross-subject supervised
-pretraining on session 1 of all subjects (no test-session leakage).
+pretraining on session 1 of all subjects; session 2 is reserved for test.
 
 | Config | Mean | Source |
 |---|---|---|
@@ -63,8 +62,8 @@ both protocols. (EA gives the better alignment-only within number, but RA+IM-TTA
 
 EA per-subject (seed 42): S1 86.8 · S2 71.5 · S3 95.8 · S4 84.0 · S5 78.5 · S6 67.0 · S7 84.4 · S8 88.5 · S9 87.5.
 
-Reference SOTA (same 4-class protocol): CTNet 82.52 · MSCARNet 82.66 · EEGEncoder 86.46.
-EA-EEGNet (82.67) is competitive and leak-free.
+Reference SOTA (same 4-class protocol): CTNet 82.52 · MSCARNet 82.66 · EEGEncoder 86.46 —
+EA-EEGNet (82.67) sits right in that range.
 
 ### 2.1 Within-subject ablations (negative / neutral — justify "EA, not X")
 Probe on subjects {2,3,5}; baseline (no align) on those = 62.5 / 89.2 / 67.0.
@@ -137,10 +136,10 @@ Sources: `_rs1`, `_lratta9` (steps=5), `_rs10`, `_rs20`.
 aligned source subjects, adapt **only the BatchNorm affine parameters** on the held-out
 subject's **unlabelled** trials (BN on batch statistics) by minimising
 **L = E[H(p)] − H(E[p])** (Information Maximization / SHOT-style). The marginal-entropy term
-prevents the collapse that plain Tent suffers on hard MI subjects. No labels are used →
-transductive and honest; natural for LOSO where the target subject's unlabelled EEG is
-available. First application of source-free IM test-time adaptation to cross-subject MI-BCI,
-combined with Euclidean/Riemannian alignment.
+prevents the collapse that plain Tent suffers on hard MI subjects. It uses no labels — a
+transductive step that fits LOSO naturally, since the target subject's unlabelled EEG is already
+available. To our knowledge this is the first use of source-free information-maximization
+test-time adaptation for cross-subject MI-BCI, paired with Euclidean/Riemannian alignment.
 
 CLI: `--align {none,ea,ra}` · `--tta_steps N` · `--tta_div {1=IM,0=Tent}`.
 
