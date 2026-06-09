@@ -33,6 +33,10 @@ pretraining on session 1 of all subjects (no test-session leakage).
 | Baseline UnifiedEEGNet (no alignment) | 75.6 (seed42); ~74.8 multi-seed | `*_base9*.csv` |
 | **+ Euclidean Alignment (EA)** | **82.67 ± 0.63** (6 seeds) | `*_ea9*.csv` |
 | + Riemannian/Centroid Alignment (RA) | 81.87 (seed42) | `*_ra9.csv` |
+| + EA + IM-TTA | 83.33 (seed42) | `*_waea_tta.csv` |
+
+IM-TTA also helps within-subject (+0.65, 82.68→83.33), but the gain is far smaller than
+cross-subject (+2.9) — confirming IM-TTA primarily addresses the subject gap, as intended.
 
 EA per-subject (seed 42): S1 86.8 · S2 71.5 · S3 95.8 · S4 84.0 · S5 78.5 · S6 67.0 · S7 84.4 · S8 88.5 · S9 87.5.
 
