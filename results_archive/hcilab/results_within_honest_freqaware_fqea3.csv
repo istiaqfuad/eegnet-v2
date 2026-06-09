@@ -1,4 +1,0 @@
-subject,test_acc,model
-2,0.6319444444444444,FreqAwareEEGNet
-3,0.9236111111111112,FreqAwareEEGNet
-5,0.5347222222222222,FreqAwareEEGNet

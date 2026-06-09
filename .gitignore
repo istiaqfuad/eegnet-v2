@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Run outputs (raw CSVs land in repo root; the curated copies live in results/)
+/results_*.csv
+/logs/
+models/
