@@ -4,22 +4,6 @@
   "graph": {
     "hyperedges": [
       {
-        "id": "bci_competition_datasets",
-        "label": "BCI Competition IV Datasets",
-        "nodes": [
-          "transformer_mi_eeg_paper_bci_competition_iv_2a",
-          "eeg_augmented_deep_learning_bci_competition_iv_2b",
-          "bci_dataset_description_graz_dataset",
-          "bci_dataset_description_9_subjects",
-          "bci_dataset_description_4_classes",
-          "bci_dataset_description_22_channels"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 1.0,
-        "source_file": "papers/bci_dataset_description.md"
-      },
-      {
         "id": "transformer_bci_models",
         "label": "Transformer-based BCI Models",
         "nodes": [
@@ -48,10 +32,916 @@
         "confidence": "EXTRACTED",
         "confidence_score": 1.0,
         "source_file": "papers/transformer_mi_eeg_paper.md"
+      },
+      {
+        "id": "bci_competition_datasets",
+        "label": "BCI Competition IV Datasets",
+        "nodes": [
+          "transformer_mi_eeg_paper_bci_competition_iv_2a",
+          "eeg_augmented_deep_learning_bci_competition_iv_2b",
+          "bci_dataset_description_graz_dataset",
+          "bci_dataset_description_9_subjects",
+          "bci_dataset_description_4_classes",
+          "bci_dataset_description_22_channels"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "papers/bci_dataset_description.md"
+      },
+      {
+        "id": "alignment_family",
+        "label": "Covariance alignment family",
+        "nodes": [
+          "last_bci_architecture_euclidean_alignment",
+          "last_bci_architecture_riemannian_alignment",
+          "last_bci_architecture_dual_fusion"
+        ],
+        "relation": "participate_in",
+        "confidence": "INFERRED",
+        "confidence_score": 0.85,
+        "source_file": "ARCHITECTURE.md"
+      },
+      {
+        "id": "unified_pipeline",
+        "label": "RA + EEGNet + IM-TTA pipeline",
+        "nodes": [
+          "last_bci_architecture_riemannian_alignment",
+          "last_bci_model_unifiedeegnet",
+          "last_bci_architecture_im_tta"
+        ],
+        "relation": "form",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "ARCHITECTURE.md"
       }
     ]
   },
   "nodes": [
+    {
+      "label": "run.sh",
+      "file_type": "code",
+      "source_file": "run.sh",
+      "source_location": "L1",
+      "id": "run_sh",
+      "community": 8,
+      "norm_label": "run.sh"
+    },
+    {
+      "label": "model.py",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L1",
+      "id": "model_py",
+      "community": 0,
+      "norm_label": "model.py"
+    },
+    {
+      "label": "FreqAttn",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L6",
+      "id": "last_bci_model_freqattn",
+      "community": 0,
+      "norm_label": "freqattn"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L7",
+      "id": "last_bci_model_freqattn_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L27",
+      "id": "last_bci_model_freqattn_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "FreqAwareEEGNet",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L42",
+      "id": "last_bci_model_freqawareeegnet",
+      "community": 0,
+      "norm_label": "freqawareeegnet"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L43",
+      "id": "last_bci_model_freqawareeegnet_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L77",
+      "id": "last_bci_model_freqawareeegnet_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "UnifiedEEGNet",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L109",
+      "id": "last_bci_model_unifiedeegnet",
+      "community": 0,
+      "norm_label": "unifiedeegnet"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L110",
+      "id": "last_bci_model_unifiedeegnet_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L137",
+      "id": "last_bci_model_unifiedeegnet_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "SpatialAlign",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L171",
+      "id": "last_bci_model_spatialalign",
+      "community": 0,
+      "norm_label": "spatialalign"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L174",
+      "id": "last_bci_model_spatialalign_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L179",
+      "id": "last_bci_model_spatialalign_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "AdaptiveSpatialAlign",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L184",
+      "id": "last_bci_model_adaptivespatialalign",
+      "community": 0,
+      "norm_label": "adaptivespatialalign"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L193",
+      "id": "last_bci_model_adaptivespatialalign_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L204",
+      "id": "last_bci_model_adaptivespatialalign_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "AlignedEEGNet",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L213",
+      "id": "last_bci_model_alignedeegnet",
+      "community": 0,
+      "norm_label": "alignedeegnet"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L215",
+      "id": "last_bci_model_alignedeegnet_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L220",
+      "id": "last_bci_model_alignedeegnet_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "AdaptiveAlignEEGNet",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L224",
+      "id": "last_bci_model_adaptivealigneegnet",
+      "community": 0,
+      "norm_label": "adaptivealigneegnet"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L226",
+      "id": "last_bci_model_adaptivealigneegnet_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L231",
+      "id": "last_bci_model_adaptivealigneegnet_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "DualAlignEEGNet",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L235",
+      "id": "last_bci_model_dualaligneegnet",
+      "community": 0,
+      "norm_label": "dualaligneegnet"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L244",
+      "id": "last_bci_model_dualaligneegnet_init",
+      "community": 0,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "model.py",
+      "source_location": "L250",
+      "id": "last_bci_model_dualaligneegnet_forward",
+      "community": 0,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "Static learnable spatial alignment: x' = (I + dW) x, dW init 0.     Weight decay",
+      "file_type": "rationale",
+      "source_file": "model.py",
+      "source_location": "L172",
+      "id": "last_bci_model_rationale_172",
+      "community": 0,
+      "norm_label": "static learnable spatial alignment: x' = (i + dw) x, dw init 0.     weight decay"
+    },
+    {
+      "label": "Input-adaptive (per-trial) spatial alignment \u2014 the novel contribution.      EA a",
+      "file_type": "rationale",
+      "source_file": "model.py",
+      "source_location": "L185",
+      "id": "last_bci_model_rationale_185",
+      "community": 0,
+      "norm_label": "input-adaptive (per-trial) spatial alignment \u2014 the novel contribution.      ea a"
+    },
+    {
+      "label": "UnifiedEEGNet + static learnable spatial alignment front-end.",
+      "file_type": "rationale",
+      "source_file": "model.py",
+      "source_location": "L214",
+      "id": "last_bci_model_rationale_214",
+      "community": 0,
+      "norm_label": "unifiedeegnet + static learnable spatial alignment front-end."
+    },
+    {
+      "label": "UnifiedEEGNet + per-trial input-adaptive spatial alignment front-end.",
+      "file_type": "rationale",
+      "source_file": "model.py",
+      "source_location": "L225",
+      "id": "last_bci_model_rationale_225",
+      "community": 0,
+      "norm_label": "unifiedeegnet + per-trial input-adaptive spatial alignment front-end."
+    },
+    {
+      "label": "Dual-geometry alignment fusion \u2014 the novel contribution.      Input is the chann",
+      "file_type": "rationale",
+      "source_file": "model.py",
+      "source_location": "L236",
+      "id": "last_bci_model_rationale_236",
+      "community": 0,
+      "norm_label": "dual-geometry alignment fusion \u2014 the novel contribution.      input is the chann"
+    },
+    {
+      "label": "dataset.py",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L1",
+      "id": "dataset_py",
+      "community": 1,
+      "norm_label": "dataset.py"
+    },
+    {
+      "label": "SRSegment",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L10",
+      "id": "last_bci_dataset_srsegment",
+      "community": 6,
+      "norm_label": "srsegment"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L14",
+      "id": "last_bci_dataset_srsegment_init",
+      "community": 6,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__call__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L17",
+      "id": "last_bci_dataset_srsegment_call",
+      "community": 6,
+      "norm_label": ".__call__()"
+    },
+    {
+      "label": "FrequencyMasking",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L32",
+      "id": "last_bci_dataset_frequencymasking",
+      "community": 3,
+      "norm_label": "frequencymasking"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L36",
+      "id": "last_bci_dataset_frequencymasking_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__call__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L40",
+      "id": "last_bci_dataset_frequencymasking_call",
+      "community": 3,
+      "norm_label": ".__call__()"
+    },
+    {
+      "label": "ChannelDropout",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L53",
+      "id": "last_bci_dataset_channeldropout",
+      "community": 3,
+      "norm_label": "channeldropout"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L55",
+      "id": "last_bci_dataset_channeldropout_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__call__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L58",
+      "id": "last_bci_dataset_channeldropout_call",
+      "community": 3,
+      "norm_label": ".__call__()"
+    },
+    {
+      "label": "GaussianNoise",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L65",
+      "id": "last_bci_dataset_gaussiannoise",
+      "community": 3,
+      "norm_label": "gaussiannoise"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L67",
+      "id": "last_bci_dataset_gaussiannoise_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__call__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L71",
+      "id": "last_bci_dataset_gaussiannoise_call",
+      "community": 3,
+      "norm_label": ".__call__()"
+    },
+    {
+      "label": "TemporalShift",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L77",
+      "id": "last_bci_dataset_temporalshift",
+      "community": 3,
+      "norm_label": "temporalshift"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L79",
+      "id": "last_bci_dataset_temporalshift_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__call__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L83",
+      "id": "last_bci_dataset_temporalshift_call",
+      "community": 3,
+      "norm_label": ".__call__()"
+    },
+    {
+      "label": "ChannelPermutation",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L90",
+      "id": "last_bci_dataset_channelpermutation",
+      "community": 3,
+      "norm_label": "channelpermutation"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L92",
+      "id": "last_bci_dataset_channelpermutation_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__call__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L95",
+      "id": "last_bci_dataset_channelpermutation_call",
+      "community": 3,
+      "norm_label": ".__call__()"
+    },
+    {
+      "label": "SlidingWindowDataset",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L102",
+      "id": "last_bci_dataset_slidingwindowdataset",
+      "community": 6,
+      "norm_label": "slidingwindowdataset"
+    },
+    {
+      "label": "Dataset",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "dataset",
+      "community": 6,
+      "norm_label": "dataset"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L106",
+      "id": "last_bci_dataset_slidingwindowdataset_init",
+      "community": 6,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__len__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L143",
+      "id": "last_bci_dataset_slidingwindowdataset_len",
+      "community": 6,
+      "norm_label": ".__len__()"
+    },
+    {
+      "label": ".__getitem__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L146",
+      "id": "last_bci_dataset_slidingwindowdataset_getitem",
+      "community": 6,
+      "norm_label": ".__getitem__()"
+    },
+    {
+      "label": "BCIDataset",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L164",
+      "id": "last_bci_dataset_bcidataset",
+      "community": 2,
+      "norm_label": "bcidataset"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L166",
+      "id": "last_bci_dataset_bcidataset_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".__len__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L199",
+      "id": "last_bci_dataset_bcidataset_len",
+      "community": 2,
+      "norm_label": ".__len__()"
+    },
+    {
+      "label": ".__getitem__()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L204",
+      "id": "last_bci_dataset_bcidataset_getitem",
+      "community": 2,
+      "norm_label": ".__getitem__()"
+    },
+    {
+      "label": "load_dataset()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L256",
+      "id": "last_bci_dataset_load_dataset",
+      "community": 7,
+      "norm_label": "load_dataset()"
+    },
+    {
+      "label": "load_bci_iva_dataset()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L278",
+      "id": "last_bci_dataset_load_bci_iva_dataset",
+      "community": 7,
+      "norm_label": "load_bci_iva_dataset()"
+    },
+    {
+      "label": "prepare_pretrain_data()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L284",
+      "id": "last_bci_dataset_prepare_pretrain_data",
+      "community": 1,
+      "norm_label": "prepare_pretrain_data()"
+    },
+    {
+      "label": "_stratified_split()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L320",
+      "id": "last_bci_dataset_stratified_split",
+      "community": 1,
+      "norm_label": "_stratified_split()"
+    },
+    {
+      "label": "_per_trial_standardize()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L333",
+      "id": "last_bci_dataset_per_trial_standardize",
+      "community": 1,
+      "norm_label": "_per_trial_standardize()"
+    },
+    {
+      "label": "_ea_reference()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L344",
+      "id": "last_bci_dataset_ea_reference",
+      "community": 1,
+      "norm_label": "_ea_reference()"
+    },
+    {
+      "label": "_inv_sqrt()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L353",
+      "id": "last_bci_dataset_inv_sqrt",
+      "community": 1,
+      "norm_label": "_inv_sqrt()"
+    },
+    {
+      "label": "_ea_apply()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L360",
+      "id": "last_bci_dataset_ea_apply",
+      "community": 1,
+      "norm_label": "_ea_apply()"
+    },
+    {
+      "label": "_ca_whitener()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L365",
+      "id": "last_bci_dataset_ca_whitener",
+      "community": 1,
+      "norm_label": "_ca_whitener()"
+    },
+    {
+      "label": "_whitener()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L380",
+      "id": "last_bci_dataset_whitener",
+      "community": 1,
+      "norm_label": "_whitener()"
+    },
+    {
+      "label": "_dual_views()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L389",
+      "id": "last_bci_dataset_dual_views",
+      "community": 1,
+      "norm_label": "_dual_views()"
+    },
+    {
+      "label": "prepare_subject_data()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L394",
+      "id": "last_bci_dataset_prepare_subject_data",
+      "community": 1,
+      "norm_label": "prepare_subject_data()"
+    },
+    {
+      "label": "prepare_subject_data_cv()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L454",
+      "id": "last_bci_dataset_prepare_subject_data_cv",
+      "community": 1,
+      "norm_label": "prepare_subject_data_cv()"
+    },
+    {
+      "label": "prepare_loso_data()",
+      "file_type": "code",
+      "source_file": "dataset.py",
+      "source_location": "L507",
+      "id": "last_bci_dataset_prepare_loso_data",
+      "community": 1,
+      "norm_label": "prepare_loso_data()"
+    },
+    {
+      "label": "Dataset loading and augmentation for BCI Competition IV-2a",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L1",
+      "id": "last_bci_dataset_rationale_1",
+      "community": 1,
+      "norm_label": "dataset loading and augmentation for bci competition iv-2a"
+    },
+    {
+      "label": "Segmentation and Recombination (S&R) augmentation - critical for CTNet     From",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L11",
+      "id": "last_bci_dataset_rationale_11",
+      "community": 6,
+      "norm_label": "segmentation and recombination (s&r) augmentation - critical for ctnet     from"
+    },
+    {
+      "label": "Random frequency masking - masks random frequency bands     Simulates band-stop",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L33",
+      "id": "last_bci_dataset_rationale_33",
+      "community": 3,
+      "norm_label": "random frequency masking - masks random frequency bands     simulates band-stop"
+    },
+    {
+      "label": "Randomly zero out channels (keeps same size)",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L54",
+      "id": "last_bci_dataset_rationale_54",
+      "community": 3,
+      "norm_label": "randomly zero out channels (keeps same size)"
+    },
+    {
+      "label": "Add Gaussian noise for robustness",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L66",
+      "id": "last_bci_dataset_rationale_66",
+      "community": 3,
+      "norm_label": "add gaussian noise for robustness"
+    },
+    {
+      "label": "Random temporal shift",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L78",
+      "id": "last_bci_dataset_rationale_78",
+      "community": 3,
+      "norm_label": "random temporal shift"
+    },
+    {
+      "label": "Random channel permutation",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L91",
+      "id": "last_bci_dataset_rationale_91",
+      "community": 3,
+      "norm_label": "random channel permutation"
+    },
+    {
+      "label": "Sliding window augmentation - from MSCARNet paper (+8.82% improvement)     Split",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L103",
+      "id": "last_bci_dataset_rationale_103",
+      "community": 6,
+      "norm_label": "sliding window augmentation - from mscarnet paper (+8.82% improvement)     split"
+    },
+    {
+      "label": "BCI Competition IV-2a Dataset with comprehensive augmentation pipeline",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L165",
+      "id": "last_bci_dataset_rationale_165",
+      "community": 2,
+      "norm_label": "bci competition iv-2a dataset with comprehensive augmentation pipeline"
+    },
+    {
+      "label": "Load a MOABB MotorImagery dataset by registry name.      Band-pass [fmin, fmax]",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L257",
+      "id": "last_bci_dataset_rationale_257",
+      "community": 7,
+      "norm_label": "load a moabb motorimagery dataset by registry name.      band-pass [fmin, fmax]"
+    },
+    {
+      "label": "Backwards-compatible alias for the IV-2a loader (returns X, y, meta).",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L279",
+      "id": "last_bci_dataset_rationale_279",
+      "community": 7,
+      "norm_label": "backwards-compatible alias for the iv-2a loader (returns x, y, meta)."
+    },
+    {
+      "label": "Prepare cross-subject pre-training data.     Uses session 1 from ALL subjects. N",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L285",
+      "id": "last_bci_dataset_rationale_285",
+      "community": 1,
+      "norm_label": "prepare cross-subject pre-training data.     uses session 1 from all subjects. n"
+    },
+    {
+      "label": "Class-stratified index split. Returns (train_idx, val_idx).",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L321",
+      "id": "last_bci_dataset_rationale_321",
+      "community": 1,
+      "norm_label": "class-stratified index split. returns (train_idx, val_idx)."
+    },
+    {
+      "label": "Standardize each trial per channel using its own statistics.     No cross-trial",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L334",
+      "id": "last_bci_dataset_rationale_334",
+      "community": 1,
+      "norm_label": "standardize each trial per channel using its own statistics.     no cross-trial"
+    },
+    {
+      "label": "Euclidean-Alignment reference = mean spatial covariance over trials.     X: [N,",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L345",
+      "id": "last_bci_dataset_rationale_345",
+      "community": 1,
+      "norm_label": "euclidean-alignment reference = mean spatial covariance over trials.     x: [n,"
+    },
+    {
+      "label": "Symmetric inverse square root of an SPD matrix.",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L354",
+      "id": "last_bci_dataset_rationale_354",
+      "community": 1,
+      "norm_label": "symmetric inverse square root of an spd matrix."
+    },
+    {
+      "label": "Whiten each trial: X' = R^{-1/2} X. X: [N, C, T]. Works for any whitener.",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L361",
+      "id": "last_bci_dataset_rationale_361",
+      "community": 1,
+      "norm_label": "whiten each trial: x' = r^{-1/2} x. x: [n, c, t]. works for any whitener."
+    },
+    {
+      "label": "Centroid / Riemannian Alignment whitener = invsqrtm(Riemannian mean covariance).",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L366",
+      "id": "last_bci_dataset_rationale_366",
+      "community": 1,
+      "norm_label": "centroid / riemannian alignment whitener = invsqrtm(riemannian mean covariance)."
+    },
+    {
+      "label": "Per-set whitener for the requested alignment ('ea' arithmetic / 'ra' Riemannian)",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L381",
+      "id": "last_bci_dataset_rationale_381",
+      "community": 1,
+      "norm_label": "per-set whitener for the requested alignment ('ea' arithmetic / 'ra' riemannian)"
+    },
+    {
+      "label": "Concatenate EA-aligned and RA-aligned views along channels: [N,C,T] -> [N,2C,T].",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L390",
+      "id": "last_bci_dataset_rationale_390",
+      "community": 1,
+      "norm_label": "concatenate ea-aligned and ra-aligned views along channels: [n,c,t] -> [n,2c,t]."
+    },
+    {
+      "label": "Within-subject SESSION-HOLDOUT split, leak-free (official competition protocol):",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L396",
+      "id": "last_bci_dataset_rationale_396",
+      "community": 1,
+      "norm_label": "within-subject session-holdout split, leak-free (official competition protocol):"
+    },
+    {
+      "label": "Within-subject k-fold CV split (sessions pooled), leak-free. Uniform protocol fo",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L456",
+      "id": "last_bci_dataset_rationale_456",
+      "community": 1,
+      "norm_label": "within-subject k-fold cv split (sessions pooled), leak-free. uniform protocol fo"
+    },
+    {
+      "label": "Leave-one-subject-out (cross-subject) split, leak-free:        train / val = all",
+      "file_type": "rationale",
+      "source_file": "dataset.py",
+      "source_location": "L508",
+      "id": "last_bci_dataset_rationale_508",
+      "community": 1,
+      "norm_label": "leave-one-subject-out (cross-subject) split, leak-free:        train / val = all"
+    },
     {
       "label": "main.py",
       "file_type": "code",
@@ -62,53 +952,265 @@
       "norm_label": "main.py"
     },
     {
+      "label": "assert_no_leakage()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L44",
+      "id": "last_bci_main_assert_no_leakage",
+      "community": 5,
+      "norm_label": "assert_no_leakage()"
+    },
+    {
+      "label": "_fit()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L51",
+      "id": "last_bci_main_fit",
+      "community": 5,
+      "norm_label": "_fit()"
+    },
+    {
+      "label": "_summarize()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L78",
+      "id": "last_bci_main_summarize",
+      "community": 5,
+      "norm_label": "_summarize()"
+    },
+    {
+      "label": "run_within()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L91",
+      "id": "last_bci_main_run_within",
+      "community": 5,
+      "norm_label": "run_within()"
+    },
+    {
+      "label": "run_within_cv()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L132",
+      "id": "last_bci_main_run_within_cv",
+      "community": 5,
+      "norm_label": "run_within_cv()"
+    },
+    {
+      "label": "run_loso()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L165",
+      "id": "last_bci_main_run_loso",
+      "community": 5,
+      "norm_label": "run_loso()"
+    },
+    {
       "label": "main()",
       "file_type": "code",
       "source_file": "main.py",
-      "source_location": "L1",
+      "source_location": "L189",
       "id": "last_bci_main_main",
       "community": 5,
       "norm_label": "main()"
     },
     {
-      "label": "settings.local.json",
-      "file_type": "code",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L1",
-      "id": "claude_settings_local_json",
-      "community": 4,
-      "norm_label": "settings.local.json"
-    },
-    {
-      "label": "permissions",
-      "file_type": "code",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L2",
-      "id": "claude_settings_local_permissions",
-      "community": 4,
-      "norm_label": "permissions"
-    },
-    {
-      "label": "allow",
-      "file_type": "code",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L3",
-      "id": "claude_settings_local_permissions_allow",
-      "community": 4,
-      "norm_label": "allow"
-    },
-    {
-      "label": "Main Function",
-      "file_type": "code",
+      "label": "Within-subject (session 1 -> train/val, session 2 -> test), leak-free.",
+      "file_type": "rationale",
       "source_file": "main.py",
-      "source_location": 1,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "main_main",
-      "community": 6,
-      "norm_label": "main function"
+      "source_location": "L92",
+      "id": "last_bci_main_rationale_92",
+      "community": 5,
+      "norm_label": "within-subject (session 1 -> train/val, session 2 -> test), leak-free."
+    },
+    {
+      "label": "Within-subject k-fold CV (sessions pooled). Uniform across datasets.      Each s",
+      "file_type": "rationale",
+      "source_file": "main.py",
+      "source_location": "L133",
+      "id": "last_bci_main_rationale_133",
+      "community": 5,
+      "norm_label": "within-subject k-fold cv (sessions pooled). uniform across datasets.      each s"
+    },
+    {
+      "label": "Leave-one-subject-out cross-subject, trained from scratch on the 8-subject pool.",
+      "file_type": "rationale",
+      "source_file": "main.py",
+      "source_location": "L166",
+      "id": "last_bci_main_rationale_166",
+      "community": 5,
+      "norm_label": "leave-one-subject-out cross-subject, trained from scratch on the 8-subject pool."
+    },
+    {
+      "label": "train.py",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L1",
+      "id": "train_py",
+      "community": 2,
+      "norm_label": "train.py"
+    },
+    {
+      "label": "ModelEma",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L10",
+      "id": "last_bci_train_modelema",
+      "community": 2,
+      "norm_label": "modelema"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L11",
+      "id": "last_bci_train_modelema_init",
+      "community": 2,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": "update()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L18",
+      "id": "last_bci_train_update",
+      "community": 2,
+      "norm_label": "update()"
+    },
+    {
+      "label": "FocalLoss",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L25",
+      "id": "last_bci_train_focalloss",
+      "community": 2,
+      "norm_label": "focalloss"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L26",
+      "id": "last_bci_train_focalloss_init",
+      "community": 2,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".forward()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L30",
+      "id": "last_bci_train_focalloss_forward",
+      "community": 2,
+      "norm_label": ".forward()"
+    },
+    {
+      "label": "mixup_data()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L36",
+      "id": "last_bci_train_mixup_data",
+      "community": 2,
+      "norm_label": "mixup_data()"
+    },
+    {
+      "label": "mixup_criterion()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L44",
+      "id": "last_bci_train_mixup_criterion",
+      "community": 2,
+      "norm_label": "mixup_criterion()"
+    },
+    {
+      "label": "train_one_epoch()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L48",
+      "id": "last_bci_train_train_one_epoch",
+      "community": 2,
+      "norm_label": "train_one_epoch()"
+    },
+    {
+      "label": "evaluate()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L69",
+      "id": "last_bci_train_evaluate",
+      "community": 2,
+      "norm_label": "evaluate()"
+    },
+    {
+      "label": "evaluate_acc_loss()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L80",
+      "id": "last_bci_train_evaluate_acc_loss",
+      "community": 2,
+      "norm_label": "evaluate_acc_loss()"
+    },
+    {
+      "label": "pretrain_model()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L95",
+      "id": "last_bci_train_pretrain_model",
+      "community": 2,
+      "norm_label": "pretrain_model()"
+    },
+    {
+      "label": "_build_optim_sched()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L135",
+      "id": "last_bci_train_build_optim_sched",
+      "community": 2,
+      "norm_label": "_build_optim_sched()"
+    },
+    {
+      "label": "tent_adapt()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L144",
+      "id": "last_bci_train_tent_adapt",
+      "community": 2,
+      "norm_label": "tent_adapt()"
+    },
+    {
+      "label": "train_model()",
+      "file_type": "code",
+      "source_file": "train.py",
+      "source_location": "L188",
+      "id": "last_bci_train_train_model",
+      "community": 2,
+      "norm_label": "train_model()"
+    },
+    {
+      "label": "Return (accuracy, mean cross-entropy loss) over a loader.",
+      "file_type": "rationale",
+      "source_file": "train.py",
+      "source_location": "L81",
+      "id": "last_bci_train_rationale_81",
+      "community": 2,
+      "norm_label": "return (accuracy, mean cross-entropy loss) over a loader."
+    },
+    {
+      "label": "Label-free source-free test-time adaptation via Information Maximization (SHOT-s",
+      "file_type": "rationale",
+      "source_file": "train.py",
+      "source_location": "L145",
+      "id": "last_bci_train_rationale_145",
+      "community": 2,
+      "norm_label": "label-free source-free test-time adaptation via information maximization (shot-s"
+    },
+    {
+      "label": "Leak-free training.      Model selection and early stopping use ONLY the validat",
+      "file_type": "rationale",
+      "source_file": "train.py",
+      "source_location": "L195",
+      "id": "last_bci_train_rationale_195",
+      "community": 2,
+      "norm_label": "leak-free training.      model selection and early stopping use only the validat"
     },
     {
       "label": "Local Settings",
@@ -120,7 +1222,7 @@
       "author": null,
       "contributor": null,
       "id": "settingslocaljson_settings",
-      "community": 7,
+      "community": 9,
       "norm_label": "local settings"
     },
     {
@@ -133,7 +1235,7 @@
       "author": "Wangdan Liao, Hongyun Liu, Weidong Wang",
       "contributor": null,
       "id": "transformer_mi_eeg_paper_eegencoder",
-      "community": 0,
+      "community": 4,
       "norm_label": "eegencoder"
     },
     {
@@ -146,7 +1248,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_dsts",
-      "community": 0,
+      "community": 4,
       "norm_label": "dual-stream temporal-spatial block"
     },
     {
@@ -159,7 +1261,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_tcn",
-      "community": 0,
+      "community": 4,
       "norm_label": "temporal convolutional network"
     },
     {
@@ -172,7 +1274,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_stabletransformer",
-      "community": 0,
+      "community": 4,
       "norm_label": "stable transformer"
     },
     {
@@ -185,7 +1287,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_rmsnorm",
-      "community": 0,
+      "community": 4,
       "norm_label": "rmsnorm"
     },
     {
@@ -198,7 +1300,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_swiglu",
-      "community": 0,
+      "community": 4,
       "norm_label": "swiglu"
     },
     {
@@ -211,7 +1313,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_bci_competition_iv_2a",
-      "community": 0,
+      "community": 4,
       "norm_label": "bci competition iv-2a dataset"
     },
     {
@@ -224,7 +1326,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_motor_imagery",
-      "community": 0,
+      "community": 4,
       "norm_label": "motor imagery"
     },
     {
@@ -237,7 +1339,7 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_eeg",
-      "community": 8,
+      "community": 10,
       "norm_label": "electroencephalography"
     },
     {
@@ -250,86 +1352,8 @@
       "author": null,
       "contributor": null,
       "id": "transformer_mi_eeg_paper_prenormalization",
-      "community": 0,
+      "community": 4,
       "norm_label": "pre-normalization"
-    },
-    {
-      "label": "GDC-Net",
-      "file_type": "paper",
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 7,
-      "source_url": "https://doi.org/10.3390/electronics14142827",
-      "captured_at": null,
-      "author": "Mouna Bouchane, Wei Guo, Shuojin Yang",
-      "contributor": null,
-      "id": "eeg_augmented_deep_learning_gdcnet",
-      "community": 2,
-      "norm_label": "gdc-net"
-    },
-    {
-      "label": "DCGAN",
-      "file_type": "concept",
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 134,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "eeg_augmented_deep_learning_dcgan",
-      "community": 2,
-      "norm_label": "dcgan"
-    },
-    {
-      "label": "CNN-LSTM Hybrid",
-      "file_type": "concept",
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 176,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "eeg_augmented_deep_learning_cnn_lstm",
-      "community": 2,
-      "norm_label": "cnn-lstm hybrid"
-    },
-    {
-      "label": "BCI Competition IV-2b Dataset",
-      "file_type": "concept",
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 74,
-      "source_url": "https://www.bbci.de/competition/iv/",
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "eeg_augmented_deep_learning_bci_competition_iv_2b",
-      "community": 1,
-      "norm_label": "bci competition iv-2b dataset"
-    },
-    {
-      "label": "Generalized Morse Wavelet Transform",
-      "file_type": "concept",
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 112,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "eeg_augmented_deep_learning_gmwt",
-      "community": 2,
-      "norm_label": "generalized morse wavelet transform"
-    },
-    {
-      "label": "Left/Right Hand Motor Imagery",
-      "file_type": "concept",
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 31,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "eeg_augmented_deep_learning_left_right_hand_mi",
-      "community": 2,
-      "norm_label": "left/right hand motor imagery"
     },
     {
       "label": "BCI Competition 2008 Graz Dataset",
@@ -341,7 +1365,7 @@
       "author": "C. Brunner, R. Leeb, G. R. M\u00fcller-Putz, A. Schl\u00f6gl, G. Pfurtscheller",
       "contributor": null,
       "id": "bci_dataset_description_graz_dataset",
-      "community": 1,
+      "community": 4,
       "norm_label": "bci competition 2008 graz dataset"
     },
     {
@@ -354,7 +1378,7 @@
       "author": null,
       "contributor": null,
       "id": "bci_dataset_description_9_subjects",
-      "community": 1,
+      "community": 4,
       "norm_label": "9 subjects"
     },
     {
@@ -367,7 +1391,7 @@
       "author": null,
       "contributor": null,
       "id": "bci_dataset_description_4_classes",
-      "community": 1,
+      "community": 4,
       "norm_label": "4 mi classes"
     },
     {
@@ -380,7 +1404,7 @@
       "author": null,
       "contributor": null,
       "id": "bci_dataset_description_22_channels",
-      "community": 1,
+      "community": 4,
       "norm_label": "22 eeg channels"
     },
     {
@@ -392,7 +1416,7 @@
       "captured_at": null,
       "contributor": null,
       "id": "bci_dataset_description_250_hz",
-      "community": 1,
+      "community": 4,
       "norm_label": "250 hz sampling rate"
     },
     {
@@ -405,7 +1429,7 @@
       "author": "Wei Zhao, Xiaolu Jiang, Baocan Zhang, Shixiao Xiao, Sujun Weng",
       "contributor": null,
       "id": "ctnet_paper_ctnet",
-      "community": 3,
+      "community": 4,
       "norm_label": "ctnet"
     },
     {
@@ -418,7 +1442,7 @@
       "author": null,
       "contributor": null,
       "id": "ctnet_paper_cnn_transformer_hybrid",
-      "community": 2,
+      "community": 4,
       "norm_label": "cnn-transformer hybrid architecture"
     },
     {
@@ -431,7 +1455,7 @@
       "author": null,
       "contributor": null,
       "id": "ctnet_paper_multi_head_attention",
-      "community": 3,
+      "community": 4,
       "norm_label": "multi-head attention"
     },
     {
@@ -443,7 +1467,7 @@
       "captured_at": null,
       "contributor": null,
       "id": "ctnet_paper_eegnet",
-      "community": 3,
+      "community": 4,
       "norm_label": "eegnet"
     },
     {
@@ -455,7 +1479,7 @@
       "captured_at": null,
       "contributor": null,
       "id": "ctnet_paper_subject_specific",
-      "community": 3,
+      "community": 4,
       "norm_label": "subject-specific classification"
     },
     {
@@ -466,40 +1490,2481 @@
       "source_url": null,
       "contributor": null,
       "id": "ctnet_paper_cross_subject",
-      "community": 3,
+      "community": 4,
       "norm_label": "cross-subject classification"
+    },
+    {
+      "label": "Information-Maximization Test-Time Adaptation (IM-TTA)",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_im_tta",
+      "community": 2,
+      "norm_label": "information-maximization test-time adaptation (im-tta)"
+    },
+    {
+      "label": "Anti-collapse diversity term (marginal-entropy maximization)",
+      "file_type": "rationale",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_diversity_term",
+      "community": 2,
+      "norm_label": "anti-collapse diversity term (marginal-entropy maximization)"
+    },
+    {
+      "label": "Euclidean Alignment (EA)",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_euclidean_alignment",
+      "community": 1,
+      "norm_label": "euclidean alignment (ea)"
+    },
+    {
+      "label": "Riemannian / Centroid Alignment (RA)",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_riemannian_alignment",
+      "community": 1,
+      "norm_label": "riemannian / centroid alignment (ra)"
+    },
+    {
+      "label": "Session-holdout within-subject protocol",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_session_holdout",
+      "community": 1,
+      "norm_label": "session-holdout within-subject protocol"
+    },
+    {
+      "label": "Leave-one-subject-out (LOSO) cross-subject protocol",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_loso",
+      "community": 2,
+      "norm_label": "leave-one-subject-out (loso) cross-subject protocol"
+    },
+    {
+      "label": "Leak-free evaluation (val-based selection, test once)",
+      "file_type": "rationale",
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_leakfree_eval",
+      "community": 2,
+      "norm_label": "leak-free evaluation (val-based selection, test once)"
+    },
+    {
+      "label": "Dual-geometry alignment fusion (EA+RA)",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_dual_fusion",
+      "community": 1,
+      "norm_label": "dual-geometry alignment fusion (ea+ra)"
+    },
+    {
+      "label": "Learnable spatial alignment refinement",
+      "file_type": "concept",
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_architecture_learnable_align",
+      "community": 0,
+      "norm_label": "learnable spatial alignment refinement"
+    },
+    {
+      "label": "BCI Competition IV-2a (4-class, 22ch)",
+      "file_type": "document",
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_results_iv2a",
+      "community": 7,
+      "norm_label": "bci competition iv-2a (4-class, 22ch)"
+    },
+    {
+      "label": "BCI Competition IV-2b (2-class, 3ch)",
+      "file_type": "document",
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_results_iv2b",
+      "community": 7,
+      "norm_label": "bci competition iv-2b (2-class, 3ch)"
+    },
+    {
+      "label": "MSCARNet (multi-scale temporal conv for MI-EEG)",
+      "file_type": "paper",
+      "source_file": "papers/MSCARNet_Paper.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "papers_mscarnet_paper_mscarnet",
+      "community": 0,
+      "norm_label": "mscarnet (multi-scale temporal conv for mi-eeg)"
+    },
+    {
+      "label": "EEG augmentation & deep-learning reference (S&R, mixup, freq-mask)",
+      "file_type": "document",
+      "source_file": "EEG_Augmented_Deep_Learning.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "last_bci_eeg_augmented_deep_learning_augmentation",
+      "community": 1,
+      "norm_label": "eeg augmentation & deep-learning reference (s&r, mixup, freq-mask)"
     }
   ],
   "links": [
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "main.py",
+      "source_file": "model.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_freqattn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_freqawareeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_unifiedeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L171",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_spatialalign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L184",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_adaptivespatialalign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_alignedeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L224",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_adaptivealigneegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "model_py",
+      "target": "last_bci_model_dualaligneegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "last_bci_model_freqattn",
+      "target": "last_bci_model_freqattn_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "last_bci_model_freqattn",
+      "target": "last_bci_model_freqattn_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "last_bci_model_freqawareeegnet_init",
+      "target": "last_bci_model_freqattn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "last_bci_model_freqattn_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "last_bci_model_freqawareeegnet",
+      "target": "last_bci_model_freqawareeegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "last_bci_model_freqawareeegnet",
+      "target": "last_bci_model_freqawareeegnet_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "papers/MSCARNet_Paper.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "papers_mscarnet_paper_mscarnet",
+      "target": "last_bci_model_freqawareeegnet"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "last_bci_model_freqawareeegnet_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "last_bci_model_unifiedeegnet",
+      "target": "last_bci_model_unifiedeegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L137",
+      "weight": 1.0,
+      "source": "last_bci_model_unifiedeegnet",
+      "target": "last_bci_model_unifiedeegnet_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L218",
+      "weight": 1.0,
+      "source": "last_bci_model_alignedeegnet_init",
+      "target": "last_bci_model_unifiedeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L229",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivealigneegnet_init",
+      "target": "last_bci_model_unifiedeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L246",
+      "weight": 1.0,
+      "source": "last_bci_model_dualaligneegnet_init",
+      "target": "last_bci_model_unifiedeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "last_bci_model_unifiedeegnet_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L174",
+      "weight": 1.0,
+      "source": "last_bci_model_spatialalign",
+      "target": "last_bci_model_spatialalign_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L179",
+      "weight": 1.0,
+      "source": "last_bci_model_spatialalign",
+      "target": "last_bci_model_spatialalign_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L217",
+      "weight": 1.0,
+      "source": "last_bci_model_alignedeegnet_init",
+      "target": "last_bci_model_spatialalign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "last_bci_model_rationale_172",
+      "target": "last_bci_model_spatialalign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_learnable_align",
+      "target": "last_bci_model_spatialalign"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L175",
+      "weight": 1.0,
+      "source": "last_bci_model_spatialalign_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L193",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivespatialalign",
+      "target": "last_bci_model_adaptivespatialalign_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L204",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivespatialalign",
+      "target": "last_bci_model_adaptivespatialalign_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L228",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivealigneegnet_init",
+      "target": "last_bci_model_adaptivespatialalign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L185",
+      "weight": 1.0,
+      "source": "last_bci_model_rationale_185",
+      "target": "last_bci_model_adaptivespatialalign",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_learnable_align",
+      "target": "last_bci_model_adaptivespatialalign"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivespatialalign_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L215",
+      "weight": 1.0,
+      "source": "last_bci_model_alignedeegnet",
+      "target": "last_bci_model_alignedeegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L220",
+      "weight": 1.0,
+      "source": "last_bci_model_alignedeegnet",
+      "target": "last_bci_model_alignedeegnet_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L214",
+      "weight": 1.0,
+      "source": "last_bci_model_rationale_214",
+      "target": "last_bci_model_alignedeegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L216",
+      "weight": 1.0,
+      "source": "last_bci_model_alignedeegnet_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L226",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivealigneegnet",
+      "target": "last_bci_model_adaptivealigneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L231",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivealigneegnet",
+      "target": "last_bci_model_adaptivealigneegnet_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L225",
+      "weight": 1.0,
+      "source": "last_bci_model_rationale_225",
+      "target": "last_bci_model_adaptivealigneegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L227",
+      "weight": 1.0,
+      "source": "last_bci_model_adaptivealigneegnet_init",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L244",
+      "weight": 1.0,
+      "source": "last_bci_model_dualaligneegnet",
+      "target": "last_bci_model_dualaligneegnet_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L250",
+      "weight": 1.0,
+      "source": "last_bci_model_dualaligneegnet",
+      "target": "last_bci_model_dualaligneegnet_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "model.py",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "last_bci_model_rationale_236",
+      "target": "last_bci_model_dualaligneegnet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_dual_fusion",
+      "target": "last_bci_model_dualaligneegnet"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_srsegment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_frequencymasking",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_channeldropout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_gaussiannoise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L77",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_temporalshift",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_channelpermutation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_slidingwindowdataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_bcidataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L256",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_load_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L278",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_load_bci_iva_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L284",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_prepare_pretrain_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L320",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_stratified_split",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L333",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_per_trial_standardize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L344",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_ea_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L353",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_inv_sqrt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L360",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L365",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_ca_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L380",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L389",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_dual_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L394",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_prepare_subject_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L454",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_prepare_subject_data_cv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L507",
+      "weight": 1.0,
+      "source": "dataset_py",
+      "target": "last_bci_dataset_prepare_loso_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
       "source_location": "L1",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_1",
+      "target": "dataset_py",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "last_bci_dataset_srsegment",
+      "target": "last_bci_dataset_srsegment_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "last_bci_dataset_srsegment",
+      "target": "last_bci_dataset_srsegment_call",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "last_bci_dataset_slidingwindowdataset_init",
+      "target": "last_bci_dataset_srsegment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L185",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_srsegment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_11",
+      "target": "last_bci_dataset_srsegment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "last_bci_dataset_frequencymasking",
+      "target": "last_bci_dataset_frequencymasking_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "last_bci_dataset_frequencymasking",
+      "target": "last_bci_dataset_frequencymasking_call",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_frequencymasking",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_33",
+      "target": "last_bci_dataset_frequencymasking",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "last_bci_dataset_channeldropout",
+      "target": "last_bci_dataset_channeldropout_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "last_bci_dataset_channeldropout",
+      "target": "last_bci_dataset_channeldropout_call",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L187",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_channeldropout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_54",
+      "target": "last_bci_dataset_channeldropout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "last_bci_dataset_gaussiannoise",
+      "target": "last_bci_dataset_gaussiannoise_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "last_bci_dataset_gaussiannoise",
+      "target": "last_bci_dataset_gaussiannoise_call",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L188",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_gaussiannoise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_66",
+      "target": "last_bci_dataset_gaussiannoise",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "last_bci_dataset_temporalshift",
+      "target": "last_bci_dataset_temporalshift_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "last_bci_dataset_temporalshift",
+      "target": "last_bci_dataset_temporalshift_call",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L189",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_temporalshift",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_78",
+      "target": "last_bci_dataset_temporalshift",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "last_bci_dataset_channelpermutation",
+      "target": "last_bci_dataset_channelpermutation_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "last_bci_dataset_channelpermutation",
+      "target": "last_bci_dataset_channelpermutation_call",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L190",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_channelpermutation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_91",
+      "target": "last_bci_dataset_channelpermutation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "last_bci_dataset_slidingwindowdataset",
+      "target": "dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "last_bci_dataset_slidingwindowdataset",
+      "target": "last_bci_dataset_slidingwindowdataset_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L143",
+      "weight": 1.0,
+      "source": "last_bci_dataset_slidingwindowdataset",
+      "target": "last_bci_dataset_slidingwindowdataset_len",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L146",
+      "weight": 1.0,
+      "source": "last_bci_dataset_slidingwindowdataset",
+      "target": "last_bci_dataset_slidingwindowdataset_getitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset_init",
+      "target": "last_bci_dataset_slidingwindowdataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_103",
+      "target": "last_bci_dataset_slidingwindowdataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset",
+      "target": "dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset",
+      "target": "last_bci_dataset_bcidataset_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L199",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset",
+      "target": "last_bci_dataset_bcidataset_len",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L204",
+      "weight": 1.0,
+      "source": "last_bci_dataset_bcidataset",
+      "target": "last_bci_dataset_bcidataset_getitem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L165",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_165",
+      "target": "last_bci_dataset_bcidataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "train.py",
+      "source_location": "L206",
+      "weight": 0.8,
+      "source": "last_bci_train_modelema",
+      "target": "last_bci_dataset_bcidataset",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "train.py",
+      "source_location": "L206",
+      "weight": 0.8,
+      "source": "last_bci_train_focalloss",
+      "target": "last_bci_dataset_bcidataset",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "train.py",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "last_bci_train_pretrain_model",
+      "target": "last_bci_dataset_bcidataset"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "train.py",
+      "source_location": "L208",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_dataset_bcidataset"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L280",
+      "weight": 1.0,
+      "source": "last_bci_dataset_load_bci_iva_dataset",
+      "target": "last_bci_dataset_load_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L257",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_257",
+      "target": "last_bci_dataset_load_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "last_bci_main_main",
+      "target": "last_bci_dataset_load_dataset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_results_iv2a",
+      "target": "last_bci_dataset_load_dataset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_results_iv2b",
+      "target": "last_bci_dataset_load_dataset"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L279",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_279",
+      "target": "last_bci_dataset_load_bci_iva_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L302",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_pretrain_data",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L302",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_pretrain_data",
+      "target": "last_bci_dataset_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L308",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_pretrain_data",
+      "target": "last_bci_dataset_dual_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L308",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_pretrain_data",
+      "target": "last_bci_dataset_inv_sqrt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L308",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_pretrain_data",
+      "target": "last_bci_dataset_ea_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L308",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_pretrain_data",
+      "target": "last_bci_dataset_ca_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L285",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_285",
+      "target": "last_bci_dataset_prepare_pretrain_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L96",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within",
+      "target": "last_bci_dataset_prepare_pretrain_data"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L425",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_stratified_split",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L479",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_stratified_split",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L543",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_loso_data",
+      "target": "last_bci_dataset_stratified_split",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L321",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_321",
+      "target": "last_bci_dataset_stratified_split",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L538",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_loso_data",
+      "target": "last_bci_dataset_per_trial_standardize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L334",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_334",
+      "target": "last_bci_dataset_per_trial_standardize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L383",
+      "weight": 1.0,
+      "source": "last_bci_dataset_whitener",
+      "target": "last_bci_dataset_ea_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L434",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_ea_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L488",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_ea_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L345",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_345",
+      "target": "last_bci_dataset_ea_reference",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_euclidean_alignment",
+      "target": "last_bci_dataset_ea_reference"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L383",
+      "weight": 1.0,
+      "source": "last_bci_dataset_whitener",
+      "target": "last_bci_dataset_inv_sqrt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L434",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_inv_sqrt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L488",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_inv_sqrt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L354",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_354",
+      "target": "last_bci_dataset_inv_sqrt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L391",
+      "weight": 1.0,
+      "source": "last_bci_dataset_dual_views",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L431",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L485",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L531",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_loso_data",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L361",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_361",
+      "target": "last_bci_dataset_ea_apply",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L385",
+      "weight": 1.0,
+      "source": "last_bci_dataset_whitener",
+      "target": "last_bci_dataset_ca_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L434",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_ca_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L488",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_ca_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L366",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_366",
+      "target": "last_bci_dataset_ca_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_riemannian_alignment",
+      "target": "last_bci_dataset_ca_whitener"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L430",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L484",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L531",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_loso_data",
+      "target": "last_bci_dataset_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L381",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_381",
+      "target": "last_bci_dataset_whitener",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_euclidean_alignment",
+      "target": "last_bci_dataset_whitener"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_riemannian_alignment",
+      "target": "last_bci_dataset_whitener"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L436",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data",
+      "target": "last_bci_dataset_dual_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L490",
+      "weight": 1.0,
+      "source": "last_bci_dataset_prepare_subject_data_cv",
+      "target": "last_bci_dataset_dual_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L390",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_390",
+      "target": "last_bci_dataset_dual_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L396",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_396",
+      "target": "last_bci_dataset_prepare_subject_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within",
+      "target": "last_bci_dataset_prepare_subject_data"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_session_holdout",
+      "target": "last_bci_dataset_prepare_subject_data"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "EEG_Augmented_Deep_Learning.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_eeg_augmented_deep_learning_augmentation",
+      "target": "last_bci_dataset_prepare_subject_data"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L456",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_456",
+      "target": "last_bci_dataset_prepare_subject_data_cv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L146",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within_cv",
+      "target": "last_bci_dataset_prepare_subject_data_cv"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "dataset.py",
+      "source_location": "L508",
+      "weight": 1.0,
+      "source": "last_bci_dataset_rationale_508",
+      "target": "last_bci_dataset_prepare_loso_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "last_bci_main_run_loso",
+      "target": "last_bci_dataset_prepare_loso_data"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_loso",
+      "target": "last_bci_dataset_prepare_loso_data"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_assert_no_leakage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_fit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_summarize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_run_within",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L132",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_run_within_cv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L165",
+      "weight": 1.0,
+      "source": "main_py",
+      "target": "last_bci_main_run_loso",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L189",
       "weight": 1.0,
       "source": "main_py",
       "target": "last_bci_main_main",
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "calls",
+      "context": "call",
       "confidence": "EXTRACTED",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L2",
+      "source_file": "main.py",
+      "source_location": "L118",
       "weight": 1.0,
-      "source": "claude_settings_local_json",
-      "target": "claude_settings_local_permissions",
+      "source": "last_bci_main_run_within",
+      "target": "last_bci_main_assert_no_leakage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within_cv",
+      "target": "last_bci_main_assert_no_leakage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L175",
+      "weight": 1.0,
+      "source": "last_bci_main_run_loso",
+      "target": "last_bci_main_assert_no_leakage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L120",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within",
+      "target": "last_bci_main_fit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L150",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within_cv",
+      "target": "last_bci_main_fit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L177",
+      "weight": 1.0,
+      "source": "last_bci_main_run_loso",
+      "target": "last_bci_main_fit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "last_bci_main_fit",
+      "target": "last_bci_train_train_model"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L129",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within",
+      "target": "last_bci_main_summarize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L162",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within_cv",
+      "target": "last_bci_main_summarize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "last_bci_main_run_loso",
+      "target": "last_bci_main_summarize",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L252",
+      "weight": 1.0,
+      "source": "last_bci_main_main",
+      "target": "last_bci_main_run_within",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "last_bci_main_rationale_92",
+      "target": "last_bci_main_run_within",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "main.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "last_bci_main_run_within",
+      "target": "last_bci_train_pretrain_model"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L254",
+      "weight": 1.0,
+      "source": "last_bci_main_main",
+      "target": "last_bci_main_run_within_cv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "last_bci_main_rationale_133",
+      "target": "last_bci_main_run_within_cv",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L256",
+      "weight": 1.0,
+      "source": "last_bci_main_main",
+      "target": "last_bci_main_run_loso",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "last_bci_main_rationale_166",
+      "target": "last_bci_main_run_loso",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": ".claude/settings.local.json",
-      "source_location": "L3",
+      "source_file": "train.py",
+      "source_location": "L10",
       "weight": 1.0,
-      "source": "claude_settings_local_permissions",
-      "target": "claude_settings_local_permissions_allow",
+      "source": "train_py",
+      "target": "last_bci_train_modelema",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_focalloss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_mixup_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_mixup_criterion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_train_one_epoch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_evaluate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_evaluate_acc_loss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_pretrain_model",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L135",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_build_optim_sched",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_tent_adapt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L188",
+      "weight": 1.0,
+      "source": "train_py",
+      "target": "last_bci_train_train_model",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "last_bci_train_modelema",
+      "target": "last_bci_train_modelema_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L223",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_modelema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "last_bci_train_train_one_epoch",
+      "target": "last_bci_train_update",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "last_bci_train_focalloss",
+      "target": "last_bci_train_focalloss_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "last_bci_train_focalloss",
+      "target": "last_bci_train_focalloss_forward",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L225",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_focalloss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "last_bci_train_train_one_epoch",
+      "target": "last_bci_train_mixup_data",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "last_bci_train_train_one_epoch",
+      "target": "last_bci_train_mixup_criterion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L233",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_train_one_epoch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L268",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_evaluate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_evaluate_acc_loss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "last_bci_train_rationale_81",
+      "target": "last_bci_train_evaluate_acc_loss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L226",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_build_optim_sched",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L282",
+      "weight": 1.0,
+      "source": "last_bci_train_train_model",
+      "target": "last_bci_train_tent_adapt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L145",
+      "weight": 1.0,
+      "source": "last_bci_train_rationale_145",
+      "target": "last_bci_train_tent_adapt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_im_tta",
+      "target": "last_bci_train_tent_adapt"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_diversity_term",
+      "target": "last_bci_train_tent_adapt"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "train.py",
+      "source_location": "L195",
+      "weight": 1.0,
+      "source": "last_bci_train_rationale_195",
+      "target": "last_bci_train_train_model",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_leakfree_eval",
+      "target": "last_bci_train_train_model"
     },
     {
       "relation": "conceptually_related_to",
@@ -645,106 +4110,6 @@
       "relation": "conceptually_related_to",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 134,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_gdcnet",
-      "target": "eeg_augmented_deep_learning_dcgan"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 176,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_gdcnet",
-      "target": "eeg_augmented_deep_learning_cnn_lstm"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 74,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_gdcnet",
-      "target": "eeg_augmented_deep_learning_bci_competition_iv_2b"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 112,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_gdcnet",
-      "target": "eeg_augmented_deep_learning_gmwt"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 31,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_gdcnet",
-      "target": "eeg_augmented_deep_learning_left_right_hand_mi"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 1,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_gdcnet",
-      "target": "ctnet_paper_ctnet"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 1,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_dcgan",
-      "target": "eeg_augmented_deep_learning_gmwt"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 176,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_cnn_lstm",
-      "target": "ctnet_paper_cnn_transformer_hybrid"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/EEG Augmented Deep Learning.md",
-      "source_location": 795,
-      "weight": 1.0,
-      "source": "eeg_augmented_deep_learning_bci_competition_iv_2b",
-      "target": "bci_dataset_description_graz_dataset"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/CTNet_paper.md",
-      "source_location": 257,
-      "weight": 1.0,
-      "source": "ctnet_paper_ctnet",
-      "target": "eeg_augmented_deep_learning_bci_competition_iv_2b"
-    },
-    {
-      "relation": "conceptually_related_to",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
       "source_file": "papers/bci_dataset_description.md",
       "source_location": 12,
       "weight": 1.0,
@@ -830,25 +4195,49 @@
       "weight": 1.0,
       "source": "ctnet_paper_ctnet",
       "target": "ctnet_paper_cross_subject"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_diversity_term",
+      "target": "last_bci_architecture_im_tta"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "RESULTS.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_im_tta",
+      "target": "last_bci_architecture_loso"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_dual_fusion",
+      "target": "last_bci_architecture_euclidean_alignment"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "ARCHITECTURE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "last_bci_architecture_dual_fusion",
+      "target": "last_bci_architecture_riemannian_alignment"
     }
   ],
   "hyperedges": [
-    {
-      "id": "bci_competition_datasets",
-      "label": "BCI Competition IV Datasets",
-      "nodes": [
-        "transformer_mi_eeg_paper_bci_competition_iv_2a",
-        "eeg_augmented_deep_learning_bci_competition_iv_2b",
-        "bci_dataset_description_graz_dataset",
-        "bci_dataset_description_9_subjects",
-        "bci_dataset_description_4_classes",
-        "bci_dataset_description_22_channels"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "papers/bci_dataset_description.md"
-    },
     {
       "id": "transformer_bci_models",
       "label": "Transformer-based BCI Models",
@@ -878,6 +4267,49 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "papers/transformer_mi_eeg_paper.md"
+    },
+    {
+      "id": "bci_competition_datasets",
+      "label": "BCI Competition IV Datasets",
+      "nodes": [
+        "transformer_mi_eeg_paper_bci_competition_iv_2a",
+        "eeg_augmented_deep_learning_bci_competition_iv_2b",
+        "bci_dataset_description_graz_dataset",
+        "bci_dataset_description_9_subjects",
+        "bci_dataset_description_4_classes",
+        "bci_dataset_description_22_channels"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "papers/bci_dataset_description.md"
+    },
+    {
+      "id": "alignment_family",
+      "label": "Covariance alignment family",
+      "nodes": [
+        "last_bci_architecture_euclidean_alignment",
+        "last_bci_architecture_riemannian_alignment",
+        "last_bci_architecture_dual_fusion"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "ARCHITECTURE.md"
+    },
+    {
+      "id": "unified_pipeline",
+      "label": "RA + EEGNet + IM-TTA pipeline",
+      "nodes": [
+        "last_bci_architecture_riemannian_alignment",
+        "last_bci_model_unifiedeegnet",
+        "last_bci_architecture_im_tta"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "ARCHITECTURE.md"
     }
-  ]
+  ],
+  "built_at_commit": "7ca66d9339e6110a65ad13384d1777bddacf2973"
 }
