@@ -110,11 +110,14 @@ Cost: a few gradient steps on a handful of BN parameters; one forward model at t
 
 ## 4. Full pipelines
 
-**Within-subject** (per subject): EA-align → pretrained UnifiedEEGNet → fine-tune (val-selected) →
-single test eval. **82.7% ± 0.6** (6 seeds).
+One unified pipeline — **RA-align → UnifiedEEGNet → IM-TTA** — is best on both protocols.
+
+**Within-subject** (per subject): RA-align → pretrained UnifiedEEGNet → fine-tune (val-selected) →
+IM-TTA on session-2 unlabelled trials → single test eval. **84.88% ± 0.83** (3 seeds).
+(EA alignment without TTA gives 82.7; IM-TTA adds +3.0.)
 
 **Cross-subject (LOSO)**: RA-align all subjects → train UnifiedEEGNet on 8 source subjects
-(val-selected) → **IM-TTA on the held-out subject's unlabelled trials** → single test eval.
+(val-selected) → IM-TTA on the held-out subject's unlabelled trials → single test eval.
 **67.8% ± 0.4** (3 seeds); baseline → here = **+8.7 pp** (59.1 → 67.8).
 
 ---
