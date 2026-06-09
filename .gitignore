@@ -13,3 +13,6 @@ wheels/
 /results_*.csv
 /logs/
 models/
+
+# Reference papers (local only)
+papers/
