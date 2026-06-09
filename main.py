@@ -9,8 +9,10 @@ import torch
 from model import (FreqAwareEEGNet, UnifiedEEGNet, AlignedEEGNet,
                    AdaptiveAlignEEGNet, DualAlignEEGNet)
 from dataset import (
-    load_bci_iva_dataset,
+    load_dataset,
+    DATASETS,
     prepare_subject_data,
+    prepare_subject_data_cv,
     prepare_loso_data,
     prepare_pretrain_data,
 )
@@ -48,7 +50,7 @@ def assert_no_leakage(X_train, X_val, X_test, y_train, y_val, y_test):
 
 def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
          pretrained_state, expand=1, refit=False, epochs=EPOCHS, patience=PATIENCE, seed=SEED,
-         tta_steps=0, tta_div=1.0):
+         tta_steps=0, tta_div=1.0, n_classes=4, n_channels=22):
     return train_model(
         X_train, y_train, X_val, y_val, X_test, y_test,
         model_class=model_class,
@@ -68,6 +70,8 @@ def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
         refit=refit,
         tta_steps=tta_steps,
         tta_div=tta_div,
+        n_classes=n_classes,
+        n_channels=n_channels,
     )
 
 
@@ -87,7 +91,7 @@ def _summarize(results, label, model_name, out_path):
 def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Within-subject (session 1 -> train/val, session 2 -> test), leak-free."""
     pretrained_path = os.path.join(script_dir, 'models',
-                                   f'pretrained_{model_name}_{cfg.align}_s{cfg.seed}{cfg.tagsuffix}.pt')
+                                   f'pretrained_{cfg.dataset}_{model_name}_{cfg.align}_s{cfg.seed}{cfg.tagsuffix}.pt')
     print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
     X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta, align=cfg.align)
     if os.path.exists(pretrained_path):
@@ -98,13 +102,13 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
         pretrained_state = pretrain_model(
             X_pretrain, y_pretrain, model_class=model_class, device=device,
             save_path=pretrained_path, epochs=cfg.pretrain_epochs, batch_size=BATCH_SIZE,
-            lr=LR, weight_decay=WEIGHT_DECAY,
+            lr=LR, weight_decay=WEIGHT_DECAY, n_classes=cfg.n_classes, n_channels=cfg.n_channels,
         )
 
     print(f"\n[within] Fine-tuning {model_class.__name__} per subject "
           f"(val_frac={cfg.val_frac}, expand={cfg.aug_expand}, refit={cfg.refit})...")
     subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
-    out_path = os.path.join(script_dir, f'results_within_honest_{model_name}{cfg.tagsuffix}.csv')
+    out_path = os.path.join(script_dir, f'results_within_honest_{cfg.dataset}_{model_name}{cfg.tagsuffix}.csv')
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
@@ -115,19 +119,62 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
                         pretrained_state, expand=cfg.aug_expand, refit=cfg.refit,
                         epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
-                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div)
+                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
+                        n_classes=cfg.n_classes, n_channels=cfg.n_channels)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
         print(f"    [within] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
-    return _summarize(results, f'WITHIN-SUBJECT (honest){cfg.tagsuffix}', model_class.__name__, out_path)
+    return _summarize(results, f'WITHIN-SUBJECT {cfg.dataset}{cfg.tagsuffix}', model_class.__name__, out_path)
+
+
+def run_within_cv(X, y, meta, model_class, model_name, device, script_dir, cfg):
+    """Within-subject k-fold CV (sessions pooled). Uniform across datasets.
+
+    Per held-out subject: pretrain on the OTHER subjects only (so the init never sees
+    the test subject's trials), then run K stratified folds; average folds per subject.
+    """
+    subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
+    all_subjects = sorted(int(s) for s in np.unique(meta['subject']))
+    out_path = os.path.join(script_dir, f'results_within_cv_{cfg.dataset}_{model_name}{cfg.tagsuffix}.csv')
+    print(f"\n[within_cv] {model_class.__name__} {cfg.kfolds}-fold, align={cfg.align}, "
+          f"tta_steps={cfg.tta_steps}; pretrain on other subjects per fold-group")
+    results = []
+    for subject in subjects:
+        # Cross-subject pretrain on the OTHER subjects' session-1 (excludes held subject).
+        others_mask = np.isin(meta['subject'].values, [s for s in all_subjects if s != subject])
+        Xo, yo, mo = X[others_mask], y[others_mask], meta[others_mask]
+        Xp, yp = prepare_pretrain_data(Xo, yo, mo, align=cfg.align)
+        pstate = pretrain_model(Xp, yp, model_class=model_class, device=device,
+                                save_path=None, epochs=cfg.pretrain_epochs, batch_size=BATCH_SIZE,
+                                lr=LR, weight_decay=WEIGHT_DECAY,
+                                n_classes=cfg.n_classes, n_channels=cfg.n_channels)
+        fold_accs = []
+        for fold in range(cfg.kfolds):
+            X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data_cv(
+                X, y, meta, subject, n_splits=cfg.kfolds, fold=fold,
+                val_frac=cfg.val_frac, seed=cfg.seed, align=cfg.align)
+            assert_no_leakage(X_tr, X_va, X_te, y_tr, y_va, y_te)
+            acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
+                       pstate, expand=cfg.aug_expand, refit=cfg.refit,
+                       epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
+                       tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
+                       n_classes=cfg.n_classes, n_channels=cfg.n_channels)
+            fold_accs.append(acc)
+        subj_acc = float(np.mean(fold_accs))
+        results.append({'subject': subject, 'test_acc': subj_acc, 'model': model_class.__name__})
+        df = pd.DataFrame(results)
+        df.to_csv(out_path, index=False)
+        print(f"    [within_cv] Subject {subject}: {subj_acc*100:.2f}% | running mean "
+              f"{df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
+    return _summarize(results, f'WITHIN-CV {cfg.dataset}{cfg.tagsuffix}', model_class.__name__, out_path)
 
 
 def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
     """Leave-one-subject-out cross-subject, trained from scratch on the 8-subject pool."""
     print(f"\n[loso] Cross-subject (LOSO) for {model_class.__name__} — no pretrain, from scratch...")
     subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
-    out_path = os.path.join(script_dir, f'results_loso_{model_name}{cfg.tagsuffix}.csv')
+    out_path = os.path.join(script_dir, f'results_loso_{cfg.dataset}_{model_name}{cfg.tagsuffix}.csv')
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_loso_data(X, y, meta, subject,
@@ -138,20 +185,24 @@ def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
         test_acc = _fit(X_tr, y_tr, X_va, y_va, X_te, y_te, model_class, device,
                         pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
                         epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
-                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div)
+                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
+                        n_classes=cfg.n_classes, n_channels=cfg.n_channels)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
         print(f"    [loso] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
-    return _summarize(results, f'CROSS-SUBJECT LOSO{cfg.tagsuffix}', model_class.__name__, out_path)
+    return _summarize(results, f'CROSS-SUBJECT LOSO {cfg.dataset}{cfg.tagsuffix}', model_class.__name__, out_path)
 
 
 def main():
     parser = argparse.ArgumentParser(description='BCI Competition IV-2a training (leak-free)')
     parser.add_argument('--model', choices=list(MODEL_MAP.keys()), default='unified',
                         help='Model architecture to use')
-    parser.add_argument('--protocol', choices=['within', 'loso', 'both'], default='within',
-                        help='Evaluation protocol: within-subject, cross-subject LOSO, or both')
+    parser.add_argument('--dataset', choices=list(DATASETS.keys()), default='iv2a',
+                        help='Dataset: iv2a (4-class) or iv2b (2-class)')
+    parser.add_argument('--protocol', choices=['within', 'within_cv', 'loso', 'both'], default='within',
+                        help='within (session-based) | within_cv (k-fold) | loso | both')
+    parser.add_argument('--kfolds', type=int, default=5, help='Folds for within_cv')
     parser.add_argument('--fmin', type=float, default=0.5, help='Band-pass low cutoff (Hz)')
     parser.add_argument('--fmax', type=float, default=100.0, help='Band-pass high cutoff (Hz)')
     parser.add_argument('--aug_expand', type=int, default=1, help='Replicate augmented train epochs')
@@ -178,9 +229,6 @@ def main():
     args.tagsuffix = f'_{args.tag}' if args.tag else ''
     args.subject_list = [int(s) for s in args.subjects.split(',') if s.strip()] if args.subjects else None
     model_class = MODEL_MAP[args.model]
-    print(f"Model: {model_class.__name__} ({args.model}) | Protocol: {args.protocol} | "
-          f"band={args.fmin}-{args.fmax}Hz expand={args.aug_expand} val_frac={args.val_frac} "
-          f"refit={args.refit} align={args.align} tag='{args.tag}'")
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
@@ -192,25 +240,32 @@ def main():
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    print("\nLoading BCI Competition IV-2a (MOABB)...")
-    X, y, meta = load_bci_iva_dataset(fmin=args.fmin, fmax=args.fmax)
-    print(f"    X: {X.shape}, y: {y.shape}")
+    print(f"\nLoading dataset '{args.dataset}' (MOABB)...")
+    X, y, meta, n_classes, n_channels = load_dataset(args.dataset, fmin=args.fmin, fmax=args.fmax)
+    args.n_classes, args.n_channels = n_classes, n_channels
+    print(f"Model: {model_class.__name__} ({args.model}) | Dataset: {args.dataset} "
+          f"(classes={n_classes}, ch={n_channels}) | Protocol: {args.protocol} | "
+          f"band={args.fmin}-{args.fmax}Hz align={args.align} tta_steps={args.tta_steps} "
+          f"seed={args.seed} tag='{args.tag}'")
     print(f"    Subjects: {sorted(np.unique(meta['subject']).tolist())}")
-    sessions_per_subj = meta.groupby('subject')['session'].nunique().to_dict()
-    assert all(v == 2 for v in sessions_per_subj.values()), \
-        f"Expected 2 sessions per subject, got {sessions_per_subj}"
+
+    if args.protocol in ('within', 'both'):
+        sps = meta.groupby('subject')['session'].nunique().to_dict()
+        assert all(v >= 2 for v in sps.values()), \
+            f"session-based within needs >=2 sessions/subject, got {sps}"
 
     means = {}
     if args.protocol in ('within', 'both'):
         means['within'] = run_within(X, y, meta, model_class, args.model, device, script_dir, args)
+    if args.protocol == 'within_cv':
+        means['within_cv'] = run_within_cv(X, y, meta, model_class, args.model, device, script_dir, args)
     if args.protocol in ('loso', 'both'):
         means['loso'] = run_loso(X, y, meta, model_class, args.model, device, script_dir, args)
 
     print("\n" + "=" * 60)
-    print(f"SUMMARY ({model_class.__name__})")
+    print(f"SUMMARY ({model_class.__name__}, {args.dataset})")
     for k, v in means.items():
-        print(f"  {k:8s}: {v*100:.2f}%")
-    print("Reference SOTA (within-subject, 4-class): CTNet 82.52 / MSCARNet 82.66 / EEGEncoder 86.46")
+        print(f"  {k:10s}: {v*100:.2f}%")
     return float(np.mean(list(means.values()))) if means else 0.0
 
 

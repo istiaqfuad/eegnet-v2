@@ -93,14 +93,15 @@ def evaluate_acc_loss(model, loader, device):
 
 
 def pretrain_model(X_pretrain, y_pretrain, model_class, device, save_path=None,
-                   epochs=200, batch_size=64, lr=0.001, weight_decay=0.02):
+                   epochs=200, batch_size=64, lr=0.001, weight_decay=0.02,
+                   n_classes=4, n_channels=22):
     from dataset import BCIDataset
 
-    print(f"    Pre-training on {len(X_pretrain)} trials (session 1 of all subjects)")
+    print(f"    Pre-training on {len(X_pretrain)} trials")
     train_dataset = BCIDataset(X_pretrain, y_pretrain, augment=True, use_sr=True)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
-    model = model_class(n_classes=4, n_channels=22).to(device)
+    model = model_class(n_classes=n_classes, n_channels=n_channels).to(device)
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
@@ -190,7 +191,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
                 label_smoothing=0.1, patience=150,
                 pretrained_state=None, use_ema=True, ema_decay=0.999,
                 use_focal_loss=False, expand=1, refit=False, tta_steps=0, tta_lr=1e-3,
-                tta_div=1.0):
+                tta_div=1.0, n_classes=4, n_channels=22):
     """Leak-free training.
 
     Model selection and early stopping use ONLY the validation set (X_val/y_val),
@@ -214,7 +215,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    model = model_class(n_classes=4, n_channels=22).to(device)
+    model = model_class(n_classes=n_classes, n_channels=n_channels).to(device)
     if pretrained_state is not None:
         model.load_state_dict(pretrained_state, strict=False)
         print(f"      Loaded pretrained weights (seed {seed})", flush=True)
@@ -256,7 +257,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
         refit_loader = DataLoader(refit_ds, batch_size=batch_size, shuffle=True, num_workers=0)
         torch.manual_seed(seed)
         np.random.seed(seed)
-        rmodel = model_class(n_classes=4, n_channels=22).to(device)
+        rmodel = model_class(n_classes=n_classes, n_channels=n_channels).to(device)
         if pretrained_state is not None:
             rmodel.load_state_dict(pretrained_state, strict=False)
         rcrit = FocalLoss(gamma=2.0) if use_focal_loss else nn.CrossEntropyLoss(label_smoothing=label_smoothing)

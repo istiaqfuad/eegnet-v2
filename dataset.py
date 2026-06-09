@@ -241,24 +241,40 @@ class BCIDataset(Dataset):
         return x, y
 
 
-def load_bci_iva_dataset(fmin=0.5, fmax=100.0):
-    """Load BCI Competition IV-2a dataset using MOABB.
+# Dataset registry: name -> (MOABB dataset class name, n_classes)
+DATASETS = {
+    'iv2a': ('BNCI2014_001', 4),   # BCI IV-2a: 22 ch, 4 class, 2 sessions
+    'iv2b': ('BNCI2014_004', 2),   # BCI IV-2b: 3 ch,  2 class, 5 sessions
+}
 
-    Band-pass [fmin, fmax] Hz is configurable: broadband 0.5-100 keeps gamma but
-    also drift/line/EMG; the motor-imagery mu/beta rhythms live in ~4-40 Hz, so a
-    narrower band often denoises EEGNet-style models.
+LABEL_MAP = {'left_hand': 0, 'right_hand': 1, 'feet': 2, 'tongue': 3}
+
+
+def load_dataset(name='iv2a', fmin=0.5, fmax=100.0):
+    """Load a MOABB MotorImagery dataset by registry name.
+
+    Band-pass [fmin, fmax] Hz is configurable. Returns
+    (X, y, meta, n_classes, n_channels); n_channels is inferred from the data.
     """
+    import moabb.datasets as mds
     from moabb.paradigms import MotorImagery
-    from moabb.datasets import BNCI2014_001
 
-    paradigm = MotorImagery(n_classes=4, channels=None, fmin=fmin, fmax=fmax)
-    dataset = BNCI2014_001()
+    assert name in DATASETS, f"unknown dataset {name}; choices={list(DATASETS)}"
+    ds_name, n_classes = DATASETS[name]
+    paradigm = MotorImagery(n_classes=n_classes, channels=None, fmin=fmin, fmax=fmax)
+    dataset = getattr(mds, ds_name)()
     dataset.download()
     X, y, meta = paradigm.get_data(dataset)
 
-    label_map = {'left_hand': 0, 'right_hand': 1, 'feet': 2, 'tongue': 3}
-    y = np.array([label_map[l] for l in y])
+    y = np.array([LABEL_MAP[l] for l in y])
+    n_channels = X.shape[1]
+    print(f"    Dataset {name} ({ds_name}): X={X.shape}, classes={n_classes}, channels={n_channels}")
+    return X, y, meta, n_classes, n_channels
 
+
+def load_bci_iva_dataset(fmin=0.5, fmax=100.0):
+    """Backwards-compatible alias for the IV-2a loader (returns X, y, meta)."""
+    X, y, meta, _, _ = load_dataset('iv2a', fmin, fmax)
     return X, y, meta
 
 
@@ -428,6 +444,59 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
           f"(session {sessions_sorted[0]}), test={len(y_test)} (session {sessions_sorted[1]}); "
           f"align={align}; z-score from train only", flush=True)
     return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def prepare_subject_data_cv(X, y, meta, subject, n_splits=5, fold=0, val_frac=0.2,
+                            seed=42, align='none'):
+    """
+    Within-subject k-fold CV split (sessions pooled), leak-free. Uniform protocol for
+    datasets without a clean 2-session train/test layout (e.g. IV-2b, 5 sessions).
+
+      All of a subject's trials -> StratifiedKFold(n_splits); fold `fold` = test,
+      the rest = train; a stratified val_frac is held out of train for selection.
+
+    Alignment (EA/RA/dual) references are fit on the TRAIN portion (applied to train+val)
+    and on the test fold's own trials (label-free). Z-score from train only. Test fold is
+    evaluated exactly once. Returns (X_train, X_val, X_test, y_train, y_val, y_test).
+    """
+    from sklearn.model_selection import StratifiedKFold
+
+    subject_idx = meta['subject'].values == subject
+    Xs = X[subject_idx][:, :, :1000].copy()
+    ys = y[subject_idx].copy()
+
+    skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+    splits = list(skf.split(Xs, ys))
+    tr_full, te = splits[fold]
+    X_te, y_test = Xs[te], ys[te]
+
+    ytf = ys[tr_full]
+    rel_tr, rel_va = _stratified_split(ytf, val_frac, seed)
+    X_train, y_train = Xs[tr_full[rel_tr]], ytf[rel_tr]
+    X_val, y_val = Xs[tr_full[rel_va]], ytf[rel_va]
+
+    if align in ('ea', 'ra'):
+        Wtr = _whitener(X_train, align)
+        X_train, X_val = _ea_apply(X_train, Wtr), _ea_apply(X_val, Wtr)
+        X_te = _ea_apply(X_te, _whitener(X_te, align))
+    elif align == 'dual':
+        We, Wr = _inv_sqrt(_ea_reference(X_train)), _ca_whitener(X_train)
+        Wee, Wrr = _inv_sqrt(_ea_reference(X_te)), _ca_whitener(X_te)
+        X_train = _dual_views(X_train, We, Wr)
+        X_val = _dual_views(X_val, We, Wr)
+        X_te = _dual_views(X_te, Wee, Wrr)
+
+    mean = X_train.mean().astype(np.float32)
+    std = X_train.std().astype(np.float32) + 1e-8
+
+    def norm(a):
+        return ((a.astype(np.float32) - mean) / std).astype(np.float32)
+
+    X_train, X_val, X_te = norm(X_train), norm(X_val), norm(X_te)
+
+    print(f"    [no-leakage] Subject {subject} fold {fold+1}/{n_splits}: train={len(y_train)} "
+          f"val={len(y_val)} test={len(y_test)}; align={align}; z-score from train only", flush=True)
+    return X_train, X_val, X_te, y_train, y_val, y_test
 
 
 def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42, align='none'):
