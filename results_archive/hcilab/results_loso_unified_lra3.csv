@@ -1,0 +1,4 @@
+subject,test_acc,model
+1,0.7760416666666666,UnifiedEEGNet
+2,0.4947916666666667,UnifiedEEGNet
+5,0.5225694444444444,UnifiedEEGNet
