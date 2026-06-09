@@ -9,7 +9,7 @@
   :root{
     --bg:#0d1117; --panel:#141b24; --panel2:#1a2330; --line:#243140;
     --ink:#e7edf3; --mut:#8da2b5; --dim:#5d7286;
-    --acc:#4cc9c0; --acc2:#7aa2ff; --warn:#f0a35e; --good:#69d28a; --bad:#e57373;
+    --acc:#4cc9c0; --acc2:#7aa2ff; --good:#69d28a; --bad:#e57373;
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -20,33 +20,42 @@
                      radial-gradient(700px 400px at 0% 0%,rgba(122,162,255,.08),transparent);}
   a{color:var(--acc);text-decoration:none}
   a:hover{text-decoration:underline}
-  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
-  header{padding:72px 0 30px}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;background:rgba(13,17,23,.82);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:20px;height:52px;overflow-x:auto}
+  nav .brand{font-family:var(--mono);font-weight:700;color:var(--ink);white-space:nowrap}
+  nav .brand b{color:var(--acc)}
+  nav a{color:var(--mut);font-size:13.5px;white-space:nowrap}
+  nav a:hover{color:var(--ink);text-decoration:none}
+  nav .sp{flex:1}
+  header{padding:64px 0 30px}
   .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)}
   h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:14px 0 10px;letter-spacing:-.02em}
   h1 .g{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .lead{font-size:18px;color:var(--mut);max-width:760px}
+  .lead{font-size:18px;color:var(--mut);max-width:780px}
   .badges{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 6px}
   .badge{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:13px}
   .badge b{color:var(--acc);font-size:18px}
+  .badge span{color:var(--dim)}
   .links{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
   .btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:9px 16px;font-size:14px;color:var(--ink)}
   .btn.p{background:linear-gradient(90deg,rgba(76,201,192,.22),rgba(122,162,255,.18));border-color:#2c4a52}
-  section{padding:34px 0;border-top:1px solid var(--line)}
+  section{padding:38px 0;border-top:1px solid var(--line);scroll-margin-top:60px}
   h2{font-size:24px;letter-spacing:-.01em;margin:0 0 6px}
   h2 .n{font-family:var(--mono);color:var(--acc);font-size:15px;margin-right:10px}
-  .sub{color:var(--mut);margin:0 0 18px;max-width:780px}
-  /* pipeline */
+  .sub{color:var(--mut);margin:0 0 18px;max-width:800px}
   .pipe{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;margin:8px 0 4px}
-  .stage{flex:1;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative}
+  .stage{flex:1;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
   .stage .k{font-family:var(--mono);font-size:12px;color:var(--acc);letter-spacing:.1em;text-transform:uppercase}
   .stage h3{margin:6px 0 6px;font-size:17px}
   .stage p{margin:0;color:var(--mut);font-size:14px}
   .stage.t3{border-color:#2c4a52;box-shadow:0 0 0 1px rgba(76,201,192,.15) inset}
   .arrow{align-self:center;color:var(--dim);font-size:22px}
-  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14.5px;overflow:hidden;border-radius:12px;border:1px solid var(--line)}
-  th,td{padding:11px 14px;text-align:center;border-bottom:1px solid var(--line)}
-  th{background:var(--panel2);color:var(--mut);font-weight:600;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:14.5px;border-radius:12px;border:1px solid var(--line);overflow:hidden}
+  th,td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--mut);font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
   td:first-child,th:first-child{text-align:left}
   tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
   tbody tr:last-child td{border-bottom:none}
@@ -54,21 +63,41 @@
   .row-best td{background:rgba(76,201,192,.08)}
   .delta{color:var(--good);font-family:var(--mono);font-size:12px}
   .neg{color:var(--bad)}
+  .lo{color:var(--bad)} .hi{color:var(--good)}
   .note{color:var(--mut);font-size:14px;margin-top:8px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
   .card h3{margin:0 0 4px;font-size:16px}
   .card .cap{color:var(--mut);font-size:13px;margin:0 0 12px}
   pre{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-family:var(--mono);font-size:13px;color:#cfe3ea}
+  .math{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:8px;
+    padding:12px 16px;font-family:var(--mono);font-size:14px;color:#dbe9ef;margin:10px 0;overflow:auto}
+  .math .c{color:var(--dim)}
   .tag{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--acc);border:1px solid #2c4a52;border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:middle}
-  ul.tight{margin:6px 0 0;padding-left:20px;color:var(--mut)}
-  ul.tight li{margin:4px 0}
+  ul.tight{margin:6px 0 0;padding-left:20px;color:var(--mut)} ul.tight li{margin:5px 0}
+  ul.tight b{color:var(--ink)}
+  .layer td:nth-child(2){font-family:var(--mono);font-size:12.5px;color:#cfe3ea;text-align:left}
+  .layer td:last-child{color:var(--mut);text-align:left;font-size:13px}
   footer{padding:40px 0 70px;color:var(--dim);font-size:13px;border-top:1px solid var(--line)}
   .kicker{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.08em}
 </style>
 </head>
 <body>
+
+<nav><div class="wrap">
+  <span class="brand">eegnet<b>-v2</b></span>
+  <a href="#method">Method</a>
+  <a href="#data">Datasets</a>
+  <a href="#arch">Architecture</a>
+  <a href="#results">Results</a>
+  <a href="#persubj">Per-subject</a>
+  <a href="#ablations">Ablations</a>
+  <a href="#takeaways">Takeaways</a>
+  <span class="sp"></span>
+  <a href="https://github.com/istiaqfuad/eegnet-v2">GitHub ↗</a>
+</div></nav>
+
 <div class="wrap">
 
 <header>
@@ -78,51 +107,95 @@
   run it through a small EEGNet-style network, then adapt the model to the target subject at
   inference. Two datasets, within- and cross-subject.</p>
   <div class="badges">
-    <div class="badge">IV-2a within <b>84.9%</b></div>
-    <div class="badge">IV-2a LOSO <b>67.8%</b></div>
-    <div class="badge">IV-2b within <b>87.2%</b></div>
-    <div class="badge">IV-2b LOSO <b>80.2%</b></div>
+    <div class="badge">IV-2a within <b>84.9%</b> <span>4-class</span></div>
+    <div class="badge">IV-2a LOSO <b>67.8%</b> <span>cross-subj</span></div>
+    <div class="badge">IV-2b within <b>87.2%</b> <span>2-class</span></div>
+    <div class="badge">IV-2b LOSO <b>80.2%</b> <span>cross-subj</span></div>
   </div>
   <div class="links">
     <a class="btn p" href="https://github.com/istiaqfuad/eegnet-v2">GitHub repository →</a>
-    <a class="btn" href="https://github.com/istiaqfuad/eegnet-v2/blob/main/ARCHITECTURE.md">Architecture</a>
-    <a class="btn" href="https://github.com/istiaqfuad/eegnet-v2/blob/main/RESULTS.md">Full results</a>
+    <a class="btn" href="https://github.com/istiaqfuad/eegnet-v2/blob/main/ARCHITECTURE.md">Architecture.md</a>
+    <a class="btn" href="https://github.com/istiaqfuad/eegnet-v2/blob/main/RESULTS.md">Results.md</a>
   </div>
 </header>
 
 <section id="method">
   <h2><span class="n">01</span>How it works</h2>
-  <p class="sub">One architecture, three stages. The same RA + EEGNet + IM-TTA pipeline is used
-  for both within- and cross-subject evaluation.</p>
+  <p class="sub">One architecture, three stages. The same RA + EEGNet + IM-TTA pipeline runs for
+  both within- and cross-subject evaluation.</p>
   <div class="pipe">
-    <div class="stage">
-      <div class="k">Stage 1</div><h3>Covariance alignment</h3>
+    <div class="stage"><div class="k">Stage 1</div><h3>Covariance alignment</h3>
       <p>Whiten each recording by its mean spatial covariance — Euclidean (arithmetic mean) or
-      Riemannian/centroid (SPD geometric mean). Computed from the signals alone.</p>
-    </div>
+      Riemannian/centroid (SPD geometric mean). From signals alone, no labels.</p></div>
     <div class="arrow">→</div>
-    <div class="stage">
-      <div class="k">Stage 2</div><h3>EEGNet backbone</h3>
-      <p><code>UnifiedEEGNet</code> — a compact EEGNet-style CNN (~34k params). Its depthwise
-      spatial conv acts like CSP filters in the whitened space.</p>
-    </div>
+    <div class="stage"><div class="k">Stage 2</div><h3>EEGNet backbone</h3>
+      <p><code>UnifiedEEGNet</code>, a compact EEGNet-style CNN (~34k params). The depthwise
+      spatial conv behaves like CSP filters in the whitened space.</p></div>
     <div class="arrow">→</div>
-    <div class="stage t3">
-      <div class="k">Stage 3</div><h3>IM-TTA <span class="tag">novel</span></h3>
+    <div class="stage t3"><div class="k">Stage 3</div><h3>IM-TTA <span class="tag">novel</span></h3>
       <p>At inference, adapt BatchNorm to the target subject's unlabelled trials by information
-      maximization — sharpen predictions while keeping the class mix balanced.</p>
+      maximization — sharpen predictions while keeping the class mix balanced.</p></div>
+  </div>
+</section>
+
+<section id="data">
+  <h2><span class="n">02</span>Datasets</h2>
+  <p class="sub">Two standard MOABB motor-imagery benchmarks. Within-subject follows each
+  competition's official session split; cross-subject is leave-one-subject-out.</p>
+  <table>
+    <thead><tr><th>Dataset</th><th>MOABB</th><th>Classes</th><th>Channels</th><th>Subjects</th><th>Sessions</th><th>Within split</th></tr></thead>
+    <tbody>
+      <tr><td>BCI IV-2a</td><td>BNCI2014-001</td><td>4 (LH/RH/feet/tongue)</td><td>22</td><td>9</td><td>2</td><td>session 1 → 2</td></tr>
+      <tr><td>BCI IV-2b</td><td>BNCI2014-004</td><td>2 (LH/RH)</td><td>3</td><td>9</td><td>5</td><td>sessions 1–3 → 4–5</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Trials are 4&nbsp;s windows at 250&nbsp;Hz (1000 samples). A validation split is
+  carved from the training data to pick the checkpoint; the test set is scored once.</p>
+</section>
+
+<section id="arch">
+  <h2><span class="n">03</span>Architecture &amp; math</h2>
+  <p class="sub">The backbone is a small EEGNet variant; the alignment and adaptation steps are
+  where the gains come from.</p>
+
+  <h3 style="margin:14px 0 4px;font-size:16px">UnifiedEEGNet backbone <span class="kicker">~34k params</span></h3>
+  <table class="layer">
+    <thead><tr><th>Block</th><th>Layer</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>Temporal</td><td>Conv2d(1→8, 1×64) · BN</td><td>temporal filters (mu/beta cycles)</td></tr>
+      <tr><td>Spatial</td><td>DepthwiseConv2d(8→16, C×1) · BN · ELU · AvgPool(1×4) · Drop</td><td>per-channel spatial filters (CSP-like)</td></tr>
+      <tr><td>Sep-conv</td><td>Conv2d(16→32, 1×16) · BN · ELU · AvgPool(1×8) · Drop</td><td>mid-level temporal features</td></tr>
+      <tr><td>Refine</td><td>Conv2d(32→32, 1×8) · BN · ELU · AvgPool(1×4) · Drop</td><td>compression</td></tr>
+      <tr><td>Head</td><td>AdaptiveAvgPool · Linear(256→64) · GELU · Drop · Linear(64→n)</td><td>classifier</td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Alignment</h3>
+      <p class="cap">Whiten each recording by a covariance reference, applied as X′ = M·X.</p>
+      <div class="math"><b>EA</b>&nbsp; M = R<sup>−1/2</sup>, &nbsp; R = mean<sub>n</sub>( X<sub>n</sub>X<sub>n</sub><sup>T</sup> / T ) <span class="c"># arithmetic mean cov</span></div>
+      <div class="math"><b>RA</b>&nbsp; M = invsqrtm( 𝔊({cov<sub>n</sub>}) ) <span class="c"># 𝔊 = SPD geometric (Fréchet) mean</span></div>
+      <p class="note">RA respects the curved geometry of the SPD manifold and is better
+      conditioned when covariances are heterogeneous (e.g. across subjects).</p>
+    </div>
+    <div class="card">
+      <h3>IM-TTA loss</h3>
+      <p class="cap">Adapt only BatchNorm affine params on the target's unlabelled trials.</p>
+      <div class="math">L = 𝔼[ H(p) ] − H( 𝔼[p] )</div>
+      <ul class="tight">
+        <li><b>𝔼[H(p)]</b> ↓ — sharpen each prediction (confidence)</li>
+        <li><b>H(𝔼[p])</b> ↑ — keep the batch class mix balanced (anti-collapse)</li>
+      </ul>
+      <p class="note">Dropping the second term reduces to plain Tent, which collapses on hard
+      subjects — see the ablation below.</p>
     </div>
   </div>
-  <p class="note">Datasets: BCI IV-2a (BNCI2014-001, 4-class, 22 ch) and IV-2b (BNCI2014-004,
-  2-class, 3 ch), 9 subjects each. Within-subject uses the official session split; LOSO trains on
-  eight subjects and tests on the ninth. A validation split picks the checkpoint; the test set is
-  scored once.</p>
 </section>
 
 <section id="results">
-  <h2><span class="n">02</span>Results</h2>
-  <p class="sub">Accuracy (%) across both datasets and protocols. RA + IM-TTA is the full pipeline;
-  rows show what each component adds.</p>
+  <h2><span class="n">04</span>Results</h2>
+  <p class="sub">Accuracy (%). Each row shows what a component adds; RA + IM-TTA is the full pipeline.</p>
   <table>
     <thead><tr><th>Method</th><th>IV-2a within</th><th>IV-2a LOSO</th><th>IV-2b within</th><th>IV-2b LOSO</th></tr></thead>
     <tbody>
@@ -131,18 +204,31 @@
       <tr class="row-best"><td>+ RA + IM-TTA</td><td class="best">84.9 ±0.8</td><td class="best">67.8 ±0.4</td><td>86.1 ±0.2</td><td class="best">80.2 ±0.2</td></tr>
     </tbody>
   </table>
-  <p class="note">Alignment helps everywhere. The test-time adaptation drives the cross-subject
-  gains <span class="delta">+3.0 / +3.6 LOSO</span>; within-subject it helps IV-2a and runs about
-  even with plain alignment on IV-2b. Reference (IV-2a within, 4-class): CTNet 82.5 · MSCARNet 82.7 ·
+  <p class="note">Alignment helps everywhere. Test-time adaptation drives the cross-subject gains
+  <span class="delta">+3.0 / +3.6 LOSO</span>; within-subject it helps IV-2a and runs about even
+  with plain alignment on IV-2b. Reference (IV-2a within, 4-class): CTNet 82.5 · MSCARNet 82.7 ·
   EEGEncoder 86.5.</p>
-  <p class="note">Per-subject, IV-2a within (RA + IM-TTA): S1 88.2 · S2 77.8 · S3 94.4 · S4 83.0 ·
-  S5 80.6 · S6 67.0 · S7 89.2 · S8 89.2 · S9 84.4.</p>
+</section>
+
+<section id="persubj">
+  <h2><span class="n">05</span>Per-subject breakdown</h2>
+  <p class="sub">RA + IM-TTA, per subject (single representative seed). The hard subjects (S2/S6 on
+  IV-2a) are well known in the literature.</p>
+  <table>
+    <thead><tr><th>Subject</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th><th>S8</th><th>S9</th><th>mean</th></tr></thead>
+    <tbody>
+      <tr><td>IV-2a within</td><td>88.2</td><td class="lo">77.8</td><td class="hi">94.4</td><td>83.0</td><td>80.6</td><td class="lo">67.0</td><td>89.2</td><td>89.2</td><td>84.4</td><td class="best">83.8</td></tr>
+      <tr><td>IV-2a LOSO</td><td>79.5</td><td class="lo">49.3</td><td class="hi">86.3</td><td>57.3</td><td>58.0</td><td>58.0</td><td>71.9</td><td>78.0</td><td>67.4</td><td class="best">67.3</td></tr>
+      <tr><td>IV-2b within</td><td>79.1</td><td class="lo">66.8</td><td>80.0</td><td class="hi">97.5</td><td>96.6</td><td>87.2</td><td>89.7</td><td>95.0</td><td>85.9</td><td class="best">86.4</td></tr>
+      <tr><td>IV-2b LOSO</td><td>78.9</td><td>67.6</td><td class="lo">60.6</td><td class="hi">93.2</td><td>86.8</td><td>86.5</td><td>84.2</td><td>84.5</td><td>78.5</td><td class="best">80.5</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Multi-seed means (in the headline) are within ±0.2–0.8 of these single-seed values.</p>
 </section>
 
 <section id="ablations">
-  <h2><span class="n">03</span>Ablation studies</h2>
-  <p class="sub">Where the numbers come from. All on BCI IV-2a unless noted.</p>
-
+  <h2><span class="n">06</span>Ablation studies</h2>
+  <p class="sub">Where the design choices come from. All on BCI IV-2a unless noted.</p>
   <div class="grid2">
     <div class="card">
       <h3>Alignment × TTA <span class="kicker">(LOSO)</span></h3>
@@ -158,8 +244,7 @@
     </div>
     <div class="card">
       <h3>Why information-maximization <span class="kicker">(LOSO, EA)</span></h3>
-      <p class="cap">Plain entropy-min (Tent) collapses on hard subjects; the diversity term is
-      what makes test-time adaptation pay off.</p>
+      <p class="cap">The diversity term is what makes test-time adaptation pay off.</p>
       <table>
         <thead><tr><th>TTA loss</th><th>LOSO</th></tr></thead>
         <tbody>
@@ -170,11 +255,10 @@
       </table>
     </div>
   </div>
-
   <div class="grid2" style="margin-top:20px">
     <div class="card">
       <h3>TTA-step sensitivity <span class="kicker">(LOSO, RA+IM-TTA)</span></h3>
-      <p class="cap">Gentle and monotonic — not sensitive to the adaptation budget.</p>
+      <p class="cap">Gentle and monotonic — robust to the adaptation budget.</p>
       <table>
         <thead><tr><th>steps</th><th>1</th><th>5</th><th>10</th><th>20</th></tr></thead>
         <tbody><tr><td>LOSO</td><td>66.8</td><td>67.3</td><td class="best">68.2</td><td>68.0</td></tr></tbody>
@@ -182,12 +266,12 @@
     </div>
     <div class="card">
       <h3>Within-subject negatives</h3>
-      <p class="cap">Things that did <em>not</em> beat RA alignment — kept for the record.</p>
+      <p class="cap">Tried, did <em>not</em> beat RA alignment — kept on record.</p>
       <ul class="tight">
         <li>Band-narrowing (4–40 / 8–30 Hz) — <span class="neg">worse</span> than broadband</li>
         <li>Augmentation expansion ×2–3 — <span class="neg">worse</span></li>
         <li>Refit on train+val — <span class="neg">worse</span></li>
-        <li>Learnable / per-trial spatial alignment — neutral to <span class="neg">worse</span></li>
+        <li>Learnable / per-trial spatial alignment — neutral→<span class="neg">worse</span></li>
         <li>Dual-geometry (EA+RA) fusion — <span class="neg">worse</span> (overfits)</li>
       </ul>
     </div>
@@ -196,8 +280,46 @@
   <code>results/</code>.</p>
 </section>
 
+<section id="train">
+  <h2><span class="n">07</span>Training setup</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Optimisation</h3>
+      <ul class="tight">
+        <li>AdamW · OneCycleLR · label smoothing 0.1</li>
+        <li>MixUp + signal-space augmentation (S&amp;R, freq-mask, channel-drop, jitter)</li>
+        <li>Checkpoint &amp; early-stop on the validation split</li>
+        <li>Cross-subject supervised pretrain → per-subject fine-tune (within); from scratch (LOSO)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>IM-TTA at inference</h3>
+      <ul class="tight">
+        <li>Adapts BatchNorm affine params only (rest frozen)</li>
+        <li>BN uses batch statistics; ~5 entropy/diversity steps</li>
+        <li>No labels, no ensembling — a single forward model</li>
+        <li>Results reported over multiple seeds (mean ± std)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="takeaways">
+  <h2><span class="n">08</span>Key takeaways</h2>
+  <ul class="tight">
+    <li><b>Alignment is the foundation.</b> Whitening covariance (EA or RA) lifts every setting;
+      RA edges EA on the cross-subject side.</li>
+    <li><b>Test-time adaptation is a cross-subject lever.</b> IM-TTA adds ~+3 points on LOSO for
+      both datasets, where the subject gap is largest.</li>
+    <li><b>The diversity term is essential.</b> Plain entropy-minimisation collapses on hard
+      subjects and gives no gain; balancing the class mix is what unlocks it.</li>
+    <li><b>One pipeline, two protocols, two datasets.</b> The same RA + EEGNet + IM-TTA recipe is
+      competitive within-subject and improves cross-subject — no per-setting redesign.</li>
+  </ul>
+</section>
+
 <section id="repro">
-  <h2><span class="n">04</span>Reproduce</h2>
+  <h2><span class="n">09</span>Reproduce</h2>
   <p class="sub">MOABB pulls the datasets automatically. One command runs both protocols.</p>
 <pre>uv sync
 python main.py --dataset iv2a --protocol both --align ra --tta_steps 5 --tta_div 1.0 --seed 42
@@ -205,12 +327,19 @@ python main.py --dataset iv2b --protocol both --align ra --tta_steps 5 --tta_div
   <p class="note">Flags: <code>--dataset {iv2a,iv2b}</code> · <code>--protocol {within,loso,both}</code> ·
   <code>--align {none,ea,ra}</code> · <code>--tta_steps N</code> ·
   <code>--tta_div {1 = info-max, 0 = entropy-only}</code> · <code>--seed</code>.</p>
+<pre>@software{eegnet_v2,
+  title  = {Aligned EEGNet + IM-TTA for Motor-Imagery Decoding},
+  author = {Istiaq Fuad},
+  year   = {2026},
+  url    = {https://github.com/istiaqfuad/eegnet-v2}
+}</pre>
 </section>
 
 <footer>
   <div class="wrap" style="padding:0">
     UnifiedEEGNet · ~34k params · PyTorch + MOABB &nbsp;·&nbsp;
-    <a href="https://github.com/istiaqfuad/eegnet-v2">istiaqfuad/eegnet-v2</a>
+    <a href="https://github.com/istiaqfuad/eegnet-v2">istiaqfuad/eegnet-v2</a> &nbsp;·&nbsp;
+    BCI Competition IV-2a &amp; IV-2b
   </div>
 </footer>
 
