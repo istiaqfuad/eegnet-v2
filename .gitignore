@@ -16,3 +16,10 @@ models/
 
 # Reference papers (local only)
 papers/
+
+.claude/
+.agents/
+skills-lock.json
+IEEE_Conference/
+LITERATURE_REVIEW.md
+PIPELINE_DEEP_DIVE.md
