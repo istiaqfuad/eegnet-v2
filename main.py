@@ -50,7 +50,7 @@ def assert_no_leakage(X_train, X_val, X_test, y_train, y_val, y_test):
 
 def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
          pretrained_state, expand=1, refit=False, epochs=EPOCHS, patience=PATIENCE, seed=SEED,
-         tta_steps=0, tta_div=1.0, n_classes=4, n_channels=22):
+         tta_steps=0, tta_div=1.0, n_classes=4, n_channels=22, num_workers=0):
     return train_model(
         X_train, y_train, X_val, y_val, X_test, y_test,
         model_class=model_class,
@@ -72,6 +72,7 @@ def _fit(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
         tta_div=tta_div,
         n_classes=n_classes,
         n_channels=n_channels,
+        num_workers=num_workers,
     )
 
 
@@ -89,26 +90,40 @@ def _summarize(results, label, model_name, out_path):
 
 
 def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
-    """Within-subject (session 1 -> train/val, session 2 -> test), leak-free."""
-    pretrained_path = os.path.join(script_dir, 'models',
-                                   f'pretrained_{cfg.dataset}_{model_name}_{cfg.align}_s{cfg.seed}{cfg.tagsuffix}.pt')
-    print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
-    X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta, align=cfg.align)
-    if os.path.exists(pretrained_path):
-        print(f"    Loading existing pretrained model: {pretrained_path}")
-        pretrained_state = torch.load(pretrained_path, map_location=device, weights_only=True)
-    else:
-        os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
-        pretrained_state = pretrain_model(
-            X_pretrain, y_pretrain, model_class=model_class, device=device,
-            save_path=pretrained_path, epochs=cfg.pretrain_epochs, batch_size=BATCH_SIZE,
-            lr=LR, weight_decay=WEIGHT_DECAY, n_classes=cfg.n_classes, n_channels=cfg.n_channels,
-        )
+    """Within-subject session-holdout, leak-free.
 
-    print(f"\n[within] Fine-tuning {model_class.__name__} per subject "
+    pure=False (transfer-assisted, protocol B): pretrain on session 1 of ALL subjects,
+    then fine-tune per subject on that subject's session 1, test on session 2.
+    pure=True (subject-dependent, protocol A): no cross-subject pretraining — train
+    from scratch on the target subject's session 1 only, test on session 2.
+    """
+    if cfg.pure:
+        pretrained_state = None
+        print(f"\n[within-pure] Subject-dependent (no cross-subject pretraining) "
+              f"{model_class.__name__}, align={cfg.align}, tta_steps={cfg.tta_steps}")
+    else:
+        pretrained_path = os.path.join(script_dir, 'models',
+                                       f'pretrained_{cfg.dataset}_{model_name}_{cfg.align}_s{cfg.seed}{cfg.tagsuffix}.pt')
+        print(f"\n[within] Pretraining {model_class.__name__} on session 1 of all subjects...")
+        X_pretrain, y_pretrain = prepare_pretrain_data(X, y, meta, align=cfg.align)
+        if os.path.exists(pretrained_path) and not cfg.clean:
+            print(f"    Loading existing pretrained model: {pretrained_path}")
+            pretrained_state = torch.load(pretrained_path, map_location=device, weights_only=True)
+        else:
+            os.makedirs(os.path.dirname(pretrained_path), exist_ok=True)
+            pretrained_state = pretrain_model(
+                X_pretrain, y_pretrain, model_class=model_class, device=device,
+                save_path=pretrained_path, epochs=cfg.pretrain_epochs, batch_size=BATCH_SIZE,
+                lr=LR, weight_decay=WEIGHT_DECAY, n_classes=cfg.n_classes,
+                n_channels=cfg.n_channels, num_workers=cfg.num_workers,
+            )
+
+    mode = 'within-pure' if cfg.pure else 'within'
+    print(f"\n[{mode}] Fine-tuning {model_class.__name__} per subject "
           f"(val_frac={cfg.val_frac}, expand={cfg.aug_expand}, refit={cfg.refit})...")
     subjects = cfg.subject_list or sorted(int(s) for s in np.unique(meta['subject']))
-    out_path = os.path.join(script_dir, f'results_within_honest_{cfg.dataset}_{model_name}{cfg.tagsuffix}.csv')
+    out_path = os.path.join(script_dir,
+                            f'results_{mode}_honest_{cfg.dataset}_{model_name}{cfg.tagsuffix}.csv')
     results = []
     for subject in subjects:
         X_tr, X_va, X_te, y_tr, y_va, y_te = prepare_subject_data(X, y, meta, subject,
@@ -121,12 +136,13 @@ def run_within(X, y, meta, model_class, model_name, device, script_dir, cfg):
                         pretrained_state, expand=cfg.aug_expand, refit=cfg.refit,
                         epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
                         tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
-                        n_classes=cfg.n_classes, n_channels=cfg.n_channels)
+                        n_classes=cfg.n_classes, n_channels=cfg.n_channels,
+                        num_workers=cfg.num_workers)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
-        print(f"    [within] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
-    return _summarize(results, f'WITHIN-SUBJECT {cfg.dataset}{cfg.tagsuffix}', model_class.__name__, out_path)
+        print(f"    [{mode}] Running mean: {df['test_acc'].mean()*100:.2f}% ({len(df)}/{len(subjects)})")
+    return _summarize(results, f'{mode.upper()} {cfg.dataset}{cfg.tagsuffix}', model_class.__name__, out_path)
 
 
 def run_within_cv(X, y, meta, model_class, model_name, device, script_dir, cfg):
@@ -151,7 +167,8 @@ def run_within_cv(X, y, meta, model_class, model_name, device, script_dir, cfg):
                        pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
                        epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
                        tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
-                       n_classes=cfg.n_classes, n_channels=cfg.n_channels)
+                       n_classes=cfg.n_classes, n_channels=cfg.n_channels,
+                       num_workers=cfg.num_workers)
             fold_accs.append(acc)
         subj_acc = float(np.mean(fold_accs))
         results.append({'subject': subject, 'test_acc': subj_acc, 'model': model_class.__name__})
@@ -178,7 +195,8 @@ def run_loso(X, y, meta, model_class, model_name, device, script_dir, cfg):
                         pretrained_state=None, expand=cfg.aug_expand, refit=cfg.refit,
                         epochs=cfg.epochs, patience=cfg.patience, seed=cfg.seed,
                         tta_steps=cfg.tta_steps, tta_div=cfg.tta_div,
-                        n_classes=cfg.n_classes, n_channels=cfg.n_channels)
+                        n_classes=cfg.n_classes, n_channels=cfg.n_channels,
+                        num_workers=cfg.num_workers)
         results.append({'subject': subject, 'test_acc': test_acc, 'model': model_class.__name__})
         df = pd.DataFrame(results)
         df.to_csv(out_path, index=False)
@@ -192,8 +210,11 @@ def main():
                         help='Model architecture to use')
     parser.add_argument('--dataset', choices=list(DATASETS.keys()), default='iv2a',
                         help='Dataset: iv2a (4-class) or iv2b (2-class)')
-    parser.add_argument('--protocol', choices=['within', 'within_cv', 'loso', 'both'], default='within',
-                        help='within (session-based) | within_cv (k-fold) | loso | both')
+    parser.add_argument('--protocol', choices=['within', 'within_pure', 'within_cv', 'loso', 'both'],
+                        default='within',
+                        help='within (transfer-assisted, cross-subject pretrain) | '
+                             'within_pure (subject-dependent, from scratch) | '
+                             'within_cv (k-fold) | loso | both')
     parser.add_argument('--kfolds', type=int, default=5, help='Folds for within_cv')
     parser.add_argument('--fmin', type=float, default=0.5, help='Band-pass low cutoff (Hz)')
     parser.add_argument('--fmax', type=float, default=100.0, help='Band-pass high cutoff (Hz)')
@@ -204,6 +225,9 @@ def main():
                         help='Alignment: ea=Euclidean, ra=Riemannian/Centroid, '
                              'dual=stacked EA+RA views (use with --model dualalign), label-free')
     parser.add_argument('--tag', type=str, default='', help='Suffix for output CSV / pretrain cache')
+    parser.add_argument('--clean', action='store_true',
+                        help='Ignore cached pretrained checkpoints (force re-pretraining). '
+                             'Required after any preprocessing change.')
     parser.add_argument('--seed', type=int, default=SEED, help='Random seed (vary for multi-seed runs)')
     parser.add_argument('--tta_steps', type=int, default=0,
                         help='Test-time adaptation: entropy-min BN-affine passes over the '
@@ -217,9 +241,12 @@ def main():
                         help='Cross-subject pretrain epochs (lower for quick tests)')
     parser.add_argument('--epochs', type=int, default=EPOCHS, help='Fine-tune epochs')
     parser.add_argument('--patience', type=int, default=PATIENCE, help='Early-stop patience')
+    parser.add_argument('--num_workers', type=int, default=2,
+                        help='DataLoader workers for the augmented train loader')
     args = parser.parse_args()
     args.tagsuffix = f'_{args.tag}' if args.tag else ''
     args.subject_list = [int(s) for s in args.subjects.split(',') if s.strip()] if args.subjects else None
+    args.pure = args.protocol == 'within_pure'
     model_class = MODEL_MAP[args.model]
 
     torch.manual_seed(args.seed)
@@ -248,7 +275,7 @@ def main():
             f"session-based within needs > {args.n_test_sessions} sessions/subject, got {sps}"
 
     means = {}
-    if args.protocol in ('within', 'both'):
+    if args.protocol in ('within', 'within_pure', 'both'):
         means['within'] = run_within(X, y, meta, model_class, args.model, device, script_dir, args)
     if args.protocol == 'within_cv':
         means['within_cv'] = run_within_cv(X, y, meta, model_class, args.model, device, script_dir, args)

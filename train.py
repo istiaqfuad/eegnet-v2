@@ -94,12 +94,14 @@ def evaluate_acc_loss(model, loader, device):
 
 def pretrain_model(X_pretrain, y_pretrain, model_class, device, save_path=None,
                    epochs=200, batch_size=64, lr=0.001, weight_decay=0.02,
-                   n_classes=4, n_channels=22):
+                   n_classes=4, n_channels=22, num_workers=0):
     from dataset import BCIDataset
 
     print(f"    Pre-training on {len(X_pretrain)} trials")
     train_dataset = BCIDataset(X_pretrain, y_pretrain, augment=True, use_sr=True)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                              num_workers=num_workers, worker_init_fn=_seed_worker,
+                              persistent_workers=num_workers > 0)
 
     model = model_class(n_classes=n_classes, n_channels=n_channels).to(device)
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
@@ -141,7 +143,7 @@ def _build_optim_sched(model, lr, weight_decay, max_lr, n_epochs, steps_per_epoc
     return optimizer, scheduler
 
 
-def tent_adapt(model, loader, device, steps=1, lr=1e-3, div_weight=1.0):
+def tent_adapt(model, loader, device, steps=1, lr=1e-3, div_weight=1.0, log_history=False):
     """Label-free source-free test-time adaptation via Information Maximization (SHOT-style).
 
     Adapts ONLY the BatchNorm affine params (gamma, beta) on the target subject's
@@ -152,29 +154,44 @@ def tent_adapt(model, loader, device, steps=1, lr=1e-3, div_weight=1.0):
     one class (the failure mode of plain entropy-min / Tent on hard subjects).
     div_weight=0 reduces to plain Tent (entropy-only) — used for the ablation. No labels
     are used -> honest, transductive. Natural for LOSO. Returns an adapted deep copy.
+
+    Correct TTA mode (cf. Tent, Wang et al. 2020): the network is in eval() so DROPOUT
+    IS OFF and only BN layers are switched to batch statistics (track_running_stats=False
+    makes BN use batch stats in eval mode). Gradients flow only to BN weight/bias.
     """
     model = copy.deepcopy(model)
-    model.train()
+    model.eval()                                   # dropout OFF during adaptation
     params = []
     for m in model.modules():
         if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
-            m.track_running_stats = False           # use batch statistics
+            m.track_running_stats = False           # use batch statistics even in eval mode
             m.running_mean = None
             m.running_var = None
             if m.affine:
                 m.weight.requires_grad_(True)
                 m.bias.requires_grad_(True)
                 params += [m.weight, m.bias]
+            else:
+                for p in m.parameters(recurse=False):
+                    p.requires_grad_(False)
         else:
             for p in m.parameters(recurse=False):
                 p.requires_grad_(False)
     if not params:
         return model
+    n_adapted = sum(p.numel() for p in params)
+    n_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    assert n_adapted == n_trainable, \
+        f"TTA leak: {n_trainable - n_adapted} non-BN params still trainable"
     opt = torch.optim.Adam(params, lr=lr)
-    for _ in range(steps):
-        for x, _ in loader:
+    history = []
+    n_classes = None
+    for step in range(steps):
+        for x, _ in loader:                          # labels present in the loader are IGNORED
             x = x.to(device)
             p = model(x).softmax(1)
+            if n_classes is None:
+                n_classes = p.shape[1]
             cond_ent = -(p * p.clamp_min(1e-8).log()).sum(1).mean()   # minimise
             pbar = p.mean(0)
             div = -(pbar * pbar.clamp_min(1e-8).log()).sum()          # maximise (anti-collapse)
@@ -182,7 +199,69 @@ def tent_adapt(model, loader, device, steps=1, lr=1e-3, div_weight=1.0):
             opt.zero_grad()
             loss.backward()
             opt.step()
+            if log_history:
+                history.append({
+                    'step': step,
+                    'cond_ent': float(cond_ent.detach()),
+                    'marginal_ent': float(div.detach()),
+                    'loss': float(loss.detach()),
+                    'pred_hist': p.argmax(1).bincount(minlength=n_classes).tolist(),
+                })
+    if log_history:
+        model._tta_history = history   # diagnostics only (per-step entropies + class histogram)
+    model.eval()
     return model
+
+
+def tta_sanity_check(model_class, device, n_classes=4, n_channels=22, n_trials=32, n_time=1000):
+    """Regression check for tent_adapt: exactly the BN affine parameters are trainable
+    (176 for UnifiedEEGNet), dropout is inactive during adaptation, non-BN weights are
+    bit-identical afterwards, and BN uses batch statistics. Raises AssertionError on any
+    violation; returns the number of adapted parameters."""
+    from dataset import BCIDataset
+    model = model_class(n_classes=n_classes, n_channels=n_channels).to(device)
+    # snapshot every parameter before adaptation
+    before = {k: v.detach().clone() for k, v in model.state_dict().items()}
+    # dropout must exist for the check to be meaningful
+    assert any(isinstance(m, nn.Dropout) for m in model.modules()), "model has no Dropout layers"
+    loader = DataLoader(BCIDataset(np.random.randn(n_trials, n_channels, n_time).astype(np.float32),
+                                    np.random.randint(0, n_classes, n_trials),
+                                    augment=False, use_sr=False),
+                         batch_size=16, shuffle=False)
+    adapted = tent_adapt(model, loader, device, steps=2, log_history=True)
+    # 1) all BN modules use batch statistics (running stats disabled)
+    for m in adapted.modules():
+        if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)):
+            assert m.track_running_stats is False and m.running_mean is None \
+                and m.running_var is None, "BN not in batch-stats mode"
+    # 2) dropout inactive
+    for m in adapted.modules():
+        if isinstance(m, nn.Dropout):
+            assert m.training is False, "dropout still in training mode after tent_adapt"
+    # 3) exactly the BN affine params changed, everything else bit-identical
+    bn_affine_keys = set()
+    for name, m in adapted.named_modules():
+        if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d)) and m.affine:
+            bn_affine_keys.add(f'{name}.weight')
+            bn_affine_keys.add(f'{name}.bias')
+    n_changed = 0
+    for k, v in adapted.state_dict().items():
+        if not torch.equal(v.detach().cpu(), before[k].detach().cpu()):
+            assert k in bn_affine_keys, f"non-BN-affine param changed during TTA: {k}"
+            n_changed += 1
+    assert n_changed == len(bn_affine_keys) and n_changed > 0, \
+        f"expected all {len(bn_affine_keys)} BN affine tensors to change, {n_changed} did"
+    n_params = sum(v.numel() for k, v in adapted.state_dict().items() if k in bn_affine_keys)
+    assert hasattr(adapted, '_tta_history') and len(adapted._tta_history) > 0, "no TTA history logged"
+    print(f"    [tta-sanity] OK: {n_params} BN affine params adapted "
+          f"({len(bn_affine_keys)} tensors), dropout off, non-BN weights frozen")
+    return n_params
+
+
+def _seed_worker(worker_id):
+    """Give each DataLoader worker a distinct numpy RNG stream (fork would
+    otherwise duplicate the parent state and repeat augmentations)."""
+    np.random.seed((torch.initial_seed() + worker_id) % 2**32)
 
 
 def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, device,
@@ -191,7 +270,7 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
                 label_smoothing=0.1, patience=150,
                 pretrained_state=None, use_ema=True, ema_decay=0.999,
                 use_focal_loss=False, expand=1, refit=False, tta_steps=0, tta_lr=1e-3,
-                tta_div=1.0, n_classes=4, n_channels=22):
+                tta_div=1.0, n_classes=4, n_channels=22, num_workers=0):
     """Leak-free training.
 
     Model selection and early stopping use ONLY the validation set (X_val/y_val),
@@ -202,18 +281,22 @@ def train_model(X_train, y_train, X_val, y_val, X_test, y_test, model_class, dev
     refit: after picking the best epoch on val, refit a fresh model on train+val for
            that many epochs (no val peeking), then test once. Uses all session-1 data
            for the final fit while keeping epoch-count selection leak-free.
+    num_workers: DataLoader workers for the AUGMENTED train loader only (val/test
+           loaders stay in-process; they are small and unaugmented).
     """
     from dataset import BCIDataset
+
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
     train_dataset = BCIDataset(X_train, y_train, augment=True, use_sr=True, expand=expand)
     val_dataset = BCIDataset(X_val, y_val, augment=False, use_sr=False)
     test_dataset = BCIDataset(X_test, y_test, augment=False, use_sr=False)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                              num_workers=num_workers, worker_init_fn=_seed_worker,
+                              persistent_workers=num_workers > 0)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0)
-
-    torch.manual_seed(seed)
-    np.random.seed(seed)
 
     model = model_class(n_classes=n_classes, n_channels=n_channels).to(device)
     if pretrained_state is not None:

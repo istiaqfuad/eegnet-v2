@@ -9,12 +9,19 @@ from torch.utils.data import Dataset
 
 class SRSegment:
     """Segmentation and Recombination (S&R) augmentation - critical for CTNet
-    From CTNet paper: adds +7.21% accuracy improvement
+    From CTNet paper: adds +7.21% accuracy improvement.
+
+    Two modes:
+      __call__(x)      -> segment SHUFFLE: permute the temporal segments of one trial
+                          (label-preserving within-trial reordering).
+      recombine(x1, x2) -> true S&R: split two same-class trials into segments and
+                          recombine, taking each segment from either trial
+                          (label-preserving cross-trial recombination).
     """
     def __init__(self, n_segments=4):
         self.n_segments = n_segments
 
-    def __call__(self, x):
+    def _split(self, x):
         n_channels, n_timesteps = x.shape
         segment_len = n_timesteps // self.n_segments
         remainder = n_timesteps % self.n_segments
@@ -25,14 +32,26 @@ class SRSegment:
             if i == self.n_segments - 1:
                 end += remainder
             segments.append(x[:, start:end])
+        return segments
+
+    def __call__(self, x):
+        segments = self._split(x)
         indices = np.random.permutation(self.n_segments)
         return np.concatenate([segments[i] for i in indices], axis=1)
 
+    def recombine(self, x1, x2):
+        """True segmentation-and-recombination of two same-class trials:
+        each output segment is drawn from either x1 or x2 (label-preserving)."""
+        s1, s2 = self._split(x1), self._split(x2)
+        picked = [s1[i] if np.random.random() < 0.5 else s2[i] for i in range(self.n_segments)]
+        return np.concatenate(picked, axis=1)
 
-class FrequencyMasking:
-    """Random frequency masking - masks random frequency bands
-    Simulates band-stop filtering effects for robustness
-    """
+
+class RandomWindowSuppression:
+    """Random temporal-window suppression (time domain): scales a random contiguous
+    time window by 0.2-0.8. Despite its earlier name ('FrequencyMasking'), this is NOT
+    a frequency-domain mask — it attenuates a time window. Simulates transient
+    signal-dropout artifacts for robustness."""
     def __init__(self, mask_prob=0.15, max_mask_ratio=0.2):
         self.mask_prob = mask_prob
         self.max_mask_ratio = max_mask_ratio
@@ -40,8 +59,6 @@ class FrequencyMasking:
     def __call__(self, x):
         if np.random.random() > self.mask_prob:
             return x
-        # Apply in time domain by smoothing random windows
-        # Simulates frequency masking by temporal smoothing
         x = x.copy()
         n_channels, n_timesteps = x.shape
         mask_len = int(n_timesteps * self.max_mask_ratio * np.random.random())
@@ -183,7 +200,7 @@ class BCIDataset(Dataset):
 
         # Augmentation pipeline
         self.sr = SRSegment(n_segments=4)
-        self.freq_mask = FrequencyMasking(mask_prob=0.15)
+        self.freq_mask = RandomWindowSuppression(mask_prob=0.15)
         self.channel_drop = ChannelDropout(p=0.1)
         self.gaussian_noise = GaussianNoise(p=0.15, std=0.03)
         self.temporal_shift = TemporalShift(p=0.1, max_shift=40)
@@ -213,16 +230,18 @@ class BCIDataset(Dataset):
             r = np.random.random()
 
             if self.use_sr and r > 0.55:
-                # S&R augmentation (CTNet, +7.21%)
+                # True S&R recombination (CTNet): recombine segments of this trial
+                # with segments from another SAME-CLASS trial (label-preserving).
                 sr_X = self.sr_samples.get(y.item())
                 if sr_X is not None and len(sr_X) > 1:
                     rand_idx = np.random.randint(len(sr_X))
-                    x = torch.from_numpy(sr_X[rand_idx].copy())
+                    other = sr_X[rand_idx]
+                    x = torch.from_numpy(self.sr.recombine(x.numpy(), other))
             elif r > 0.4:
                 # Segment shuffle
                 x = torch.from_numpy(self.sr(x.numpy()))
             elif r > 0.3:
-                # Frequency masking
+                # Random temporal-window suppression (time domain)
                 x = torch.from_numpy(self.freq_mask(x.numpy()))
             elif r > 0.2:
                 # Gaussian noise
@@ -286,13 +305,17 @@ def prepare_pretrain_data(X, y, meta, align='none'):
     Prepare cross-subject pre-training data.
     Uses session 1 from ALL subjects. NO data leakage because session 2 is held out.
 
-    align='ea': whiten each subject's session-1 trials by that subject's own mean
-    spatial covariance (label-free), matching the within-subject EA distribution.
+    Unified preprocessing (shared with all alignment arms): per-trial channel-wise
+    standardization first (label-free, no cross-set statistics), then the alignment
+    transform ('ea'/'ra' per subject, 'none' = identity), then a global scalar
+    z-score. The ONLY factor that differs across alignment conditions is the
+    whitening transform itself.
     """
     sessions = meta['session'].values
     s1 = sorted(np.unique(sessions))[0]
     session_1_mask = sessions == s1
     X_pretrain = X[session_1_mask][:, :, :1000].copy().astype(np.float32)
+    X_pretrain = _per_trial_standardize(X_pretrain)
     y_pretrain = y[session_1_mask].copy()
 
     subj_p = meta['subject'].values[session_1_mask]
@@ -343,15 +366,18 @@ def _per_trial_standardize(X):
 
 def _ea_reference(X):
     """Euclidean-Alignment reference = mean spatial covariance over trials.
-    X: [N, C, T] -> R: [C, C]. Label-free.
+    X: [N, C, T] -> R: [C, C]. Label-free. Symmetrized for numerical robustness.
     """
     X = X.astype(np.float64)
     covs = np.einsum('nct,ndt->ncd', X, X) / X.shape[2]
-    return covs.mean(axis=0)
+    R = covs.mean(axis=0)
+    return 0.5 * (R + R.T)
 
 
 def _inv_sqrt(R):
-    """Symmetric inverse square root of an SPD matrix."""
+    """Symmetric inverse square root of an SPD matrix (symmetrized first so the
+    eigendecomposition returns an exactly orthogonal basis and non-negative evals)."""
+    R = 0.5 * (R + R.T)
     evals, evecs = np.linalg.eigh(R)
     evals = np.clip(evals, 1e-6, None)
     return (evecs * (1.0 / np.sqrt(evals))) @ evecs.T
@@ -402,13 +428,17 @@ def prepare_subject_data(X, y, meta, subject, val_frac=0.2, seed=42, align='none
       IV-2a: n_test_sessions=1 -> train session 1, test session 2.
       IV-2b: n_test_sessions=2 -> train sessions 1-3, test sessions 4-5.
 
-    Sessions are NEVER pooled/mixed (that would be same-session leakage). Alignment
-    (ea/ra/dual) references are fit on the TRAIN trials (applied to train+val) and on
-    the test trials' own statistics (label-free). Z-score from train only.
+    Sessions are NEVER pooled/mixed (that would be same-session leakage). Unified
+    preprocessing across alignment arms: per-trial channel-wise standardization
+    (label-free), then alignment (ea/ra/dual; 'none' = identity), then z-score from
+    train only. Alignment references are fit on the TRAIN trials (applied to
+    train+val) and on the test trials' own statistics (label-free), so the only
+    manipulated factor is the alignment transform.
     Returns (X_train, X_val, X_test, y_train, y_val, y_test).
     """
     subject_idx = meta['subject'].values == subject
     X_subject = X[subject_idx][:, :, :1000].copy()
+    X_subject = _per_trial_standardize(X_subject)
     y_subject = y[subject_idx].copy()
     subj_sessions = meta.loc[subject_idx, 'session'].values
     sessions_sorted = sorted(np.unique(subj_sessions))
@@ -468,6 +498,7 @@ def prepare_subject_data_cv(X, y, meta, subject, n_splits=5, fold=0, val_frac=0.
 
     subject_idx = meta['subject'].values == subject
     Xs = X[subject_idx][:, :, :1000].copy()
+    Xs = _per_trial_standardize(Xs)
     ys = y[subject_idx].copy()
 
     skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
@@ -513,30 +544,33 @@ def prepare_loso_data(X, y, meta, test_subject, val_frac=0.1, seed=42, align='no
       test        = all trials (both sessions) of the held-out subject
                     (evaluated exactly once)
 
-    align='none': per-trial channel-wise standardization (no cross-set statistic).
-    align='ea'/'ra': per-SUBJECT alignment — whiten each subject's trials by that
-    subject's own EA/Riemannian reference (label-free), then z-score. This is the
-    standard cross-subject alignment that maps every subject's centroid to identity.
+    Unified preprocessing across alignment arms: per-trial channel-wise
+    standardization first (label-free, no cross-set statistics), then per-SUBJECT
+    alignment — whiten each subject's trials by that subject's own EA/Riemannian
+    reference ('none' = identity, same normalization otherwise), then a global
+    scalar z-score from the training pool only. The ONLY factor that differs
+    across alignment conditions is the whitening transform, so the
+    baseline-vs-alignment comparison is causally interpretable.
     Returns (X_train, X_val, X_test, y_train, y_val, y_test).
     """
     subj = meta['subject'].values
-    Xa = X[:, :, :1000]
+    Xa = _per_trial_standardize(X[:, :, :1000])   # common step 1: label-free per-trial standardization
     train_mask = subj != test_subject
     test_mask = subj == test_subject
 
+    # common step 2: alignment (the only manipulated factor; per-subject, label-free)
     if align in ('ea', 'ra'):
         Xal = Xa.astype(np.float32).copy()
         for s in np.unique(subj):
             m = subj == s
             Xal[m] = _ea_apply(Xal[m], _whitener(Xal[m], align))
-        # global scalar z-score from the training pool only
-        mtr = Xal[train_mask].mean().astype(np.float32)
-        std = Xal[train_mask].std().astype(np.float32) + 1e-8
-        X_pool = ((Xal[train_mask] - mtr) / std).astype(np.float32)
-        X_test = ((Xal[test_mask] - mtr) / std).astype(np.float32)
     else:
-        X_pool = _per_trial_standardize(Xa[train_mask])
-        X_test = _per_trial_standardize(Xa[test_mask])
+        Xal = Xa.astype(np.float32)              # 'none' -> identity alignment
+    # common step 3: global scalar z-score from the training pool only (all arms)
+    mtr = Xal[train_mask].mean().astype(np.float32)
+    std = Xal[train_mask].std().astype(np.float32) + 1e-8
+    X_pool = ((Xal[train_mask] - mtr) / std).astype(np.float32)
+    X_test = ((Xal[test_mask] - mtr) / std).astype(np.float32)
     y_pool = y[train_mask].copy()
     y_test = y[test_mask].copy()
 
