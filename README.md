@@ -57,3 +57,7 @@ Flags: `--dataset {iv2a,iv2b}` · `--protocol {within,loso,both}` · `--align {n
 - `main.py` — entry point: datasets, protocols, alignment, TTA, multi-seed runs
 - `ARCHITECTURE.md` / `RESULTS.md` — method writeup and full results
 - `results/` — per-run CSVs and training logs (see `results/README.md`)
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
