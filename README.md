@@ -12,6 +12,7 @@ two BCI Competition IV datasets — IV-2a (4-class, 22 channels) and IV-2b (2-cl
 | baseline (no alignment) | 75.6 | 59.1 | 85.7 | 76.1 |
 | + RA alignment | 81.9 | 64.8 | **87.2** | 76.6 |
 | **+ RA + IM-TTA** | **84.9 ± 0.8** | **67.8 ± 0.4** | 86.1 ± 0.2 | **80.2 ± 0.2** |
+| IV-2a EA↔RA gap (LOSO, subject-wise) | — | \|EA-RA\|: 1.77 pp (no TTA) → 1.18 pp (+IM-TTA); RA better 5/9→6/9 subjects | — | — |
 
 Within-subject uses the official session split (IV-2a: train session 1, test session 2; IV-2b:
 train sessions 1–3, test sessions 4–5). LOSO trains on eight subjects and tests on the held-out
