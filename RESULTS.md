@@ -95,6 +95,7 @@ sessions), per-subject alignment, trained from scratch.
 | none | 59.12 | 65.53 (+6.4) |
 | EA | 64.58 | 66.68 ± 0.30 (3 seeds) |
 | **RA** | 64.12–64.80 | **67.83 ± 0.42 (3 seeds)** |
+| EA↔RA subject-gap (seed 42) | \|EA-RA\| = 1.77 pp (RA better on 5/9) | \|EA+IM-RA+IM\| = 1.18 pp (RA better on 6/9; winner flips on 5/9) |
 
 - Alignment alone: +5.5 (EA) / +5.7 (RA) over no-align.
 - IM-TTA alone (no align): +6.4.
